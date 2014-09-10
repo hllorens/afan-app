@@ -1,0 +1,83 @@
+/* reset */
+* {
+    -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
+}
+
+html{margin:0; padding:0; background: #ddd;}
+body{margin:0; padding:0; font:normal 12px arial, sans-serif; color:#333;
+    -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
+    -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
+    -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
+}
+
+img{border:none;}
+a{text-decoration:none;}
+a:hover{text-decoration:underline;}
+
+/* clearfix */
+.cf:before,
+.cf:after{content:""; display:table;}
+.cf:after{clear:both;}
+.cf{zoom:1;}
+.clear{content:"."; display:block; height:0; clear:both; visibility:hidden;}
+
+
+#page{margin: 0 auto; max-width: 640px; min-height: 416px; position: relative; background:#000;}
+
+h1{font: normal 35px VanillaRegular,Arial,sans-serif; text-align: center; margin: 10px 0 5px 0; color: #555;}
+
+#zone_score{font: bold 18px Arial,sans-serif; padding: 5px;}
+.col_score{float: left;}
+.col_answered{float: right; text-align: right;}
+#best_score{color: #999;}
+#current_score{}
+#remaining_activities{color: #999;}
+#current_answered{}
+.col_moves{text-align: center; color: #d63;}
+.col_moves .critical{color: #c33;}
+
+#zone_canvas{position: relative; overflow: hidden;background:#339944;}
+#sound{height:40%;width:100%;align:center;margin:0;padding:1px;}
+#answers{height:60%;width:100%;align:center;margin:0;background:#118833;}
+#answers ul{height:100%;width:100%;align:center;margin:0;padding:0;decoration:none;border:1px solid black;decoration:none;}
+#answers ul li{height:33%;width:100%;text-align:center;margin:0;background:#118833;border:1px solid black;decoration:none;}
+#answers ul li:hover{background:#55bb66;border:1px solid red;}
+
+/* short screen (laptop) */
+@media screen and (max-height: 720px) {
+  #page{max-width: 480px;}
+}
+
+@media screen and (max-height: 720px) and (max-width: 1000px) {
+  #download_zone{display: none;}
+  #send_to_phone{display: none;}
+}
+
+@media screen and (min-height: 720px) and (max-width: 1200px) {
+  #download_zone{display: none;}
+  #send_to_phone{display: none;}
+}
+
+/* mobile (vertical) */
+@media screen and (max-width: 640px) {
+  h1{font-size: 30px;}
+  #zone_message{font-size: 35px;}
+  #zone_score{font-size: 14px;}
+  /*#download_zone{display: block; position: relative; left: 0; top: 0;}*/
+  #download_zone{display: none;}
+  #send_to_phone{display: none;}
+  #zone_message .bt-app-wall {
+    display: inline-block;
+  }
+}
+
+/* mobile (horizontal) */
+@media screen and (max-width: 640px) and (orientation: landscape) {
+  #page{min-height: 0;}
+  #zone_score{display: none;}
+  #zone_jeu{display: none;}
+  #zone_message{display: none;}
+  #download_zone{display: none;}
+  #send_to_phone{display: none;}
+  #msg_portrait{display: block; font-size: 20px; text-align: center; padding: 30px;}
+}

@@ -1,0 +1,68 @@
+<!DOCTYPE html> 
+<html>
+
+<head>
+  <title>App</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="stylesheet" href="css/index.css">
+
+</head>
+
+<body>
+<audio id="audio_sprite_object"> <!-- src="audio/soundsSprite.wav" -->
+            <!-- Seems that some browsers do not trust cognitionis.com for audio files -->
+            <!-- ie9 -->
+	    <!--<source src="http://www.cognitionis.com/audio/soundsSprite.m4a" type="audio/mpeg" />
+	    <!-- firefox --> 
+	    <!--<source src="http://www.cognitionis.com/audio/soundsSprite.ogg" type="audio/ogg" /> -->
+	    <source src="audio/soundsSprite.m4a" type="audio/mpeg" /> <!-- safari? -->
+	    <source src="https://dl.dropboxusercontent.com/u/188219/afan-app/soundsSprite.m4a" type="audio/mpeg" /> <!-- ie9 -->
+	    <source src="https://dl.dropboxusercontent.com/u/188219/afan-app/soundsSprite.ogg" type="audio/ogg" /> <!-- firefox -->
+	    
+	    
+	    
+	    <!--<source src="http://www.cognitionis.com/audio/soundsSprite.wav" type="audio/wav" />-->
+	    audio not supported. Try mp3?
+</audio><!-- http://dl.dropbox.com/u/1538714/article_resources/cat.m4a controls -->
+<div id="page">
+    <h1>Conciencia Fonológica</h1>
+
+    <div id="zone_score" class="cf">
+      <div class="col_score">
+        <div id="best_score">
+          Best score : <span id="best_score_num">0</span>
+        </div>
+        <div id="current_score">
+          Correct : <span id="current_score_num">0</span>
+        </div>
+      </div>
+      <div class="col_answered">
+        <div id="remaining_activities">
+          remaining activs : <span id="remaining_activities_num">0</span>
+        </div>
+        <div id="current_answered">
+          Answered : <span id="current_answered_num">0</span>
+        </div>
+      </div>
+      <div class="col_moves">
+        <span id="moves"></span>
+      </div>
+    </div> <!-- /#zone_score -->
+
+    <div style="height: 480px;" id="zone_canvas"></div><!-- /#zone_canvas depends on the activity type -->
+</div>
+
+<!-- scripts -->
+<script type="text/javascript" src="cordova.js"></script>
+<!-- a backup jquery version is found in lib folder -->
+<!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> does not work for now...-->
+<script type="text/javascript" src="lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="js/index.js"></script>
+
+</body>
+
+</html>

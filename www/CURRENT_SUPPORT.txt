@@ -1,0 +1,46 @@
+PEGAR EN LA WEB DE LA APP
+Para un mejor seguimiento hacer q se cree un perfil de usuario asociado a google/facebook/movil y donde se indique sexo/edad/país.
+Para q sea atractivo apra los niños, q se cree un perfil donde ellos eligen una imagen de un animalito+nombre para identificarse por si en un ipad o movil accede más de un niño.
+
+
+
+We should probably load the sounds dinamically from different locations depending on the browsers.
+
+
+IE9 (We don't consider older IEs): 
+	Works with mp3 or m4a (audio/mpeg). Does not work with http cognitionis.com but works with dropbox URL (probably also with local)
+Firefox: 
+	Audio is sometimes not very smooth but it works
+	Audio files must be in ogg format
+
+Chrome: Works
+Android chrome 36.0: Audio is sometimes not very smooth but it works
+
+IOS Safari: 
+	con sprite y WAV parece que no va, play-animal-sounds va... sera q no va currentPosition=...?
+	Does not handle currentTime.. audio needs to be loaded differently
+	See some audio spriting working example
+
+Android Webkit: Sound load is not clear (first plays all sounds), audio is sometimes not very smooth but it works
+
+Android App (Webkit):
+	Sound load is not clear (first plays all sounds), as in firefox sound_play is not very smooth, en k a k a it works smoothly...why? working bad is sasa the rest works fine)
+	Does not seem to support files loaded from local relative folder ./audio/
+		
+IOS App: ...
+
+
+Try adding more silence padding in the sprite 0.5 sec, a bit better with 1 sec
+See if it works better with (m4a and ogg) --- similar but resources are less heavi
+TRY: adding setTimeout before you call play chain again 0.5 secs...
+
+Add error handling (show to user) when audio is not supported
+Probably, not worth it,...Try adding audio_sprite_object.currentTime = 0 everytime we call sprite_chain (kind of reset)  (to avoid having "s" "a" in a chain position which seems to be the conflictive one)
+
+
+
+
+
+
+
+
