@@ -83,83 +83,44 @@ $(function () { // DOM ready
 	    console.log(json_data); // this will show the info it in firebug console
 	});*/
 	//alert("there "+json_data['activities'][0]['name'])
-	splash_screen()
+	is_app=is_cordova() // make this global to access whenever you want
+	if(is_app){
+	        document.addEventListener('deviceready', onDeviceReady, false);
+	}else{
+		onDeviceReady()
+	}
 });
 
+function is_cordova(){
+	if( navigator.userAgent.match(/(ios|iphone|ipod|ipad|android|blackberry|iemobile)/i)
+		&& /^file:\/{3}[^\/]/i.test(window.location.href) ){	
+		return true		
+	}
+	return false
+}
+
 function splash_screen(){
-	var deviceType = (navigator.userAgent.match(/iPad/i))  == "iPad" ? "iPad" : (navigator.userAgent.match(/iPhone/i))  == "iPhone" ? "iPhone" : (navigator.userAgent.match(/Android/i)) == "Android" ? "Android" : (navigator.userAgent.match(/BlackBerry/i)) == "BlackBerry" ? "BlackBerry" : "null";
 	canvas_zone.innerHTML=' \
 	<button onclick="game()">START</button><br /><img src="img/key.png" width="200px"/> \
+	<br /> userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info+'\
 	<br /> detectar si se està accediendo desde un navegador o desde la app para identificar al usuario con el num de movil o con la IP (por defecto se guardan estadísticas basadas en eso).  \
 	'	
 }
 
 
-
-	
-
-
-// Wait for PhoneGap to load
-//
-//document.addEventListener("deviceready", onDeviceReady, false);
-
-// PhoneGap is ready
-//
+// Cordova or browser is ready
 function onDeviceReady() {
-    var element = document.getElementById('deviceProperties');
-
-    element.innerHTML = 'Device Name: '     + device.name     + '<br />' + 
-                        'Device PhoneGap: ' + device.phonegap + '<br />' + 
-                        'Device Platform: ' + device.platform + '<br />' + 
-                        'Device UUID: '     + device.uuid     + '<br />' + 
-                        'Device Version: '  + device.version  + '<br />';
+	device_info="browser"
+	if(is_app){
+		device_info = 'name='     + device.name     + '-' + 
+                        'PhoneGap=' + device.phonegap + '-' + 
+                        'Platform=' + device.platform + '-' + 
+                        'UUID='     + device.uuid     + '-' + 
+                        'Ver='  + device.version
+		
+	}
+	splash_screen()
 }
-
-
-
-
-/*
-BUT IT IS NOT COMPLETE...
-if (navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/)) {
-  document.addEventListener("deviceready", onDeviceReady, false);
-} else {
-  onDeviceReady(); //this is the browser
-}
-*/
-/*
-function isPhoneGap() {
-    return (cordova || PhoneGap || phonegap) 
-    && /^file:\/{3}[^\/]/i.test(window.location.href) 
-    && /ios|iphone|ipod|ipad|android/i.test(navigator.userAgent);
-}
-
-if ( isPhoneGap() ) {
-    alert("Running on PhoneGap!");
-} else {
-    alert("Not running on PhoneGap!");
-}
-*/
-
-/*
-This should probably work perfectly because in a normal browser you won't get device.cordova at all...
-Get the version of Cordova running on the device.
-onDeviceReady...
-var string = device.cordova;
-device.name
-device.platform
-device.* should be NaN... 
-
-See http://slavik.meltser.info/phonegap-detect-if-the-application-runs-on-mobile-or-browser-using-javascript-before-the-deviceready-and-document-ready-events-are-triggered/
-*/
-
-/*
-var app = document.URL.indexOf( 'http://' ) === -1 && document.URL.indexOf( 'https://' ) === -1;
-if ( app ) {
-    // PhoneGap application
-} else {
-    // Web page
-}
-*/
 
 
 function game(){
