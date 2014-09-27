@@ -4,7 +4,7 @@ json_data={
 	"activities": [
 		{
 			"type": "sounds",
-			"sounds": ["k","a","s","a"],
+			"sounds": ["k","a","ss","a"],
 			"answers": [
 				"casa",
 				"caza",
@@ -27,7 +27,7 @@ json_data={
 		},
 		{
 			"type": "sounds",
-			"sounds": ["s","a","s","a"],
+			"sounds": ["ss","a","ss","a"],
 			"answers": [
 				"sasa",
 				"capa",
@@ -46,12 +46,36 @@ json_data={
 "a": {id: "a30", start: 0.450, end: 0.752, loop: false}, 
 "b": {id: "b", start: 0.952, end: 3.344, loop: false}, 
 "k": {id: "k25", start: 3.544, end: 3.799, loop: false}, 
-*/
-audio_sprite_object_ref={
 "s": {id: "s25", start: 0.000, end: 0.250, loop: false},
 "a": {id: "a30", start: 1.250, end: 1.552, loop: false}, 
 "b": {id: "b", start: 2.552, end: 4.944, loop: false}, 
 "k": {id: "k25", start: 5.944, end: 6.199, loop: false} 
+
+*/
+audio_sprite_object_ref={
+a: {id: "a50", start: 12.047, end: 12.547, loop: false}, 
+b: {id: "b50", start: 4.500, end: 4.996, loop: false}, 
+ch: {id: "ch50", start: 9.045, end: 9.547, loop: false}, 
+d: {id: "d50", start: 28.530, end: 29.032, loop: false}, 
+e: {id: "e50", start: 19.511, end: 20.012, loop: false}, 
+f: {id: "f50", start: 25.526, end: 26.029, loop: false}, 
+g: {id: "g50", start: 21.012, end: 21.509, loop: false}, 
+i: {id: "i50", start: 13.547, end: 14.010, loop: false}, 
+j: {id: "j50", start: 3.000, end: 3.500, loop: false}, 
+k: {id: "k50", start: 30.032, end: 30.533, loop: false}, 
+l: {id: "l50", start: 7.499, end: 8.045, loop: false}, 
+m: {id: "m50", start: 18.008, end: 18.511, loop: false}, 
+n: {id: "n50", start: 27.029, end: 27.530, loop: false}, 
+o: {id: "o50", start: 31.533, end: 32.038, loop: false}, 
+p: {id: "p50", start: 22.509, end: 22.998, loop: false}, 
+r: {id: "r50", start: 23.998, end: 24.526, loop: false}, 
+rr: {id: "rr50", start: 16.509, end: 17.008, loop: false}, 
+ss: {id: "ss50", start: 15.010, end: 15.509, loop: false}, 
+t: {id: "t50", start: 0.000, end: 0.500, loop: false}, 
+u: {id: "u50", start: 1.500, end: 2.000, loop: false}, 
+z: {id: "z50", start: 10.547, end: 11.047, loop: false}, 
+zfx_correct: {id: "zfx_correct50", start: 5.996, end: 6.499, loop: false}, 
+zfx_wrong: {id: "zfx_wrong50", start: 33.038, end: 33.539, loop: false}
 }
 
 // constants
@@ -181,16 +205,26 @@ function play_sprite_chain(){
 
 function check_correct(clicked_answer,correct_answer){
 	//alert(clicked_answer)
+	audio_sprite_position=0
+	audio_chain_waiting=false
 	if (clicked_answer==correct_answer){
-		alert("correct!")
+		playSprite("zfx_correct")
+		//alert("correct!")
+		canvas_zone.innerHTML='<div style="width:100%;text-align:center"><img src="img/correct.png" width="180px"/><br /><button onclick="nextActivity()">Next</button></div>'		
 		correct++	
 		score_correct.innerHTML=correct
 	}else{
-		alert("wrong!")
+		playSprite("zfx_wrong")	
+		//alert("wrong!")
+		canvas_zone.innerHTML='<div style="width:100%;text-align:center"><img src="img/wrong.png" width="180px"/><br /><button onclick="nextActivity()">Next</button></div>'		
 	}
 	answered++
 	score_answered.innerHTML=answered
 	
+        
+}
+
+function nextActivity(){
 	remaining_rand_activities.splice(current_activity_index,1) // remove current activity	
 	if(remaining_rand_activities.length==0){
 	canvas_zone.innerHTML=' \
@@ -205,8 +239,6 @@ function check_correct(clicked_answer,correct_answer){
 			activity(Math.floor(Math.random()*remaining_rand_activities.length))	
 		}		
 	}
-	
-        
 }
 
 
@@ -239,6 +271,8 @@ var playSprite = function(id) {
         audio_sprite_object.currentTime = currentSprite.start // not supported on IE9 (DOM Exception INVALID_STATE_ERR)
         audio_ended=false
         audio_sprite_object.play();
+    }else{
+    	console.log("Sprite "+id+" not found!")
     }
 };
 
