@@ -168,13 +168,17 @@ function activity(i){
 	canvas_zone.innerHTML=' \
 	<div id="sound">sound icon</div> \
 	<div id="answers"> \
-	<ul> \
+	<div id="answer0" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"><img src="img/words/'+current_activity_data['answers'][0]+'.png" /></div>\
+	<div id="answer1" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"><img src="img/words/'+current_activity_data['answers'][1]+'.png" /></div>\
+	<div id="answer2" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"><img src="img/words/'+current_activity_data['answers'][2]+'.png" /></div>\
+	</div>\
+	'
+/*	<ul> \
 		<li id="answer0" onclick="check_correct(this.innerHTML,correct_answer)">'+current_activity_data['answers'][0]+'</li>\
 		<li id="answer1" onclick="check_correct(this.innerHTML,correct_answer)">'+current_activity_data['answers'][1]+'</li>\
 		<li id="answer2" onclick="check_correct(this.innerHTML,correct_answer)">'+current_activity_data['answers'][2]+'</li>\
 	</ul>\
-	</div>\
-	'
+*/
 	
 	// count the time until the user clicks an answer	
 	
@@ -204,8 +208,12 @@ function play_sprite_chain(){
 }
 
 function check_correct(clicked_answer,correct_answer){
+	image_src_start_exists=clicked_answer.indexOf("src=\"")
+	if (image_src_start_exists > -1){
+		img_src_end=clicked_answer.indexOf(".png\"",image_src_start_exists+1)
+		clicked_answer=clicked_answer.substring(image_src_start_exists+15,img_src_end)	// src="img/words/ -> 15 chars	
+	}
 	//alert(clicked_answer)
-	audio_sprite_position=0
 	audio_chain_waiting=false
 	if (clicked_answer==correct_answer){
 		playSprite("zfx_correct")
@@ -220,8 +228,6 @@ function check_correct(clicked_answer,correct_answer){
 	}
 	answered++
 	score_answered.innerHTML=answered
-	
-        
 }
 
 function nextActivity(){
