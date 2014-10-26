@@ -7,33 +7,28 @@ json_data={
 			"sounds": ["k","a","ss","a"],
 			"answers": [
 				"casa",
-				"caza",
-				"cana",
-				"cala"
+				"carta",
+				"cabra"
 			],
 			"level": "1"
 		},
 		{
 			"type": "sounds",
-			"sounds": ["k","a","k","a"],
+			"sounds": ["k","a","r","t","a"],
 			"answers": [
-				"caca",
-				"capa",
-				"cata",
-				"caba",
-				"casa"
+				"carta",
+				"casa",
+				"caracol"
 			],
 			"level": "1"
 		},
 		{
 			"type": "sounds",
-			"sounds": ["ss","a","ss","a"],
+			"sounds": ["a","r","b","o","l"],
 			"answers": [
-				"sasa",
-				"capa",
-				"cata",
-				"caba",
-				"casa"
+				"arbol",
+				"arco",
+				"avión"
 			],
 			"level": "1"
 		}	
@@ -41,16 +36,17 @@ json_data={
 
 }
 
+//media_url='https://dl.dropboxusercontent.com/u/188219/apps-media/afan-app/' // inside dropbox public...
+// if these are found localy (e.g., search for a local folder called ... or a file xxx), Set the url locally
+// Otherwise use cognitionis 
+media_url='http://www.centroafan.com/afan-app-media/'
+backend_url='http://www.centroafan.com/afan-app-backend/'
+
 /*
 "s": {id: "s25", start: 0.000, end: 0.250, loop: false}, 
 "a": {id: "a30", start: 0.450, end: 0.752, loop: false}, 
 "b": {id: "b", start: 0.952, end: 3.344, loop: false}, 
 "k": {id: "k25", start: 3.544, end: 3.799, loop: false}, 
-"s": {id: "s25", start: 0.000, end: 0.250, loop: false},
-"a": {id: "a30", start: 1.250, end: 1.552, loop: false}, 
-"b": {id: "b", start: 2.552, end: 4.944, loop: false}, 
-"k": {id: "k25", start: 5.944, end: 6.199, loop: false} 
-
 */
 audio_sprite_object_ref={
 a: {id: "a50", start: 12.047, end: 12.547, loop: false}, 
@@ -83,12 +79,16 @@ var USE_ANSWERS = 3
 var max_calls=500
 
 // variables
+session_user="afan"
+session_subject="juan"
+session_subject_age="5"
+session_level="1"
 calls=0
 remaining_rand_activities=[] 
 correct_answer='undefined'
 current_activity_type='undefined' // to avoid loading all the html pattern but just changing the values
 zone_sound=null
-canvas_zone=$('#zone_canvas')[0];
+canvas_zone=$('#zone_canvas')[0]
 audio_sprite_object = $('#audio_sprite_object')[0] //document.createElement('audio'); //$('#audio_tag')[0]
 score_correct=$('#current_score_num')[0]
 score_answered=$('#current_answered_num')[0]
@@ -96,11 +96,20 @@ audio_ended=false
 audio_chain_waiting=false
 audio_sprite_position=0
 sound_array=[]
-correct=0
-answered=0
-canvas_zone=$('#zone_canvas')[0];
+num_correct_activities=0
+num_answered_activities=0
 current_activity_data={}
 current_activity_index=0
+timer_seconds=0
+timer_started=false
+timer_span=$('#timer_span')[0]
+timer_timeout=null
+session_duration=0
+session_timestamp_str="0000-00-00 00:00"
+subjects_select_elem="none"
+
+// TODO HTML5 store results locally (JSON/Cache?) and communicate with DB with ajax (PHP see examples)
+// See how to login and control session with javascript frontend... Use cookies (learn)
 	
 $(function () { // DOM ready
 	/*$.getJSON("data.json", function(json_data) {
@@ -122,13 +131,76 @@ function is_cordova(){
 	}
 	return false
 }
+//////////////////// FUNCTIONS TO BE STORED IN cognitionis_utils_general or for bigger stuff cognitionis_xxxx
+function pad_string(val, digits, pad_char){
+    var val_str = val + "", pad_str=""
+    if(val_str.length < digits){
+    	for(var i=digits-1;i>0;i--)pad_str+=pad_char
+        return pad_str + val_str;
+   }else
+        return val_str;
+}
+
+function timer_start(){
+	if(timer_started){
+		console.log("ERROR: Timer already started")	
+	}else{
+		timer_reset()
+		timer_started=true
+		timer_timeout=setTimeout('timer_advance()',1000)		
+	}
+}
+
+function timer_advance(){
+	if(timer_started){
+		++timer_seconds
+		// seconds only is easier and calculations are fast...
+		//if (timer_seconds>=60){	++timer_minutes;timer_seconds=0}
+		//timer_span.innerHTML=pad_string(timer_minutes,2,"0")+":"+pad_string(timer_seconds,2,"0")
+		timer_span.innerHTML="00:"+pad_string( (timer_seconds / 60) >> 0,2,"0")+":"+pad_string(timer_seconds % 60,2,"0")
+		timer_timeout=setTimeout('timer_advance()',1000)
+	}else{
+		console.log("ERROR: Timer not started. Starting it.")
+		timer_start()
+	}
+}
+
+function timer_stop(){
+	clearTimeout(timer_timeout)
+	timer_started=false
+}
+
+function timer_reset(){
+	timer_stop()
+	timer_span.innerHTML="00:00:00"
+	timer_seconds=0 // timer_minutes=0
+}
+///////////////////////////
+
+function select_fill_with_json(json_data,select_elem){
+	// first empty the select...
+	$.each(json_data, function(key, val) {select_elem.append('<option value="' + key + '">' + key + '</option>')})
+}
 
 function splash_screen(){
+	console.log('userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info)
+       // detectar si se està accediendo desde un navegador o desde la app para identificar al usuario con el num de movil o con la IP (por defecto se guardan estadísticas basadas en eso).
 	canvas_zone.innerHTML=' \
-	<button onclick="game()">START</button><br /><img src="img/key.png" width="200px"/> \
-	<br /> userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info+'\
-	<br /> detectar si se està accediendo desde un navegador o desde la app para identificar al usuario con el num de movil o con la IP (por defecto se guardan estadísticas basadas en eso).  \
-	'	
+	<br /><img src="'+media_url+'img/key.png" width="200px"/> \
+	<br />  \
+	<br />  \
+	Selecciona el sujeto:<br />  \
+	<select id="subjects-select"></select> \
+	<button id="start-button" onclick="game()" disabled="true">EMPEZAR</button> \
+	'
+	subjects_select_elem=$("#subjects-select")
+	$.getJSON(
+		backend_url+'ajaxdb.php?action=get_subjects&user='+session_user, 
+		function(data) { select_fill_with_json(data,subjects_select_elem); $("#start-button")[0].disabled=false; }
+		);
+	// TODO: Preload images sprite and then show start button, print a loading bar
+	
+	// TODO: Select default user and subject
 }
 
 
@@ -153,12 +225,19 @@ function game(){
 	//Fisher-Yates random at the beginning and then increment, or
 	// do not rand array but just select a random position of the remaining array
 	//
+	session_subject=subjects_select_elem[0].options[subjects_select_elem[0].selectedIndex].value
+	var session_timestamp=new Date();
+	session_timestamp_str=session_timestamp.getFullYear()+"-"+(session_timestamp.getMonth()+1) + "-" + session_timestamp.getDate() + " "
+		 + session_timestamp.getHours() + ":"  + session_timestamp.getMinutes()
+	// TODO calculate age of the subject ...
+	// session_subject_age=... 
 	remaining_rand_activities=json_data['activities']
 	$('#remaining_activities_num')[0].innerHTML=""+(remaining_rand_activities.length-1)	
         activity(Math.floor(Math.random()*remaining_rand_activities.length))
 }
 
 function activity(i){
+	timer_reset()
 	current_activity_index=i
 	current_activity_data=json_data['activities'][i]
 	correct_answer=current_activity_data['answers'][0]
@@ -168,9 +247,9 @@ function activity(i){
 	canvas_zone.innerHTML=' \
 	<div id="sound">sound icon</div> \
 	<div id="answers"> \
-	<div id="answer0" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"><img src="img/words/'+current_activity_data['answers'][0]+'.png" /></div>\
-	<div id="answer1" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"><img src="img/words/'+current_activity_data['answers'][1]+'.png" /></div>\
-	<div id="answer2" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"><img src="img/words/'+current_activity_data['answers'][2]+'.png" /></div>\
+	<div id="answer0" class="hover_red_border" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"><img src="'+media_url+'img/words/'+current_activity_data['answers'][0]+'.png" /></div>\
+	<div id="answer1" class="hover_red_border" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"><img src="'+media_url+'img/words/'+current_activity_data['answers'][1]+'.png" /></div>\
+	<div id="answer2" class="hover_red_border" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"><img src="'+media_url+'img/words/'+current_activity_data['answers'][2]+'.png" /></div>\
 	</div>\
 	'
 /*	<ul> \
@@ -186,7 +265,8 @@ function activity(i){
 	zone_sound=$('#sound')[0]
 	zone_sound.innerHTML="starting..."
 	sound_array=current_activity_data['sounds']
-	play_sound_arr();	
+	play_sound_arr()
+	timer_start()
 }
 
 function play_sound_arr(){
@@ -208,34 +288,45 @@ function play_sprite_chain(){
 }
 
 function check_correct(clicked_answer,correct_answer){
-	image_src_start_exists=clicked_answer.indexOf("src=\"")
+	timer_stop()
+	result_correct=false
+	session_duration+=timer_seconds // + timer_minutes*60
+	image_src_start_exists=clicked_answer.indexOf("src=\""+media_url)
 	if (image_src_start_exists > -1){
 		img_src_end=clicked_answer.indexOf(".png\"",image_src_start_exists+1)
-		clicked_answer=clicked_answer.substring(image_src_start_exists+15,img_src_end)	// src="img/words/ -> 15 chars	
+		clicked_answer=clicked_answer.substring(image_src_start_exists+media_url.length+15,img_src_end)	// src="img/words/ -> 15 chars	
 	}
 	//alert(clicked_answer)
 	audio_chain_waiting=false
 	if (clicked_answer==correct_answer){
 		playSprite("zfx_correct")
-		//alert("correct!")
-		canvas_zone.innerHTML='<div style="width:100%;text-align:center"><img src="img/correct.png" width="180px"/><br /><button onclick="nextActivity()">Next</button></div>'		
-		correct++	
-		score_correct.innerHTML=correct
+		//alert("correct!")// <br /><button onclick="nextActivity()">Next</button>
+		canvas_zone.innerHTML='<div style="width:100%;text-align:center"><img src="'+media_url+'img/correct.png" width="180px"/></div>'		
+		num_correct_activities++
+		result_correct=true
+		score_correct.innerHTML=num_correct_activities
 	}else{
 		playSprite("zfx_wrong")	
-		//alert("wrong!")
-		canvas_zone.innerHTML='<div style="width:100%;text-align:center"><img src="img/wrong.png" width="180px"/><br /><button onclick="nextActivity()">Next</button></div>'		
+		//alert("wrong!") //<br /><button onclick="nextActivity()">Next</button></div>
+		canvas_zone.innerHTML='<div style="width:100%;text-align:center"><img src="'+media_url+'img/wrong.png" width="180px"/>'	
 	}
-	answered++
-	score_answered.innerHTML=answered
+	num_answered_activities++
+	score_answered.innerHTML=num_answered_activities
+	// current_activity_data[current] get lenght and store like "number" : { activity-data}
+	// send data (optinal, we can send it at the end...)
+	setTimeout(function(){nextActivity()}, 2000)
 }
 
 function nextActivity(){
 	remaining_rand_activities.splice(current_activity_index,1) // remove current activity	
-	if(remaining_rand_activities.length==0){
-	canvas_zone.innerHTML=' \
-	NO HAY MAS ACTIVIDADES. FIN\
-	'	
+	if(remaining_rand_activities.length==0){	
+		alert()	
+		canvas_zone.innerHTML=' \
+		NO HAY MAS ACTIVIDADES. FIN, '+ backend_url+'ajaxdb.php?action=send_session_data&user='+session_user+'&subject='+session_subject+'&age='+session_subject_age+'&num_answered='+num_answered_activities+'&num_correct='+num_correct_activities+'&level='+session_level +'&duration='+session_duration+'&timestamp='+session_timestamp_str +'\
+		'
+		// calculate result
+		session_result=num_correct_activities/num_answered_activities
+		send_session_data()
 	}else{		
 		$('#remaining_activities_num')[0].innerHTML=""+(remaining_rand_activities.length-1)	
 		if(remaining_rand_activities.length==1){	
@@ -247,6 +338,15 @@ function nextActivity(){
 	}
 }
 
+function send_session_data(){
+	//alert(backend_url+'ajaxdb.php?action=send_session_data&user='+session_user+'&subject='+session_subject+'&age='+session_subject_age+'&num_answered='+num_answered_activities+'&num_correct='+num_correct_activities+'&level='+session_level +'&duration='+session_duration+'&session_timestamp='+session_timestamp_str)
+	msg=$.getJSON(
+		backend_url+'ajaxdb.php?action=send_session_data&user='+session_user+'&subject='+session_subject+'&age='+session_subject_age+'&num_answered='+num_answered_activities+'&num_correct='+num_correct_activities+'&level='+session_level +'&duration='+session_duration+'&timestamp='+session_timestamp_str,
+		function(data) { canvas_zone.innerHTML+='<br />Server message: '+data.msg; }
+		);
+		
+	
+}
 
 // current sprite being played
 var currentSprite = {};
