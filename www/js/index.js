@@ -1,7 +1,7 @@
 // data (will be ajax in the server in the future)
-json_data={
-	".comment": "The correct answer is always the first, the app rands them, the minimum number of answers is two, the maximum is unlimited",
-	"activities": [
+//".comment": "The correct answer is always the first, the app rands them, the minimum number of answers is two, the maximum is unlimited",
+
+json_activities=[
 		{
 			"type": "sounds",
 			"sounds": ["k","a","ss","a"],
@@ -34,7 +34,7 @@ json_data={
 		}	
 	]
 
-}
+
 
 //media_url='https://dl.dropboxusercontent.com/u/188219/apps-media/afan-app/' // inside dropbox public...
 // if these are found localy (e.g., search for a local folder called ... or a file xxx), Set the url locally
@@ -112,10 +112,10 @@ subjects_select_elem="none"
 // See how to login and control session with javascript frontend... Use cookies (learn)
 	
 $(function () { // DOM ready
-	/*$.getJSON("data.json", function(json_data) {
-	    console.log(json_data); // this will show the info it in firebug console
+	/*$.getJSON("data.json", function(json_activities) {
+	    console.log(json_activities); // this will show the info it in firebug console
 	});*/
-	//alert("there "+json_data['activities'][0]['name'])
+	//alert("there "+json_activities['activities'][0]['name'])
 	is_app=is_cordova() // make this global to access whenever you want
 	if(is_app){
 	        document.addEventListener('deviceready', onDeviceReady, false);
@@ -177,9 +177,9 @@ function timer_reset(){
 }
 ///////////////////////////
 
-function select_fill_with_json(json_data,select_elem){
+function select_fill_with_json(json_activities,select_elem){
 	// first empty the select...
-	$.each(json_data, function(key, val) {select_elem.append('<option value="' + key + '">' + key + '</option>')})
+	$.each(json_activities, function(key, val) {select_elem.append('<option value="' + key + '">' + key + '</option>')})
 }
 
 function splash_screen(){
@@ -231,7 +231,7 @@ function game(){
 		 + session_timestamp.getHours() + ":"  + session_timestamp.getMinutes()
 	// TODO calculate age of the subject ...
 	// session_subject_age=... 
-	remaining_rand_activities=json_data['activities']
+	remaining_rand_activities=json_activities
 	$('#remaining_activities_num')[0].innerHTML=""+(remaining_rand_activities.length-1)	
         activity(Math.floor(Math.random()*remaining_rand_activities.length))
 }
@@ -239,7 +239,7 @@ function game(){
 function activity(i){
 	timer_reset()
 	current_activity_index=i
-	current_activity_data=json_data['activities'][i]
+	current_activity_data=json_activities[i]
 	correct_answer=current_activity_data['answers'][0]
 	
 	// display the sounds and a select with 3 div buttons with the answers
@@ -275,6 +275,7 @@ function play_sound_arr(){
 }
 
 function play_sprite_chain(){
+	while (sound_array[audio_sprite_position]=="/") {++audio_sprite_position;} // ignore /	
 	if(audio_sprite_position>=sound_array.length){
 		zone_sound.innerHTML='<button onclick="play_sound_arr(current_activity_data.sounds,0)">re-play</button>'
 		audio_sprite_position=0
