@@ -1,7 +1,16 @@
 // data (will be ajax in the server in the future)
 //".comment": "The correct answer is always the first, the app rands them, the minimum number of answers is two, the maximum is unlimited",
 
-json_activities=[
+json_activities=
+
+
+
+[
+{"type":"sounds","sounds":["s","o","l"],"level":"1","answers":["sol","col","sal","pez","tren"]},
+{"type":"sounds","sounds":["p","e","z"],"level":"1","answers":["pez","tren","sol","sal","col"]},
+{"type":"sounds","sounds":["s","a","l"],"level":"1","answers":["sal","sol","col","pez","tren"]},
+{"type":"sounds","sounds":["k","o","l"],"level":"1","answers":["col","sol","sal","pez","tren"]},
+{"type":"sounds","sounds":["t","r","e","n"],"level":"1","answers":["tren","pez","sol","sal","col"]},
 		{
 			"type": "sounds",
 			"sounds": ["k","a","ss","a"],
@@ -67,6 +76,7 @@ p: {id: "p50", start: 22.509, end: 22.998, loop: false},
 r: {id: "r50", start: 23.998, end: 24.526, loop: false}, 
 rr: {id: "rr50", start: 16.509, end: 17.008, loop: false}, 
 ss: {id: "ss50", start: 15.010, end: 15.509, loop: false}, 
+s: {id: "ss50", start: 15.010, end: 15.509, loop: false}, 
 t: {id: "t50", start: 0.000, end: 0.500, loop: false}, 
 u: {id: "u50", start: 1.500, end: 2.000, loop: false}, 
 z: {id: "z50", start: 10.547, end: 11.047, loop: false}, 
@@ -244,23 +254,23 @@ function activity(i){
 	
 	// display the sounds and a select with 3 div buttons with the answers
 
+
+	answers_html=""
+	used_answers=[];
+	for(var i=0; i<USE_ANSWERS ; ++i) {
+		use=Math.floor(Math.random() * USE_ANSWERS)
+		while(used_answers.indexOf(use) != -1) use=Math.floor(Math.random() * USE_ANSWERS);
+		answers_html+='<div id="answer'+i+'" class="hover_red_border" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"><img src="'+media_url+'img/words/'+current_activity_data['answers'][use]+'.png" /></div>\
+		'
+		used_answers[used_answers.length]=use
+	 }
 	canvas_zone.innerHTML=' \
 	<div id="sound">sound icon</div> \
 	<div id="answers"> \
-	<div id="answer0" class="hover_red_border" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"><img src="'+media_url+'img/words/'+current_activity_data['answers'][0]+'.png" /></div>\
-	<div id="answer1" class="hover_red_border" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"><img src="'+media_url+'img/words/'+current_activity_data['answers'][1]+'.png" /></div>\
-	<div id="answer2" class="hover_red_border" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"><img src="'+media_url+'img/words/'+current_activity_data['answers'][2]+'.png" /></div>\
+	'+answers_html+'\
 	</div>\
-	'
-/*	<ul> \
-		<li id="answer0" onclick="check_correct(this.innerHTML,correct_answer)">'+current_activity_data['answers'][0]+'</li>\
-		<li id="answer1" onclick="check_correct(this.innerHTML,correct_answer)">'+current_activity_data['answers'][1]+'</li>\
-		<li id="answer2" onclick="check_correct(this.innerHTML,correct_answer)">'+current_activity_data['answers'][2]+'</li>\
-	</ul>\
-*/
-	
-	// count the time until the user clicks an answer	
-	
+	'	
+	// count the time until the user clicks an answer		
 	// reproduce the sounds one after the other and stop and button to replay
 	zone_sound=$('#sound')[0]
 	zone_sound.innerHTML="starting..."
