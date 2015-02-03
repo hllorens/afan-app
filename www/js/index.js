@@ -37,7 +37,7 @@ json_activities=
 			"answers": [
 				"arbol",
 				"arco",
-				"avión"
+				"avion"
 			],
 			"level": "1"
 		}	
