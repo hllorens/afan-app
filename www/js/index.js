@@ -3,19 +3,66 @@
 
 // MEDIA
 var images = [
-	"http://www.centroafan.com/afan-app-media/img/correct.png",	
-	"http://www.centroafan.com/afan-app-media/img/wrong.png",	
-	"http://www.centroafan.com/afan-app-media/img/key.png",	
-	"http://www.centroafan.com/afan-app-media/img/words/casa.png",	
-	"http://www.centroafan.com/afan-app-media/img/words/arbol.png",	
-	"http://www.centroafan.com/afan-app-media/img/words/arco.png",	
-	"http://www.centroafan.com/afan-app-media/img/words/avion.png",	
-	"http://www.centroafan.com/afan-app-media/img/words/sal.png"	
+"http://www.centroafan.com/afan-app-media/img/words/abrigo.png",
+"http://www.centroafan.com/afan-app-media/img/words/aceite.png",
+"http://www.centroafan.com/afan-app-media/img/words/arbol.png",
+"http://www.centroafan.com/afan-app-media/img/words/arco.png",
+"http://www.centroafan.com/afan-app-media/img/words/avion.png",
+"http://www.centroafan.com/afan-app-media/img/words/barco.png",
+"http://www.centroafan.com/afan-app-media/img/words/bici.png",
+"http://www.centroafan.com/afan-app-media/img/words/boca.png",
+"http://www.centroafan.com/afan-app-media/img/words/brazo.png",
+"http://www.centroafan.com/afan-app-media/img/words/cabra.png",
+"http://www.centroafan.com/afan-app-media/img/words/cama.png",
+"http://www.centroafan.com/afan-app-media/img/words/camara.png",
+"http://www.centroafan.com/afan-app-media/img/words/caracol.png",
+"http://www.centroafan.com/afan-app-media/img/words/carta.png",
+"http://www.centroafan.com/afan-app-media/img/words/casa.png",
+"http://www.centroafan.com/afan-app-media/img/words/col.png",
+"http://www.centroafan.com/afan-app-media/img/words/comprar.png",
+"http://www.centroafan.com/afan-app-media/img/words/copa.png",
+"http://www.centroafan.com/afan-app-media/img/words/cortinas.png",
+"http://www.centroafan.com/afan-app-media/img/words/cuatro.png",
+"http://www.centroafan.com/afan-app-media/img/words/lampara.png",
+"http://www.centroafan.com/afan-app-media/img/words/libros.png",
+"http://www.centroafan.com/afan-app-media/img/words/mano.png",
+"http://www.centroafan.com/afan-app-media/img/words/maracas.png",
+"http://www.centroafan.com/afan-app-media/img/words/mesa.png",
+"http://www.centroafan.com/afan-app-media/img/words/mono.png",
+"http://www.centroafan.com/afan-app-media/img/words/murciélago.png",
+"http://www.centroafan.com/afan-app-media/img/words/naranja.png",
+"http://www.centroafan.com/afan-app-media/img/words/pantano.png",
+"http://www.centroafan.com/afan-app-media/img/words/pato.png",
+"http://www.centroafan.com/afan-app-media/img/words/pera.png",
+"http://www.centroafan.com/afan-app-media/img/words/percha.png",
+"http://www.centroafan.com/afan-app-media/img/words/pescado.png",
+"http://www.centroafan.com/afan-app-media/img/words/piedra.png",
+"http://www.centroafan.com/afan-app-media/img/words/pino.png",
+"http://www.centroafan.com/afan-app-media/img/words/piña.png",
+"http://www.centroafan.com/afan-app-media/img/words/plano.png",
+"http://www.centroafan.com/afan-app-media/img/words/plato.png",
+"http://www.centroafan.com/afan-app-media/img/words/pluma.png",
+"http://www.centroafan.com/afan-app-media/img/words/plátano.png",
+"http://www.centroafan.com/afan-app-media/img/words/puente.png",
+"http://www.centroafan.com/afan-app-media/img/words/pájaro.png",
+"http://www.centroafan.com/afan-app-media/img/words/queso.png",
+"http://www.centroafan.com/afan-app-media/img/words/ratón.png",
+"http://www.centroafan.com/afan-app-media/img/words/regadera.png",
+"http://www.centroafan.com/afan-app-media/img/words/rojo.png",
+"http://www.centroafan.com/afan-app-media/img/words/sal.png",
+"http://www.centroafan.com/afan-app-media/img/words/sapo.png",
+"http://www.centroafan.com/afan-app-media/img/words/seta.png",
+"http://www.centroafan.com/afan-app-media/img/words/sol.png",
+"http://www.centroafan.com/afan-app-media/img/words/sopa.png",
+"http://www.centroafan.com/afan-app-media/img/words/tijeras.png",
+"http://www.centroafan.com/afan-app-media/img/words/tostadora.png",
+"http://www.centroafan.com/afan-app-media/img/words/tres.png",
+"http://www.centroafan.com/afan-app-media/img/words/ventana.png"	
 ]
 
 var sounds = [
 	"http://www.centroafan.com/afan-app-media/audio/soundsSprite.m4a",
-	"http://www.centroafan.com/afan-app/audio/datasound.m4a"
+	"http://www.centroafan.com/afan-app-media/audio/datasound.m4a"
 ]
 
 
@@ -108,6 +155,7 @@ var USE_ANSWERS = 3
 var max_calls=500
 
 // variables
+var media_objects
 session_user="afan"
 session_subject="juan"
 session_subject_age="5"
@@ -118,7 +166,7 @@ correct_answer='undefined'
 current_activity_type='undefined' // to avoid loading all the html pattern but just changing the values
 zone_sound=null
 canvas_zone=$('#zone_canvas')[0]
-audio_sprite_object = $('#audio_sprite_object')[0] //document.createElement('audio'); //$('#audio_tag')[0]
+var audio_sprite_object //$('#audio_sprite_object')[0] //document.createElement('audio'); //$('#audio_tag')[0]
 score_correct=$('#current_score_num')[0]
 score_answered=$('#current_answered_num')[0]
 audio_ended=false
@@ -212,6 +260,10 @@ function select_fill_with_json(json_activities,select_elem){
 }
 
 function splash_screen(){
+	// load audio in the object 
+	audio_sprite_object=media_objects.sounds['soundsSprite.m4a']
+	audio_sprite_object.addEventListener('timeupdate', onTimeUpdate, false);
+
 	console.log('userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info)
        // detectar si se està accediendo desde un navegador o desde la app para identificar al usuario con el num de movil o con la IP (por defecto se guardan estadísticas basadas en eso).
 	canvas_zone.innerHTML=' \
@@ -227,8 +279,7 @@ function splash_screen(){
 		backend_url+'ajaxdb.php?action=get_subjects&user='+session_user, 
 		function(data) { select_fill_with_json(data,subjects_select_elem); $("#start-button")[0].disabled=false; }
 		);
-	// TODO: Preload images sprite and then show start button, print a loading bar
-	
+	// TODO:  images sprite 
 	// TODO: Select default user and subject
 }
 
@@ -272,23 +323,24 @@ function activity(i){
 	correct_answer=current_activity_data['answers'][0]
 	
 	// display the sounds and a select with 3 div buttons with the answers
-
-
-	answers_html=""
+	canvas_zone.innerHTML=' \
+	<div id="sound">sound icon</div> \
+	<div id="answers"></div>\
+	'	
+	//answers_html=""
+	answers_div=document.getElementById('answers')
 	used_answers=[];
 	for(var i=0; i<USE_ANSWERS ; ++i) {
 		use=Math.floor(Math.random() * USE_ANSWERS)
 		while(used_answers.indexOf(use) != -1) use=Math.floor(Math.random() * USE_ANSWERS);
-		answers_html+='<div id="answer'+i+'" class="hover_red_border" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"><img src="'+media_url+'img/words/'+current_activity_data['answers'][use]+'.png" /></div>\
-		'
+		answers_div.innerHTML+='<div id="answer'+i+'" class="hover_red_border" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"></div>'
+		if(media_objects.images[current_activity_data['answers'][use]+'.png']==undefined) alert("ERROR: "+current_activity_data['answers'][use]+'.png'+" NOT FOUND, MONTSE PASAM LES FOTOS")
+		document.getElementById("answer"+i).appendChild(media_objects.images[current_activity_data['answers'][use]+'.png']);
+		//answers_html+='<div id="answer'+i+'" class="hover_red_border" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"><img src="'+media_url+'img/words/'+current_activity_data['answers'][use]+'.png" /></div>'		
 		used_answers[used_answers.length]=use
 	 }
-	canvas_zone.innerHTML=' \
-	<div id="sound">sound icon</div> \
-	<div id="answers"> \
-	'+answers_html+'\
-	</div>\
-	'	
+	
+	
 	// count the time until the user clicks an answer		
 	// reproduce the sounds one after the other and stop and button to replay
 	zone_sound=$('#sound')[0]
@@ -398,7 +450,6 @@ var onTimeUpdate = function() {
 	/*setTimeout(function(){audio_chain_callback()},500)*/
     }
 };
-audio_sprite_object.addEventListener('timeupdate', onTimeUpdate, false); // VER... SI EL FALSE ES UN CALLBACK APLICAR (CHECK_IF_CHAIN_WAITING)
 
 // in mobile Safari, the first time this is called will load the audio. Ideally, we'd load the audio file completely before doing this.
 var playSprite = function(id) {

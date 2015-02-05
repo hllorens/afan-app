@@ -10,7 +10,7 @@ var html5_audiotypes={
 
 
 // LOAD CONFIG
-var MEDIA_LOAD_TIMEOUT=6000 			// 6 sec
+var MEDIA_LOAD_TIMEOUT=10000 			// 10 sec
 var media_load_time=0 				// load time counter
 var media_load_check_status_interval=250 	// check status every 0.25 sec
 var load_progressbar
@@ -42,7 +42,7 @@ function load_sound(resource_url){
 	if (!audio_object.canPlayType || audio_object.canPlayType("audio/mp4")==""){ 
 		return {playclip:function(){throw new Error("Your browser doesn't support HTML5 audio or mp4/m4a")}}
 	}
-	audio_object.addEventListener('canplaythrough', function () {//console.log("canplaythrough ("+resource_url+")");
+	audio_object.addEventListener('canplaythrough', function () {console.log("canplaythrough ("+resource_url+")");
 		load_progressbar.value+=1;not_loaded.splice(not_loaded.indexOf(resource_url),1)});
 	//audio_object.preload='auto' or audio_object.load() doe not seem to help for iOS
 	audio_object.src=resource_url
@@ -88,7 +88,9 @@ function check_load_status() {
 		var retry=document.createElement("div") // we can reuse the other div
 		var err_msg="";
 		for(var i=0;i<not_loaded.length;i++){
-			var temp_obj=ret_media.sounds[get_resource_name(not_loaded[i])]	
+			var temp_obj
+			if(not_loaded[i].match('\.(m4a|mp4|mp3|ogg)')) temp_obj=ret_media.sounds[get_resource_name(not_loaded[i])]
+			else temp_obj=ret_media.images[get_resource_name(not_loaded[i])]			
 			err_msg+="<br />"+temp_obj.error+  " - "+temp_obj.readyState+ " - "+temp_obj.networkState;
 		}
 		// re-try by a button to reload url, previously loaded stuff should be cached (fast load)
