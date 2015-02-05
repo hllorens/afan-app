@@ -1,6 +1,25 @@
 // data (will be ajax in the server in the future)
 //".comment": "The correct answer is always the first, the app rands them, the minimum number of answers is two, the maximum is unlimited",
 
+// MEDIA
+var images = [
+	"http://www.centroafan.com/afan-app-media/img/correct.png",	
+	"http://www.centroafan.com/afan-app-media/img/wrong.png",	
+	"http://www.centroafan.com/afan-app-media/img/key.png",	
+	"http://www.centroafan.com/afan-app-media/img/words/casa.png",	
+	"http://www.centroafan.com/afan-app-media/img/words/arbol.png",	
+	"http://www.centroafan.com/afan-app-media/img/words/arco.png",	
+	"http://www.centroafan.com/afan-app-media/img/words/avion.png",	
+	"http://www.centroafan.com/afan-app-media/img/words/sal.png"	
+]
+
+var sounds = [
+	"http://www.centroafan.com/afan-app-media/audio/soundsSprite.m4a",
+	"http://www.centroafan.com/afan-app/audio/datasound.m4a"
+]
+
+
+// ACTIVITIES
 json_activities=
 
 
@@ -225,7 +244,7 @@ function onDeviceReady() {
                         'Ver='  + device.version
 		
 	}
-	splash_screen()
+	media_objects=load_media(images,sounds,splash_screen)
 }
 
 

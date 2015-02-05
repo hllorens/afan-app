@@ -15,6 +15,14 @@ var media_load_time=0 				// load time counter
 var media_load_check_status_interval=250 	// check status every 0.25 sec
 var load_progressbar
 var modal_load_window
+var callback_function_global
+var num_images=0
+var num_sounds=0
+var not_loaded=[]
+var ret_media={}
+var is_iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false )
+var download_ios_active = false
+var user_language=window.navigator.userLanguage || window.navigator.language;
 
 function get_resource_name(resource_url){
 	resource_name=resource_url
@@ -24,7 +32,7 @@ function get_resource_name(resource_url){
 
 function load_image(resource_url){
 	var image_object = new Image()
-	image_object.addEventListener("load", function() {load_progressbar.value+=1},true)
+	image_object.addEventListener("load", function() {load_progressbar.value+=1;not_loaded.splice(not_loaded.indexOf(resource_url),1)},true)
 	image_object.src = resource_url // after because load begins as soon as src is set
 	return image_object
 }
@@ -34,7 +42,9 @@ function load_sound(resource_url){
 	if (!audio_object.canPlayType || audio_object.canPlayType("audio/mp4")==""){ 
 		return {playclip:function(){throw new Error("Your browser doesn't support HTML5 audio or mp4/m4a")}}
 	}
-	audio_object.addEventListener('canplaythrough', function () {console.log("canplaythrough ("+resource_url+")");load_progressbar.value+=1});
+	audio_object.addEventListener('canplaythrough', function () {//console.log("canplaythrough ("+resource_url+")");
+		load_progressbar.value+=1;not_loaded.splice(not_loaded.indexOf(resource_url),1)});
+	//audio_object.preload='auto' or audio_object.load() doe not seem to help for iOS
 	audio_object.src=resource_url
 	audio_object.playclip=function(){
 		try{
@@ -45,39 +55,71 @@ function load_sound(resource_url){
 	return audio_object
 }
 
+function download_ios(){
+		load_interval = setInterval(function() {check_load_status();}, media_load_check_status_interval)
+		for(var i=0;i<not_loaded.length;i++){
+			ret_media.sounds[get_resource_name(not_loaded[i])].load();
+			//track.play();    setTimeout(function(){ track.pause();  },1); // extreme alternative if load() fails
+		}	
+}
+
 function check_load_status() {
 	media_load_time+=media_load_check_status_interval
-	if (load_progressbar.value == load_progressbar.max) {
-		clearInterval(load_interval);//load_progressbar.parentNode.removeChild(load_progressbar);
-		document.body.removeChild(modal_load_window)
-		// start the app
-		// sound_objects["datasound.m4a"].play() only works with Desktop/Laptop browsers (not mobile/tablet which need click/touch)
+	if (load_progressbar.value == load_progressbar.max || (load_progressbar.value==num_images && is_iOS)) {
+		if(load_progressbar.value==num_images){
+			if(!download_ios_active){	
+				download_ios_active=true	
+				clearInterval(load_interval);
+				media_load_time=0
+				var retry=document.createElement("div") // we can reuse the other div
+				var ios_media_msg="Pula Ok para empezar"
+				if(user_language=='en-US') ios_media_msg="Click Ok to start"
+				retry.innerHTML=ios_media_msg+'<button onclick="download_ios()">Ok</button> '
+				modal_load_window.appendChild(retry)
+			}
+		}else{
+			clearInterval(load_interval);
+			document.body.removeChild(modal_load_window)
+			callback_function_global() // start the app
+		}
 	}
 	if (media_load_time==MEDIA_LOAD_TIMEOUT){
-		clearInterval(load_interval);//load_progressbar.parentNode.removeChild(load_progressbar);
-		alert("ERROR: Load media timeout")
+		clearInterval(load_interval);
+		var retry=document.createElement("div") // we can reuse the other div
+		var err_msg="";
+		for(var i=0;i<not_loaded.length;i++){
+			var temp_obj=ret_media.sounds[get_resource_name(not_loaded[i])]	
+			err_msg+="<br />"+temp_obj.error+  " - "+temp_obj.readyState+ " - "+temp_obj.networkState;
+		}
+		// re-try by a button to reload url, previously loaded stuff should be cached (fast load)
+		retry.innerHTML='ERROR: Load media timeout. Not loaded ('+not_loaded.length+'): '+not_loaded+' <a href="">retry</a> '+err_msg
+		modal_load_window.appendChild(retry)
 	}
 }
 
 
 
-function load_media(image_arr, sound_arr){
-	ret={};ret.sounds=[];ret.images=[];
+function load_media(image_arr, sound_arr, callback_function){
+	ret_media={};ret_media.sounds=[];ret_media.images=[];
+	callback_function_global=callback_function
 	modal_load_window=document.createElement("div")
 	modal_load_window.className="js-modal-window"
 	var modal_dialog=document.createElement("div")
 	load_progressbar=document.createElement("progress")
-	load_progressbar.max=sounds.length+images.length; load_progressbar.value=0
+	num_images=image_arr.length; num_sounds=sound_arr.length
+	load_progressbar.max=num_images+num_sounds; load_progressbar.value=0
+
+	not_loaded=image_arr.concat(sound_arr) // to show in case of error
+	download_ios_active = false
 
 	modal_dialog.appendChild(load_progressbar)
 	modal_load_window.appendChild(modal_dialog)
 	document.body.appendChild(modal_load_window)
 	
-	//document.body.appendChild(load_progressbar)
 	load_interval = setInterval(function() {check_load_status();}, media_load_check_status_interval)
-	for (var i = 0; i < sound_arr.length; i++) {ret.sounds[get_resource_name(sound_arr[i])]=load_sound(sound_arr[i])}
-	for (var i = 0; i < image_arr.length; i++) {ret.images[get_resource_name(image_arr[i])]=load_image(image_arr[i])}
-	return ret
+	for (var i = 0; i < sound_arr.length; i++) {ret_media.sounds[get_resource_name(sound_arr[i])]=load_sound(sound_arr[i])}
+	for (var i = 0; i < image_arr.length; i++) {ret_media.images[get_resource_name(image_arr[i])]=load_image(image_arr[i])}
+	return ret_media // even if objects are not loaded yet, they are created and will point to the loaded media
 }
 
 

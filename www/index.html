@@ -8,23 +8,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="stylesheet" type="text/css" href="css/cognitionis.load-utils.css">
   <link rel="stylesheet" href="css/index.css">
 
 </head>
 
 <body>
-<audio id="audio_sprite_object" preload="auto"> <!-- src="audio/soundsSprite.wav" -->
+<audio id="audio_sprite_object"> <!-- src="audio/soundsSprite.wav" -->
             <!-- Seems that some browsers do not trust cognitionis.com for audio files -->
             <!-- ie9 -->
 	    <!--<source src="http://www.cognitionis.com/audio/soundsSprite.m4a" type="audio/mpeg" />
 	    <!-- firefox --> 
 	    <!--<source src="http://www.cognitionis.com/audio/soundsSprite.ogg" type="audio/ogg" /> -->
 	    <source src="audio/soundsSprite.m4a" type="audio/mpeg" /> <!-- safari? -->
-	    <source src="https://dl.dropboxusercontent.com/u/188219/afan-app/soundsSprite.m4a" type="audio/mp4" /> <!-- ie9, all type="audio/mpeg"-->
-	    <!--<source src="https://dl.dropboxusercontent.com/u/188219/afan-app/soundsSprite.ogg" type="audio/ogg" />  firefox should support m4a -->
-	    
-	    
-	    
+	    <source src="https://dl.dropboxusercontent.com/u/188219/afan-app/soundsSprite.m4a" type="audio/mp4" /> <!-- ie9, audio/mpeg -->
+	   <!-- <source src="https://dl.dropboxusercontent.com/u/188219/afan-app/soundsSprite.ogg" type="audio/ogg" />  firefox -->
 	    <!--<source src="http://www.cognitionis.com/audio/soundsSprite.wav" type="audio/wav" />-->
 	    audio not supported. Try mp3?
 </audio><!-- http://dl.dropbox.com/u/1538714/article_resources/cat.m4a controls -->
@@ -57,6 +55,7 @@
 </div>
 
 <!-- scripts -->
+<script src="js/cognitionis.load-utils.js"></script>
 <script type="text/javascript" src="cordova.js"></script>
 <!-- a backup jquery version is found in lib folder -->
 <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> does not work for now...-->
