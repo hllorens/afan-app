@@ -22,13 +22,17 @@ a:hover{text-decoration:underline;}
 .clear{content:"."; display:block; height:0; clear:both; visibility:hidden;}
 
 
-#page{margin: 0 auto; max-width: 640px; min-height: 416px; position: relative; background:#965;}
+#page{
+	margin: 0 auto; position: relative; background:#965; width:94%; min-width:640px; height:80%; 
+	/*max-width: 640px;min-height: 480px;min-height: 80%; CANNOT BE A PERCENTAGE :()*/
+	min-height: 600px; /*BEST SOLUTION WOULD BE ADAPT PER DEVICE MAXHEIGHT*/
+}
 
 h1{font: normal 35px VanillaRegular,Arial,sans-serif; text-align: center; margin: 10px 0 5px 0; color: #eaa;}
 
 #zone_score{font: bold 18px Arial,sans-serif; padding: 5px;}
-.col_score{float: left;}
-.col_answered{float: right; text-align: right;}
+.col_left{float: left;margin-left:10px;}
+.col_right{float: right; text-align: right; margin-right:10px;}
 #best_score{color: #111;}
 #current_score{}
 #remaining_activities{color: #111;}
@@ -36,50 +40,65 @@ h1{font: normal 35px VanillaRegular,Arial,sans-serif; text-align: center; margin
 .col_moves{text-align: center; color: #d63;}
 .col_moves .critical{color: #c33;}
 
-#zone_canvas{position: relative; overflow: hidden;background:#fee;}
-#sound{height:40%;width:100%;align:center;margin:0;padding:1px;}
-#answers{height:60%;width:100%;align:center;margin:0;padding:0 5px;background:#fee;}
+#zone_canvas{position: relative; overflow: hidden;background:#fee; height:400px;} /*HEIGHT perhaps use variables? css3?*/
+#sound{/*height:40%;*/
+	width:100%;align:center;margin:0;padding:1px;
+}
+#answers{/*height:60%;*/
+	width:100%;align:center;margin:0;padding:0 5px;background:#fee;
+}
 #answers ul{height:100%;width:100%;align:center;margin:0;padding:0;decoration:none;border:1px solid black;decoration:none;}
 #answers ul li{height:33%;width:100%;text-align:center;margin:0;background:#fee;border:1px solid black;decoration:none;}
 #answers ul li:hover{background:#55bb66;border:1px solid red;}
 
 .hover_red_border{
+	width:32%;
+	text-align:center;
 	border:2px solid #fee;decoration:none;margin-right:2px;padding:1px;
 }
 .hover_red_border:hover{
 	border:2px solid red;
 }
 
+.hover_red_border img{
+	width:80%;
+}
+
+
 /* short screen (laptop) */
-@media screen and (max-height: 720px) {
-  #page{max-width: 480px;}
+/*@media screen and (max-height: 720px) {
+  #page{min-height: 600px;height:600px;}
 }
 
 @media screen and (max-height: 720px) and (max-width: 1000px) {
-  #download_zone{display: none;}
-  #send_to_phone{display: none;}
+  #page{min-height: 600px;height:600px;}
 }
 
 @media screen and (min-height: 720px) and (max-width: 1200px) {
-  #download_zone{display: none;}
-  #send_to_phone{display: none;}
+  #page{min-height: 600px;height:600px;}
 }
 
+@media screen and (max-height: 800px) {
+  #page{min-height: 600px;height:600px;}
+}
+*/
+
+
 /* mobile (vertical) */
-@media screen and (max-width: 640px) {
+/*@media screen and (max-width: 640px) {
   h1{font-size: 30px;}
   #zone_message{font-size: 35px;}
   #zone_score{font-size: 14px;}
-  /*#download_zone{display: block; position: relative; left: 0; top: 0;}*/
+  //#download_zone{display: block; position: relative; left: 0; top: 0;}
   #download_zone{display: none;}
   #send_to_phone{display: none;}
   #zone_message .bt-app-wall {
     display: inline-block;
   }
-}
+}*/
 
 /* mobile (horizontal) */
-@media screen and (max-width: 640px) and (orientation: landscape) {
+/*@media screen and (orientation: landscape) {
   #page{min-height: 0;}
   #zone_score{display: none;}
   #zone_jeu{display: none;}
@@ -87,4 +106,4 @@ h1{font: normal 35px VanillaRegular,Arial,sans-serif; text-align: center; margin
   #download_zone{display: none;}
   #send_to_phone{display: none;}
   #msg_portrait{display: block; font-size: 20px; text-align: center; padding: 30px;}
-}
+}*/

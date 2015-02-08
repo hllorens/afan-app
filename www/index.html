@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <link rel="stylesheet" type="text/css" href="css/cognitionis.load-utils.css">
+  <link rel="stylesheet" type="text/css" href="css/cognitionis.utils.css">
   <link rel="stylesheet" href="css/index.css">
 
 </head>
@@ -20,9 +20,9 @@
 </audio>-->
 <div id="page">
     <h1>Conciencia Fonológica</h1>
-
+    
     <div id="zone_score" class="cf">
-      <div class="col_score">
+      <div class="col_left">
         <div id="activity_timer_div">
           Tiempo : <span id="activity_timer_span">00:00:00</span>
         </div>
@@ -30,7 +30,7 @@
           Correct : <span id="current_score_num">0</span>
         </div>
       </div>
-      <div class="col_answered">
+      <div class="col_right">
         <div id="remaining_activities">
           remaining activs : <span id="remaining_activities_num">0</span>
         </div>
@@ -43,7 +43,7 @@
       </div>
     </div> <!-- /#zone_score -->
 
-    <div style="height: 480px;" id="zone_canvas"></div><!-- /#zone_canvas depends on the activity type -->
+    <div id="zone_canvas"></div><!-- /#zone_canvas depends on the activity type style="height: 480px;" -->
 </div>
 
 <!-- scripts -->

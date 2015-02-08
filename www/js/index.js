@@ -63,8 +63,8 @@ var images = [
 ]
 
 var sounds = [
-	"http://www.centroafan.com/afan-app-media/audio/soundsSprite.m4a",
-	"http://www.centroafan.com/afan-app-media/audio/datasound.m4a"
+	//"http://www.centroafan.com/afan-app-media/audio/datasound.m4a",
+	"http://www.centroafan.com/afan-app-media/audio/soundsSprite2.m4a"
 ]
 
 
@@ -112,37 +112,32 @@ json_activities=
 media_url='http://www.centroafan.com/afan-app-media/'
 backend_url='http://www.centroafan.com/afan-app-backend/'
 
-/*
-"s": {id: "s25", start: 0.000, end: 0.250, loop: false}, 
-"a": {id: "a30", start: 0.450, end: 0.752, loop: false}, 
-"b": {id: "b", start: 0.952, end: 3.344, loop: false}, 
-"k": {id: "k25", start: 3.544, end: 3.799, loop: false}, 
-*/
+
 audio_sprite_object_ref={
-a: {id: "a50", start: 12.047, end: 12.547, loop: false}, 
-b: {id: "b50", start: 4.500, end: 4.996, loop: false}, 
-ch: {id: "ch50", start: 9.045, end: 9.547, loop: false}, 
-d: {id: "d50", start: 28.530, end: 29.032, loop: false}, 
-e: {id: "e50", start: 19.511, end: 20.012, loop: false}, 
-f: {id: "f50", start: 25.526, end: 26.029, loop: false}, 
-g: {id: "g50", start: 21.012, end: 21.509, loop: false}, 
-i: {id: "i50", start: 13.547, end: 14.010, loop: false}, 
-j: {id: "j50", start: 3.000, end: 3.500, loop: false}, 
-k: {id: "k50", start: 30.032, end: 30.533, loop: false}, 
-l: {id: "l50", start: 7.499, end: 8.045, loop: false}, 
-m: {id: "m50", start: 18.008, end: 18.511, loop: false}, 
-n: {id: "n50", start: 27.029, end: 27.530, loop: false}, 
-o: {id: "o50", start: 31.533, end: 32.038, loop: false}, 
-p: {id: "p50", start: 22.509, end: 22.998, loop: false}, 
-r: {id: "r50", start: 23.998, end: 24.526, loop: false}, 
-rr: {id: "rr50", start: 16.509, end: 17.008, loop: false}, 
-ss: {id: "ss50", start: 15.010, end: 15.509, loop: false}, 
-s: {id: "ss50", start: 15.010, end: 15.509, loop: false}, 
-t: {id: "t50", start: 0.050, end: 0.500, loop: false},  // EL TRUCO ES Q NO SIGA 0.00 (ADD SILENCE AT THE BEGINNING)
-u: {id: "u50", start: 1.500, end: 2.000, loop: false}, 
-z: {id: "z50", start: 10.547, end: 11.047, loop: false}, 
-zfx_correct: {id: "zfx_correct50", start: 5.996, end: 6.499, loop: false}, 
-zfx_wrong: {id: "zfx_wrong50", start: 33.038, end: 33.539, loop: false}
+a: {id: "a50", start: 13.047, end: 13.547}, 
+b: {id: "b50", start: 5.500, end: 5.996}, 
+ch: {id: "ch50", start: 10.045, end: 10.547}, 
+d: {id: "d50", start: 29.530, end: 30.032}, 
+e: {id: "e50", start: 20.511, end: 21.012}, 
+f: {id: "f50", start: 26.526, end: 27.029}, 
+g: {id: "g50", start: 22.012, end: 22.509}, 
+i: {id: "i50", start: 14.547, end: 15.010}, 
+j: {id: "j50", start: 4.000, end: 4.500}, 
+k: {id: "k50", start: 31.032, end: 31.533}, 
+l: {id: "l50", start: 8.499, end: 9.045}, 
+m: {id: "m50", start: 19.008, end: 19.511}, 
+n: {id: "n50", start: 28.029, end: 28.530}, 
+o: {id: "o50", start: 32.533, end: 33.038}, 
+p: {id: "p50", start: 23.509, end: 23.998}, 
+r: {id: "r50", start: 24.998, end: 25.526}, 
+rr: {id: "rr50", start: 17.509, end: 18.008},
+s: {id: "ss50", start: 16.010, end: 16.509}, 
+ss: {id: "ss50", start: 16.010, end: 16.509}, 
+t: {id: "t50", start: 1.000, end: 1.500},
+u: {id: "u50", start: 2.500, end: 3.000}, 
+z: {id: "z50", start: 11.547, end: 12.047}, 
+zfx_correct: {id: "zfx_correct50", start: 6.996, end: 7.499}, 
+zfx_wrong: {id: "zfx_wrong50", start: 34.038, end: 34.539},
 }
 
 
@@ -150,7 +145,7 @@ zfx_wrong: {id: "zfx_wrong50", start: 33.038, end: 33.539, loop: false}
 // constants
 var USE_ANSWERS = 3
 var max_calls=500
-AUDIO_RALENTIZATION_LAG=0.100
+AUDIO_RALENTIZATION_LAG=0.050
 
 // variables
 var media_objects
@@ -214,7 +209,7 @@ function select_fill_with_json(json_activities,select_elem){
 
 function splash_screen(){
 	// load audio in the object 
-	audio_sprite_object=media_objects.sounds['soundsSprite.m4a']
+	audio_sprite_object=media_objects.sounds['soundsSprite2.m4a']
 	audio_sprite_object.addEventListener('timeupdate', onTimeUpdate, false);
 
 	console.log('userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info)
@@ -254,10 +249,8 @@ function onDeviceReady() {
 
 function game(){
 	// check for lazy_audio load (required for iOS)
-	/*alert(not_loaded['sounds'].length+"  "+not_loaded['sounds'])
-	if(not_loaded['sounds'].length!=0) load_media_wait_for_lazy_audio(game)
-	else{*/
-
+	if(not_loaded['sounds'].length!=0){ console.log(not_loaded['sounds'].length+"  "+not_loaded['sounds']); load_media_wait_for_lazy_audio(game)}
+	else{
 		// logic
 		//random number within activity numbers of level1 (0 for now)
 		//Fisher-Yates random at the beginning and then increment, or
@@ -272,7 +265,7 @@ function game(){
 		remaining_rand_activities=json_activities
 		$('#remaining_activities_num')[0].innerHTML=""+(remaining_rand_activities.length-1)	
 		activity(Math.floor(Math.random()*remaining_rand_activities.length))
-	//}
+	}
 }
 
 function activity(i){
@@ -370,7 +363,8 @@ var playSpriteRange = function(id) {
 		//audio_sprite_object.play();
 		audio_play_safe(audio_sprite_object)
 	}else{
-		console.log("Sprite "+id+" not found!")
+		console.log("ERROR: Sprite "+id+" not found!")
+		audio_sprite_range_ended=true
 	}
 };
 
