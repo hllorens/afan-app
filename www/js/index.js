@@ -64,7 +64,7 @@ var images = [
 
 var sounds = [
 	//"http://www.centroafan.com/afan-app-media/audio/datasound.m4a",
-	"http://www.centroafan.com/afan-app-media/audio/soundsSprite2.m4a"
+	"http://www.centroafan.com/afan-app-media/audio/soundsSpriteVBR10.11kbps.55k.m4a"
 ]
 
 
@@ -209,7 +209,7 @@ function select_fill_with_json(json_activities,select_elem){
 
 function splash_screen(){
 	// load audio in the object 
-	audio_sprite_object=media_objects.sounds['soundsSprite2.m4a']
+	audio_sprite_object=media_objects.sounds['soundsSpriteVBR10.11kbps.55k.m4a']
 	audio_sprite_object.addEventListener('timeupdate', onTimeUpdate, false);
 
 	console.log('userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info)
