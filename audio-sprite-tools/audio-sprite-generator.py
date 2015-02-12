@@ -47,3 +47,5 @@ output.close()
 # Output in the required format. Here for jquery.mb.audio
 for filename, times in sprite.items():
     print '%s: {id: "%s", start: %.3f, end: %.3f}, ' % (filename, filename, times[0], times[1]) # loop: false
+print 'zsilence_start: {id: "zsilence_start", start: 0.100, end: 0.700}, ' # add zsilence_start
+

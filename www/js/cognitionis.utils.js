@@ -48,14 +48,17 @@ function load_image(resource_url){
 	return image_object
 }
 
+function log_and_remove_from_not_loaded(){
+	console.log("canplaythrough ("+this.src+")");
+	load_progressbar.value+=1;not_loaded['sounds'].splice(not_loaded['sounds'].indexOf(this.src),1)
+}
+
 function load_sound(resource_url){
 	var audio_object=new Audio() 
 	if (!audio_object.canPlayType || audio_object.canPlayType("audio/mp4")==""){ 
 		return {playclip:function(){throw new Error("Your browser doesn't support HTML5 audio or mp4/m4a")}}
 	}
-	audio_object.addEventListener('canplaythrough', function () {console.log("canplaythrough ("+resource_url+")");
-		load_progressbar.value+=1;not_loaded['sounds'].splice(not_loaded['sounds'].indexOf(resource_url),1)});
-	//audio_object.preload='auto' or audio_object.load() doe not seem to help for iOS
+	audio_object.addEventListener('canplaythrough', log_and_remove_from_not_loaded);
 	audio_object.src=resource_url
 	audio_object.playclip=function(){
 		try{
@@ -66,12 +69,12 @@ function load_sound(resource_url){
 	return audio_object
 }
 
+
 function download_audio_ios(){
 		modal_load_window.removeChild(document.getElementById('confirm_div'))
 		load_interval = setInterval(function() {check_load_status()}, media_load_check_status_interval)
 		for(var i=0;i<not_loaded['sounds'].length;i++){
-			ret_media.sounds[get_resource_name(not_loaded['sounds'][i])].load();
-			//track.play();    setTimeout(function(){ track.pause();  },1); // extreme alternative if load() fails
+			ret_media.sounds[get_resource_name(not_loaded['sounds'][i])].load(); // play()-pause() with 1ms timeout extreme alternative
 		}	
 }
 
@@ -113,7 +116,7 @@ function check_load_status() {
 			err_msg+="<br />Load complete?"+temp_obj.complete
 		}
 		for(var i=0;i<not_loaded['sounds'].length;i++){
-			temp_obj=ret_media.images[get_resource_name(not_loaded['sounds'][i])]			
+			temp_obj=ret_media.sounds[get_resource_name(not_loaded['sounds'][i])]			
 			err_msg+="<br />Error: "+temp_obj.error+  " - Ready: "+temp_obj.readyState+ " - Network: "+temp_obj.networkState;
 		}		
 		// re-try by a button to reload url, previously loaded stuff should be cached (fast load)
@@ -136,10 +139,6 @@ function check_load_status_lazy_audio() {
 		clearInterval(load_interval)
 		var retry_div=document.createElement("div") // we can reuse the other div
 		var err_msg="";
-		/*for(var i=0;i<not_loaded['sounds'].length;i++){
-			temp_obj=ret_media.images[get_resource_name(not_loaded['sounds'][i])]			
-			err_msg+="<br />Error: "+temp_obj.error+  " - Ready: "+temp_obj.readyState+ " - Network: "+temp_obj.networkState;
-		}*/		
 		// re-try by a button to reload url, previously loaded stuff should be cached (fast load)
 		retry_div.innerHTML='ERROR: Load lazy aduio timeout. Not loaded ('+not_loaded['sounds'].length+') <br /> <a href="">retry</a> '+err_msg
 		modal_load_window.appendChild(retry_div)
@@ -177,7 +176,6 @@ function load_media(image_arr, sound_arr, callback_function, lazy_audio_option){
 }
 
 function load_media_wait_for_lazy_audio(callback_function){
-
 	callback_function_global=callback_function
 	modal_load_window=document.createElement("div")
 	modal_load_window.className="js-modal-window"
@@ -207,10 +205,9 @@ function load_media_wait_for_lazy_audio(callback_function){
 
 
 // MODAL WINDOWS
-function open_js_modal(){  //(title_text, text_text){
+function open_js_modal_alert(){  //(title_text, text_text){
 	var modal_window=document.createElement("div")
 	modal_window.id="js-modal-window"; modal_window.className="js-modal-window"
-	 document.getElementById("myBtn").style.top="100px";
 
 	var modal_dialog=document.createElement("div")
 	var close_elem=document.createElement('a')
@@ -234,6 +231,21 @@ function open_js_modal(){  //(title_text, text_text){
 	modal_window.appendChild(modal_dialog)
 	document.body.appendChild(modal_window)
 }
+
+
+function open_js_modal_title(title_text){  
+	var modal_window=document.createElement("div")
+	modal_window.id="js-modal-window"; modal_window.className="js-modal-window"
+
+	var modal_title=document.createElement("h1")
+	modal_title.style.color="#FFF"
+	modal_title.innerHTML=title_text
+
+	modal_window.appendChild(modal_title)
+	document.body.appendChild(modal_window)
+	return modal_window
+}
+
 
 
 // STRING UTILS ///////////////////////////////////
