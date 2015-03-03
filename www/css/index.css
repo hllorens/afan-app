@@ -51,8 +51,13 @@ h1{font: normal 35px VanillaRegular,Arial,sans-serif; text-align: center; margin
 #answers ul li{height:33%;width:100%;text-align:center;margin:0;background:#fee;border:1px solid black;decoration:none;}
 #answers ul li:hover{background:#55bb66;border:1px solid red;}
 
+
+.text-center{
+	text-align:center;
+}
+
 .hover_red_border{
-	width:32%;
+	width:32%; /* to make it wide */
 	text-align:center;
 	border:2px solid #fee;decoration:none;margin-right:2px;padding:1px;
 }
@@ -62,6 +67,10 @@ h1{font: normal 35px VanillaRegular,Arial,sans-serif; text-align: center; margin
 
 .hover_red_border img{
 	width:80%; max-width:150px;
+}
+
+.hover_red_border div{
+	margin: 0 auto;
 }
  
 /*Galaxy S4*/

@@ -29,11 +29,7 @@ var download_lazy_audio_active = false
 var user_language=window.navigator.userLanguage || window.navigator.language;
 var is_iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false )
 
-// TIMER CONFIG
-activity_timer_seconds=0
-activity_timer_started=false
-activity_timer_span='undefined'
-activity_timer_timeout=null
+
 
 function get_resource_name(resource_url){
 	resource_name=resource_url
@@ -205,7 +201,7 @@ function load_media_wait_for_lazy_audio(callback_function){
 
 
 // MODAL WINDOWS
-function open_js_modal_alert(){  //(title_text, text_text){
+function open_js_modal_alert_demo(){  //(title_text, text_text){
 	var modal_window=document.createElement("div")
 	modal_window.id="js-modal-window"; modal_window.className="js-modal-window"
 
@@ -231,6 +227,51 @@ function open_js_modal_alert(){  //(title_text, text_text){
 	modal_window.appendChild(modal_dialog)
 	document.body.appendChild(modal_window)
 }
+
+
+function open_js_modal_alert(title_text, text_text, accept_function, cancel_function){
+	var modal_window=document.createElement("div")
+	modal_window.id="js-modal-window"; modal_window.className="js-modal-window"
+
+	var modal_dialog=document.createElement("div")
+	var close_elem=document.createElement('a')
+	close_elem.innerHTML="x"
+	close_elem.href="javascript:void(0)"
+	close_elem.onclick=function (){
+		var elem_to_remove=document.getElementById("js-modal-window");
+		elem_to_remove.parentNode.removeChild(elem_to_remove);
+	}
+
+	var title_elem=document.createElement('h2')
+	title_elem.innerHTML=title_text
+
+	var text_elem=document.createElement('p')
+	text_elem.innerHTML=text_text
+
+
+	modal_dialog.appendChild(close_elem)
+	modal_dialog.appendChild(title_elem)
+	modal_dialog.appendChild(text_elem)
+
+	if(accept_function!=='undefined'){
+		var accept_button=document.createElement('button')
+		accept_button.innerHTML='Aceptar'	
+		accept_button.onclick=accept_function	
+		modal_dialog.appendChild(accept_button)
+	}
+
+	if(cancel_function!=='undefined'){
+		var cancel_button=document.createElement('button')
+		cancel_button.innerHTML='Cancelar'		
+		cancel_button.onclick=cancel_function	
+		modal_dialog.appendChild(cancel_button)
+	}
+
+
+	modal_window.appendChild(modal_dialog)
+	document.body.appendChild(modal_window)
+}
+
 
 
 function open_js_modal_title(title_text){  
@@ -260,49 +301,67 @@ function pad_string(val, digits, pad_char){
 
 
 //////////////////// TIMER FOR A USER ACTIVITY OF ANY KIND ////////////// 
-
-function define_timer_element(elem){
-	activity_timer_span=elem //$('#activity_timer_span')[0]	
+var ActivityTimer=function (){	
+	this.seconds=0
+	this.started=false
+	this.dom_anchor='undefined'
+	this.advance_timeout=null
+	//var that=this // bad hack to store reference scopes
 }
+ActivityTimer.prototype.anchor_to_dom=function(elem){this.dom_anchor=elem}
 
+ActivityTimer.prototype.start=function(){
+	if(this.dom_anchor=='undefined'){alert("ERROR: Starging an activity_timer without defining it first"); return}
 
-function activity_timer_start(){
-	if(activity_timer_span=='undefined'){alert("ERROR: Starging a timer without defining it first")}
-
-	if(activity_timer_started){
+	if(this.started){
 		console.log("ERROR: activity_timer already started")	
 	}else{
-		activity_timer_reset()
-		activity_timer_started=true
-		activity_timer_timeout=setTimeout(function(){activity_timer_advance()},1000)		
+		this.started=true
+		this.dom_anchor.innerHTML="00:"+pad_string( (this.seconds / 60) >> 0,2,"0")+":"+pad_string(this.seconds % 60,2,"0")
+		this.advance_timeout=setTimeout(function(){this.advance()}.bind(this),1000)
 	}
 }
 
-function activity_timer_advance(){
-	if(activity_timer_started){
-		++activity_timer_seconds
+ActivityTimer.prototype.advance=function(){
+	if(this.started){
+		++this.seconds
 		// seconds only is easier and calculations are fast...
-		//if (activity_timer_seconds>=60){	++activity_timer_minutes;activity_timer_seconds=0}
-		//activity_timer_span.innerHTML=pad_string(activity_timer_minutes,2,"0")+":"+pad_string(activity_timer_seconds,2,"0")
-		activity_timer_span.innerHTML="00:"+pad_string( (activity_timer_seconds / 60) >> 0,2,"0")+":"+pad_string(activity_timer_seconds % 60,2,"0")
-		activity_timer_timeout=setTimeout(function(){activity_timer_advance()},1000)
+		//if (this.seconds>=60){++this.minutes;this.seconds=0}
+		//this.dom_anchor.innerHTML=pad_string(activity_timer_minutes,2,"0")+":"+pad_string(this.seconds,2,"0")
+		this.dom_anchor.innerHTML="00:"+pad_string( (this.seconds / 60) >> 0,2,"0")+":"+pad_string(this.seconds % 60,2,"0")
+		this.advance_timeout=setTimeout(function(){this.advance()}.bind(this),1000)
 	}else{
 		console.log("ERROR: activity_timer not started. Starting it.")
-		activity_timer_start()
+		this.start()
 	}
 }
 
-function activity_timer_stop(){
-	clearTimeout(activity_timer_timeout)
-	activity_timer_started=false
+ActivityTimer.prototype.stop=function(){
+	clearTimeout(this.advance_timeout)
+	this.started=false
 }
 
-function activity_timer_reset(){
-	activity_timer_stop()
-	activity_timer_span.innerHTML="00:00:00"
-	activity_timer_seconds=0 // activity_timer_minutes=0
+ActivityTimer.prototype.reset=function (){	
+	this.stop()
+	this.dom_anchor.innerHTML="00:00:00"
+	this.seconds=0 // this.minutes=0
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+function selectorInCSS(styleSheetName, selector) {
+    // Get the index of 'styleSheetName' from the document.styleSheets object
+    for (var i = 0; i < document.styleSheets.length; i++) {
+        var thisStyleSheet = document.styleSheets[i].href ? document.styleSheets[i].href.replace(/^.*[\\\/]/, '') : '';
+        if (thisStyleSheet == styleSheetName) { var idx = i; break; }
+    }
+    if (!idx) return false; // We can't find the specified stylesheet
 
+    // Check the stylesheet for the specified selector
+    var styleSheet = document.styleSheets[idx];
+    var cssRules = styleSheet.rules ? styleSheet.rules : styleSheet.cssRules;
+    for (var i = 0; i < cssRules.length; ++i) {
+        if(cssRules[i].selectorText == selector) return true;
+    }
+    return false;
+}
