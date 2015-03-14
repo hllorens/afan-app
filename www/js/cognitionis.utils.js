@@ -349,7 +349,209 @@ ActivityTimer.prototype.reset=function (){
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-function selectorInCSS(styleSheetName, selector) {
+/// Audio Sprite //////////////////////
+var AudioSprite=function(audio_object, sprite_ref, activate_debug){
+	this.audio_obj=audio_object; 	// either created in js or got from DOM
+	this.sound_range_ref=sprite_ref;	// index of sounds in sprite (as ranges)
+	this.currentSpriteRange = {}; 	// current sprite being played
+	this.range_ended=true;
+	this.audio_obj.removeEventListener('timeupdate', this.onAudioSpriteTimeUpdate, false); // for safety
+	this.audio_obj.addEventListener('timeupdate', this.onAudioSpriteTimeUpdate.bind(this), false);	
+	this.debug=false;
+	if(typeof(debug)!=='undefined') debug=activate_debug;
+}
+AudioSprite.FLOAT_THRESHOLD=0.005;	// for millisec comparison
+AudioSprite.AUDIO_RALENTIZATION_LAG=0.040; // margin for sound range ended check
+AudioSprite.prototype.playSpriteRange = function(range_id,callback_function) {
+	if(this.range_ended==false || !this.audio_obj.paused) alert("ERROR: trying to play a sprite range while other not ended");
+	if(callback_function==='undefined') delete this.audio_obj.callback_on_end;
+	else this.audio_obj.callback_on_end=callback_function;
+	this.audio_obj.currentTime = 0;
+        this.wait_seeked_and_paused();
+	if (this.sound_range_ref[range_id]) { // assumes the array is correct (contains start and end)
+		if(this.debug) console.log("range_id ("+range_id+") found")
+		this.currentSpriteRange = this.sound_range_ref[range_id]
+		this.audio_obj.currentTime = this.currentSpriteRange.start // currentTime not supported on IE9 (DOM Exception INVALID_STATE_ERR)
+		this.range_ended=false
+		this.play_safe(this.currentSpriteRange.start)
+	}else{
+		if(this.debug) console.log("ERROR: Sprite ("+range_id+") not found!")
+		this.range_ended=true
+	}
+};
+AudioSprite.prototype.play_safe=function(seek_position){ // wait until paused and not seekeing
+	if(this.audio_obj.paused && !this.audio_obj.seekeing && 
+		Math.abs(this.audio_obj.currentTime-seek_position)<AudioSprite.FLOAT_THRESHOLD) this.audio_obj.play() 
+	else setTimeout(function(){ // more efficien could be trying to use events... but complicates things...
+				if(this.debug) console.log("waiting to play safe ct:"+this.audio_obj.currentTime+" - seek: "+seek_position);
+				this.play_safe(seek_position)
+			}.bind(this),250);
+}
+AudioSprite.prototype.wait_seeked_and_paused=function(){// wait until paused and not seekeing
+	if(this.audio_obj.paused && !this.audio_obj.seekeing) return 
+	else setTimeout(function(){
+				this.wait_seeked_and_paused();
+			}.bind(this),250)
+}
+AudioSprite.prototype.onAudioSpriteTimeUpdate = function() {// time update handler to ensure we stop when a sprite is complete
+   if(this.debug)console.log("playing: "+this.audio_obj.currentSrc+" time:"+audio_obj.currentTime+" ended:"+audio_obj.ended)
+    if (this.ended || (!this.range_ended && this.audio_obj.currentTime >= (this.currentSpriteRange.end+AudioSprite.AUDIO_RALENTIZATION_LAG)) ) { 
+    	if(this.debug) console.log("Sprite range play ended!!")
+        this.audio_obj.pause()
+        this.wait_seeked_and_paused()
+        this.currentTime=0 // probably unnecessary
+        this.wait_seeked_and_paused()
+       	this.range_ended=true
+	if(this.audio_obj.hasOwnProperty("callback_on_end") && typeof(this.audio_obj.callback_on_end) === 'function' ) this.audio_obj.callback_on_end();
+    }
+};
+
+
+///////////////////////////////////////
+
+
+////////////////////////////////////////////////
+var SoundChain={
+	// initial initialization
+	audio_chain_waiting: false,
+	audio_chain_position: 0,
+	calls: 0,
+	sound_array: undefined,
+	audio_sprite: undefined,
+
+	play_sound_arr: function(sound_arr, audio_sprt, callback_func){
+		if(this.audio_chain_waiting==true){
+			throw new Error("SoundChain.play_sound_arr is already playing");
+		}else if(sound_arr==='undefined' || audio_sprt==='undefined' || callback_func==='undefined'){
+			throw new Error("SoundChain.play_sound_arr required arguments: sound_arr, audio_sprite, callback_function");
+			//TODO why does not this halt???
+		}else{
+			
+			console.log(callback_func +"---"+(callback_func==='undefined'));	
+			this.sound_array=sound_arr;
+			this.audio_sprite=audio_sprt;
+			this.audio_chain_waiting=true;
+			this.audio_chain_position=0;
+			this.play_sprite_chain();
+		}
+	},
+
+	play_sprite_chain: function(){
+		if(this.audio_chain_position>=this.sound_array.length){
+			this.sound_array=undefined;	
+			this.audio_chain_waiting=false;
+			this.audio_chain_position=0;
+			this.calls=0;
+			// TODO use callback instead of this
+			zone_sound.innerHTML='<button onclick="SoundChain.play_sound_arr(current_activity_data.sounds,audio_sprite)">re-play</button>'
+		}else{
+			while (this.sound_array[this.audio_chain_position]=="/") {this.audio_chain_position++;} // ignore /	
+			// TODO if this debug... and optinal argument (DOM elem) to show status
+			console.log("playing: "+this.audio_sprite.audio_obj.currentSrc+" time:"+this.audio_sprite.audio_obj.currentTime+" ended:"+this.audio_sprite.audio_obj.ended+" paused:"+this.audio_sprite.audio_obj.paused+" calls:"+this.calls+" range_id:"+this.sound_array[this.audio_chain_position]+" audio_chain_position:"+this.audio_chain_position+" audio_chain_waiting:"+this.audio_chain_waiting);
+			this.calls++;
+			this.audio_sprite.playSpriteRange(this.sound_array[this.audio_chain_position],this.audio_chain_callback.bind(this))
+		}
+	},
+	
+	audio_chain_callback: function () {
+		if(this.audio_chain_waiting==true){
+			this.audio_chain_position++;
+			this.play_sprite_chain();		
+		}
+	}
+	
+}
+
+
+///////////////////////////////////////////////////////////
+
+
+/*
+Data tables
+<table cellpadding="0" cellspacing="0" border="0" class="display" id="example"></table>
+
+$('#example').DataTable( {
+    data: data,
+    columns: [
+        { data: 'name' },
+        { data: 'position' },
+        { data: 'salary' },
+        { data: 'office' }
+    ]
+} );
+*/
+var DataTableSimple = function (table_config){
+	// Empty table
+	this.innerHTML = "";
+
+	var table_head = this.createTHead();
+	var table_body = this.createTBody();
+	
+	if(table_config.hasOwnProperty('columns')){
+		var table_row=table_head.insertRow(table_head.rows.length);
+		for(var table_column=0;table_column<table_config.columns.length;table_column++){
+				var table_cell  = table_row.insertCell(table_column);
+				var cell_text  = document.createTextNode(table_config.columns[table_column].data);
+				table_cell.appendChild(cell_text);
+		}
+	}
+	if(table_config.hasOwnProperty('data')){
+		//alert('has data '+table_config.data.length);
+		for(var i=0;i<table_config.data.length;i++){
+			var table_row   = table_body.insertRow(table_body.rows.length);
+			for(var table_column=0;table_column<table_config.columns.length;table_column++){
+				var table_cell  = table_row.insertCell(table_column);
+				var cell_text  = document.createTextNode(table_config.data[i][table_config.columns[table_column].data]);
+				table_cell.appendChild(cell_text);
+			}
+		}
+	}
+	if(table_config.hasOwnProperty('pagination') && isInteger(table_config.pagination) && table_config.pagination > 0){
+		$('#'+this.id).after('<div id="nav"></div>');	
+		var rowsShown = table_config.pagination;
+		var rowsTotal = table_config.data.length;
+		var numPages = rowsTotal/rowsShown;
+		for(i = 0;i < numPages;i++) {
+		    var pageNum = i + 1;
+		    $('#nav').append('<a href="#" rel="'+i+'">'+pageNum+'</a> ');
+		}
+		$('#'+this.id+' tbody tr').hide();
+		$('#'+this.id+' tbody tr').slice(0, rowsShown).show();
+		$('#nav a:first').addClass('active');
+		$('#nav a').bind('click', function(){
+		    $('#nav a').removeClass('active');
+		    $(this).addClass('active');
+		    var currPage = $(this).attr('rel');
+		    var startItem = currPage * rowsShown;
+		    var endItem = startItem + rowsShown;
+		    $('#'+this.id+' tbody tr').css('opacity','0.0').hide().slice(startItem, endItem).
+		            css('display','table-row').animate({opacity:1}, 300);
+		});
+	}
+	
+};
+
+function isNumber(value) {
+    if ((undefined === value) || (null === value)) {
+        return false;
+    }
+    if (typeof value == 'number') {
+        return true;
+    }
+    return !isNaN(value - 0);
+}
+
+function isInteger(value) {
+    // in the future javacript will have Number.isInteger, etc
+    if ((undefined === value) || (null === value)) {
+        return false;
+    }
+    return value % 1 == 0;
+    // or   return mixed_var === +mixed_var && isFinite(mixed_var) && !(mixed_var % 1);
+}
+
+
+function selectorExistsInCSS(styleSheetName, selector) {
     // Get the index of 'styleSheetName' from the document.styleSheets object
     for (var i = 0; i < document.styleSheets.length; i++) {
         var thisStyleSheet = document.styleSheets[i].href ? document.styleSheets[i].href.replace(/^.*[\\\/]/, '') : '';

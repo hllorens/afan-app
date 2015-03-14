@@ -38,14 +38,12 @@ for i, infile in enumerate(glob.glob('*.wav')):
     # Create sprite metadata {'mysound.wav': [start_secs, end_secs]}. Then increment current time
     start = round(currentTime, 3)
     end = round(currentTime + soundDuration, 3)
-    sprite[infile[:-4]] = [start, end]
+    idshort=infile.replace("50.wav","",1)
+    sprite[infile[:-4]] = [idshort,start, end]
     currentTime += soundDuration + silenceDuration
 
-# Yay, the worst is behind us. Close output file
 output.close()
 
 # Output in the required format. Here for jquery.mb.audio
-for filename, times in sprite.items():
-    print '%s: {id: "%s", start: %.3f, end: %.3f}, ' % (filename, filename, times[0], times[1]) # loop: false
-print 'zsilence_start: {id: "zsilence_start", start: 0.100, end: 0.700}, ' # add zsilence_start
-
+for filename, elems in sorted(sprite.items()):
+    print '%s: {id: "%s", start: %.3f, end: %.3f}, ' % (elems[0], filename, elems[1], elems[2]) # loop: false

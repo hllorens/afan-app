@@ -14,7 +14,7 @@ var images = [
 var sounds = [
 	// si es online se puede usar dropbox https://dl.dropboxusercontent.com/u/188219/
 	//"http://www.centroafan.com/afan-app-media/audio/soundsSpriteVBR30-19kbps-93k.m4a"
-	"../../afan-app-media/audio/soundsSpriteVBR30-19kbps-93k.m4a"
+	"../../afan-app-media/audio/soundsSpriteVBR30-19kbps-100k.m4a"
 ]
 
 
@@ -26,7 +26,7 @@ $.getJSON("../data/test1.tsv.json", function(json) {
     console.log(json)
     json_test=json; 
 });
-$.getJSON("../data/training1.json", function(json) {
+$.getJSON("../data/training1-short.json", function(json) { //training1
     console.log(json)
     json_training=json; 
 });
@@ -40,55 +40,54 @@ media_url='http://www.centroafan.com/afan-app-media/'
 backend_url='backend/' //../backend
 
 
-audio_sprite_object_ref={
-//falta grabar
-ll: {id: "i50", start: 8.499, end: 9.045}, 
-y: {id: "i50", start: 8.499, end: 9.045}, 
-ny: {id: "n50", start: 28.029, end: 28.530}, 
-bv: {id: "b50", start: 5.500, end: 5.996}, 
-//-------------
-a: {id: "a50", start: 13.047, end: 13.547}, 
-b: {id: "b50", start: 5.500, end: 5.996}, 
-ch: {id: "ch50", start: 10.045, end: 10.547}, 
-d: {id: "d50", start: 29.530, end: 30.032}, 
-e: {id: "e50", start: 20.511, end: 21.012}, 
-f: {id: "f50", start: 26.526, end: 27.029}, 
-g: {id: "g50", start: 22.012, end: 22.509}, 
-i: {id: "i50", start: 14.547, end: 15.010}, 
-j: {id: "j50", start: 4.000, end: 4.500}, 
-k: {id: "k50", start: 31.032, end: 31.533}, 
-l: {id: "l50", start: 8.499, end: 9.045}, 
-m: {id: "m50", start: 19.008, end: 19.511}, 
-n: {id: "n50", start: 28.029, end: 28.530}, 
-o: {id: "o50", start: 32.533, end: 33.038}, 
-p: {id: "p50", start: 23.509, end: 23.998}, 
-r: {id: "r50", start: 24.998, end: 25.526}, 
-rr: {id: "rr50", start: 17.509, end: 18.008},
-s: {id: "ss50", start: 16.010, end: 16.509}, 
-ss: {id: "ss50", start: 16.010, end: 16.509}, 
-t: {id: "t50", start: 1.000, end: 1.500},
-u: {id: "u50", start: 2.500, end: 3.000}, 
-z: {id: "z50", start: 11.547, end: 12.047}, 
-zfx_correct: {id: "zfx_correct50", start: 6.996, end: 7.499}, 
-zfx_wrong: {id: "zfx_wrong50", start: 34.038, end: 34.539},
-zsilence_start: {id: "zsilence_start", start: 0.100, end: 0.700}
-}
+var audio_object_sprite_ref={
+	a: {id: "a50", start: 19.158, end: 19.658}, 
+	b: {id: "b50", start: 11.610, end: 12.107}, 
+	bv: {id: "bv50", start: 1.000, end: 1.496}, 
+	ch: {id: "ch50", start: 16.155, end: 16.657}, 
+	d: {id: "d50", start: 34.142, end: 34.644}, 
+	e: {id: "e50", start: 25.122, end: 25.624}, 
+	f: {id: "f50", start: 31.138, end: 31.640}, 
+	g: {id: "g50", start: 26.624, end: 27.120}, 
+	i: {id: "i50", start: 20.658, end: 21.121}, 
+	j: {id: "j50", start: 7.069, end: 7.568}, 
+	k: {id: "k50", start: 35.644, end: 36.144}, 
+	l: {id: "l50", start: 14.610, end: 15.155}, 
+	m: {id: "m50", start: 23.619, end: 24.122}, 
+	n: {id: "n50", start: 32.640, end: 33.142}, 
+	ny: {id: "ny50", start: 8.568, end: 9.111}, 
+	o: {id: "o50", start: 37.144, end: 37.649}, 
+	p: {id: "p50", start: 28.120, end: 28.609}, 
+	r: {id: "r50", start: 29.609, end: 30.138}, 
+	rr: {id: "rr50", start: 22.121, end: 22.619}, 
+	s: {id: "s50", start: 10.111, end: 10.610}, 
+	t: {id: "t50", start: 2.496, end: 2.996}, 
+	u: {id: "u50", start: 3.996, end: 4.496}, 
+	y: {id: "y50", start: 5.496, end: 6.069}, 
+	z: {id: "z50", start: 17.657, end: 18.158}, 
+	zfx_correct: {id: "zfx_correct50", start: 13.107, end: 13.610}, 
+	zfx_wrong: {id: "zfx_wrong50", start: 38.649, end: 39.150}, 
+	zsilence_start: {id: "zsilence_start", start: 0.100, end: 0.700}	
+};
+
+
 
 
 
 // constants
 var USE_ANSWERS = 3
 var max_calls=500
-AUDIO_RALENTIZATION_LAG=0.050
-FLOAT_THRESHOLD=0.005
+
+
 
 // variables
 var media_objects
+var audio_sprite;
+
 session_user="afan"
 session_subject="juan"
 session_subject_age="5"
 session_level="1"
-calls=0
 remaining_rand_activities=[] 
 correct_answer='undefined'
 current_activity_type='undefined' // to avoid loading all the html pattern but just changing the values
@@ -101,12 +100,7 @@ activity_timer_element=document.getElementById('activity_timer_span')
 activity_timer=new ActivityTimer()
 activity_timer.anchor_to_dom(activity_timer_element)
 
-audio_sprite_object=null //$('#audio_sprite_object')[0] //document.createElement('audio'); //$('#audio_tag')[0]
-currentSpriteRange = {} // current sprite being played
-audio_sprite_range_ended=true
-audio_chain_waiting=false
-audio_chain_position=0
-sound_array=[]
+
 num_correct_activities=0
 num_answered_activities=0
 current_activity_data={}
@@ -245,7 +239,30 @@ var explore_results=function(){
 	$.getJSON(
 		backend_url+'ajaxdb.php?action=get_results&user='+session_user+'&subject='+session_subject, 
 		function(data) { 
-			$("#results-div")[0].innerHTML="<pre>"+JSON.stringify(data,null,2)+"</pre>";
+			//alert(JSON.stringify(data,null,2));
+			//var table_sessions="";
+			//global_data=data;
+			//for(var i=0;i<data.sessions.length;i++){
+			//	table_sessions+="<tr><td>"+data.sessions[i].id+"</td><td>"+data.sessions[i].timestamp+"</td><td>"+data.sessions[i].reference+"</td><td>"+data.sessions[i].age+"</td><td>"+data.sessions[i].duration+"</td><td>"+(data.sessions[i].result*100)+"%</td><td id=\"row-"+data.sessions[i].id+"\" onclick=\"alert(this.id)\">x</td></tr>";
+			//}
+			$("#results-div")[0].innerHTML="user:"+data.general.user+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
+			//<thead><tr><td>id</td><td>timestamp</td><td>reference</td><td>age</td><td>duration</td><td>result</td><td>actions</td></tr></thead><tbody>"+table_sessions+"</tbody>
+			//"<pre>"+JSON.stringify(data,null,2)+"</pre>"
+			results_table=$("#results-table")[0];
+			//results_table.DataTableSimple( {  // to make this possible you have to extend all Table DOM elements with this function
+			// e.g., ...table.prototype.DataTableSimple=DataTableSimple;
+			DataTableSimple.call(results_table, {
+				data: data.sessions,
+				pagination: 5,
+				columns: [
+					{ data: 'id' },
+					{ data: 'timestamp' },
+					{ data: 'reference' },
+					{ data: 'age' },
+					{ data: 'duration' }, // TODO: function that transforms the string e.g., time
+					{ data: 'result' } // TODO: function that transforms the string e.g., percentage
+				]
+			} );
 		});	
 };
 
@@ -263,14 +280,13 @@ function game(){
 		//
 
 		// load audio in the object 
-		audio_sprite_object=media_objects.sounds['soundsSpriteVBR30-19kbps-93k.m4a']
+		audio_sprite_object=media_objects.sounds['soundsSpriteVBR30-19kbps-100k.m4a'];
+		audio_sprite_object.removeEventListener('canplaythrough', log_and_remove_from_not_loaded);
 		
-		audio_sprite_object.removeEventListener('timeupdate', onTimeUpdate, false); // for safety
-		audio_sprite_object.addEventListener('timeupdate', onTimeUpdate, false);
-
-		audio_sprite_object.removeEventListener('canplaythrough', log_and_remove_from_not_loaded)		
+		audio_sprite=new AudioSprite(audio_sprite_object,audio_object_sprite_ref,true);
+		
 		title_modal_window=open_js_modal_title("Nivel 1")
-		playSpriteRange('zsilence_start',start_activity_set)		
+		audio_sprite.playSpriteRange('zsilence_start',start_activity_set)		
 	}
 }
 
@@ -306,8 +322,8 @@ function activity(i){
 		var answer_i=current_activity_data['answers'][use];
 		answers_div.innerHTML+='<div id="answer'+i+'" class="hover_red_border"  style="float:left;"></div>'; //onclick="check_correct(this,correct_answer)"
 		//if(media_objects.images[current_activity_data['answers'][use]+'.png']==undefined){
-		if(!selectorInCSS("wordimg-sprite.css",".wordimage-"+current_activity_data['answers'][use])){
-			
+		if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+current_activity_data['answers'][use])){
+			console.log("ERROR: .wordimage-"+current_activity_data['answers'][use]+" not found in wordimg-sprite.css.");
 			document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png'])
 		}else{	
 			//document.getElementById("answer"+i).appendChild(media_objects.images[current_activity_data['answers'][use]+'.png']);		
@@ -319,95 +335,19 @@ function activity(i){
 	
 	zone_sound=$('#sound')[0]
 	zone_sound.innerHTML="starting..."
-	sound_array=current_activity_data['sounds']
-	play_sound_arr()
+	//sound_array=current_activity_data['sounds'];
+	SoundChain.play_sound_arr(current_activity_data['sounds'],audio_sprite);
+	//TODO provide a callback function to show re-play and to make elements clikable
+	// show playing...
+	// show replay callback zone_sound.innerHTML='<button onclick="play_sound_arr(current_activity_data.sounds)">re-play</button>'
 	activity_timer.start()
 }
 
 
-function play_sound_arr(){
-	audio_chain_waiting=true; audio_chain_position=0
-	play_sprite_chain()
-}
-
-function play_sprite_chain(){
-	if(audio_chain_position>=sound_array.length){
-		audio_chain_waiting=false
-		audio_chain_position=0
-		zone_sound.innerHTML='<button onclick="play_sound_arr(current_activity_data.sounds,0)">re-play</button>'
-	}else{
-		while (sound_array[audio_chain_position]=="/") {++audio_chain_position;} // ignore /	
-		zone_sound.innerHTML="playing: "+audio_sprite_object.currentSrc+" time:"+audio_sprite_object.currentTime+" ended:"+audio_sprite_object.ended+" paused:"+audio_sprite_object.paused+" calls:"+calls+" id:"+sound_array[audio_chain_position]+" audio_chain_position:"+audio_chain_position+" audio_chain_waiting:"+audio_chain_waiting
-		calls++
-		playSpriteRange(sound_array[audio_chain_position],audio_chain_callback)
-	}
-}
-
-var audio_chain_callback = function () {
-	if(audio_chain_waiting==true){
-		audio_chain_position++	
-		play_sprite_chain()		
-	}
-}
-
-// time update handler to ensure we stop when a sprite is complete
-var onTimeUpdate = function() {
-   console.log("playing: "+audio_sprite_object.currentSrc+" time:"+audio_sprite_object.currentTime+" ended:"+audio_sprite_object.ended)
-
-    if (this.ended || (!audio_sprite_range_ended && this.currentTime >= (currentSpriteRange.end+AUDIO_RALENTIZATION_LAG)) ) { 
-    	console.log("Sprite range play ended!!")
-        this.pause()
-        audio_seeked_paused(this)
-        this.currentTime=0 // probably unnecessary
-        audio_seeked_paused(this)
-       	audio_sprite_range_ended=true
-	if(this.hasOwnProperty("callback_on_end") && typeof(this.callback_on_end) === 'function' ) this.callback_on_end()
-    }
-};
-
-var playSpriteRange = function(id,callback_function) {
-	if(audio_sprite_range_ended==false || !audio_sprite_object.paused) alert("trying to play a sprite range while other not ended")
-	if(callback_function==='undefined') delete audio_sprite_object.callback_on_end
-	else audio_sprite_object.callback_on_end=callback_function
-	
-	audio_sprite_object.currentTime = 0
-        audio_seeked_paused(audio_sprite_object)
-	
-	if (audio_sprite_object_ref[id]) { // assumes the array is correct (contains start and end)
-		console.log("id ("+id+") found")
-		currentSpriteRange = audio_sprite_object_ref[id]
-		audio_sprite_object.currentTime = currentSpriteRange.start // not supported on IE9 (DOM Exception INVALID_STATE_ERR)
-		audio_sprite_range_ended=false
-		audio_play_safe(audio_sprite_object, currentSpriteRange.start)
-	}else{
-		console.log("ERROR: Sprite ("+id+") not found!")
-		audio_sprite_range_ended=true
-	}
-};
-
-
-function audio_play_safe(audio_object, seek_position){
-	// wait until paused and not seekeing
-	if(audio_object.paused && !audio_object.seekeing && Math.abs(audio_object.currentTime-seek_position)<FLOAT_THRESHOLD) audio_object.play() 
-	else setTimeout(function(){console.log("waiting to play safe ct:"+audio_object.currentTime+" - seek: "+seek_position);audio_play_safe(audio_object,seek_position)},250)
-	// more efficien could be trying to use events... but complicates things...
-}
-
-function audio_seeked_paused(audio_object){
-	// wait until paused and not seekeing
-	if(audio_object.paused && !audio_object.seekeing) return 
-	else setTimeout(function(){audio_seeked_paused(audio_object)},250)
-}
-
-
-
 
 function check_correct(clicked_answer,correct_answer){
-	if(audio_chain_waiting) return // do not allow cliking while uttering
+	if(SoundChain.audio_chain_waiting) return // do not allow cliking while uttering
 	activity_timer.stop()
-	audio_chain_waiting=false
-	audio_sprite_object.pause()
-	audio_sprite_object.currentTime = 0
 	session_duration+=activity_timer.seconds
 	//image_src_start_exists=clicked_answer.indexOf("src=\""+media_url)
 	if(typeof clicked_answer == "string"){ // it is not a sprite but an image
@@ -425,13 +365,13 @@ function check_correct(clicked_answer,correct_answer){
 	if (clicked_answer==correct_answer){
 		num_correct_activities++
 		if(game_type!="test"){
-			playSpriteRange("zfx_correct")
+			audio_sprite.playSpriteRange("zfx_correct")
 			document.getElementById("answer_result").appendChild(media_objects.images['correct.png'])
 			score_correct.innerHTML=num_correct_activities
 		}
 	}else{
 		if(game_type!="test"){
-			playSpriteRange("zfx_wrong",function(){console.log('wrong already played')})	
+			audio_sprite.playSpriteRange("zfx_wrong",function(){console.log('wrong already played')})	
 			document.getElementById("answer_result").appendChild(media_objects.images['wrong.png'])
 		}
 	}

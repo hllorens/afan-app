@@ -90,18 +90,22 @@ if ($action == "get_results"){
 	$output['general'] = array();
 	$output['general']['user'] = $user;
 	$output['general']['subject'] = $subject;
+	$output['sessions'] = array();
 
 	$rResult = mysql_query( $sQuery, $db_connection ) or die(mysql_error());
+	$session_count=0;	
 	while ( $aRow = mysql_fetch_array( $rResult ) )	{
-		$output[$aRow['id']] = array();
-		$output[$aRow['id']]['reference']=$aRow['reference'];
-		$output[$aRow['id']]['age']=$aRow['age'];
-		$output[$aRow['id']]['num_answered']=$aRow['num_answered'];
-		$output[$aRow['id']]['num_correct']=$aRow['num_correct'];
-		$output[$aRow['id']]['result']=$aRow['result'];
-		$output[$aRow['id']]['level']=$aRow['level'];
-		$output[$aRow['id']]['duration']=$aRow['duration'];
-		$output[$aRow['id']]['timestamp']=$aRow['timestamp'];
+		$output['sessions'][]=array();
+		$output['sessions'][$session_count]['id'] = $aRow['id'];
+		$output['sessions'][$session_count]['reference']=$aRow['reference'];
+		$output['sessions'][$session_count]['age']=$aRow['age'];
+		$output['sessions'][$session_count]['num_answered']=$aRow['num_answered'];
+		$output['sessions'][$session_count]['num_correct']=$aRow['num_correct'];
+		$output['sessions'][$session_count]['result']=$aRow['result'];
+		$output['sessions'][$session_count]['level']=$aRow['level'];
+		$output['sessions'][$session_count]['duration']=$aRow['duration'];
+		$output['sessions'][$session_count]['timestamp']=$aRow['timestamp'];
+		$session_count++;		
 	}
 
 	header('Content-type: application/json');
@@ -109,5 +113,23 @@ if ($action == "get_results"){
 	//print_r($output);
 
 }
+
+if ($action == "delete_session"){
+	$id=get_value("id");
+	$subject=get_value("subject");
+
+	$sQuery = "DELETE FROM sessions WHERE id='$id' AND subject='$subject';";
+
+	$rResult = mysql_query( $sQuery, $db_connection ) or die(mysql_error());
+	$rResult = mysql_query( $sQuery, $db_connection );
+	if(!$rResult){ $output["msg"]=mysql_error()." -- ".$sQuery; }
+	else{ $output["msg"]="Success. Session $id of $subject deleted. --"; }	
+
+	header('Content-type: application/json');
+	echo json_encode( $output );
+	//print_r($output);
+
+}
+
 
 ?>
