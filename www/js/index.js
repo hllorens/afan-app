@@ -23,11 +23,11 @@ var json_activities;
 var json_test;
 var json_training;
 $.getJSON("../data/test1.tsv.json", function(json) {
-    console.log(json)
+    //console.log(json)
     json_test=json; 
 });
 $.getJSON("../data/training1-short.json", function(json) { //training1
-    console.log(json)
+    //console.log(json)
     json_training=json; 
 });
 json_activities=json_training;
@@ -81,14 +81,14 @@ var max_calls=500
 
 
 // variables
-var media_objects
+var media_objects;
 var audio_sprite;
 
 session_user="afan"
 session_subject="juan"
 session_subject_age="5"
 session_level="1"
-remaining_rand_activities=[] 
+remaining_rand_activities=[];
 correct_answer='undefined'
 current_activity_type='undefined' // to avoid loading all the html pattern but just changing the values
 zone_sound=null
@@ -157,13 +157,13 @@ function onDeviceReady() {
                         'Ver='  + device.version
 		
 	}
-	media_objects=load_media(images,sounds,splash_screen,true)
+	media_objects=ResourceLoader.load_media(images,sounds,splash_screen,true)
 }
 
 
 function splash_screen(){
 	console.log('userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info)
-	console.log('not_loaded sounds: '+not_loaded['sounds'].length)
+	console.log('not_loaded sounds: '+ResourceLoader.not_loaded['sounds'].length)
 	canvas_zone.innerHTML=' \
 	<br />\
 	<div id="splash-content" class="text-center">\
@@ -269,9 +269,9 @@ var explore_results=function(){
 
 
 function game(){
-	if(not_loaded['sounds'].length!=0){	
-		console.log(not_loaded['sounds'].length+"  "+not_loaded['sounds']);
-		load_media_wait_for_lazy_audio(game)
+	if(ResourceLoader.not_loaded['sounds'].length!=0){	
+		console.log(ResourceLoader.not_loaded['sounds'].length+"  "+ResourceLoader.not_loaded['sounds']);
+		ResourceLoader.load_media_wait_for_lazy_audio(game);
 	}else{
 		// logic
 		//random number within activity numbers of level1 (0 for now)
@@ -281,8 +281,7 @@ function game(){
 
 		// load audio in the object 
 		audio_sprite_object=media_objects.sounds['soundsSpriteVBR30-19kbps-100k.m4a'];
-		audio_sprite_object.removeEventListener('canplaythrough', log_and_remove_from_not_loaded);
-		
+		audio_sprite_object.removeEventListener('canplaythrough', ResourceLoader.log_and_remove_from_not_loaded);
 		audio_sprite=new AudioSprite(audio_sprite_object,audio_object_sprite_ref,true);
 		
 		title_modal_window=open_js_modal_title("Nivel 1")
@@ -298,16 +297,19 @@ function start_activity_set(){
 		 + session_timestamp.getHours() + ":"  + session_timestamp.getMinutes()
 	// TODO calculate age of the subject ...
 	// session_subject_age=... 
-	remaining_rand_activities=json_activities
+	num_answered_activities=0;
+	score_answered.innerHTML=num_answered_activities;
+	remaining_rand_activities=json_activities.slice();
 	$('#remaining_activities_num')[0].innerHTML=""+(remaining_rand_activities.length-1)	
 	activity(Math.floor(Math.random()*remaining_rand_activities.length))
 }
 
 function activity(i){
 	activity_timer.reset()
-	current_activity_index=i
-	current_activity_data=json_activities[i]
-	correct_answer=current_activity_data['answers'][0]
+	current_activity_index=i;
+	console.log(i+"--"+remaining_rand_activities);
+	current_activity_data=remaining_rand_activities[i]; //json_activities[i]
+	correct_answer=current_activity_data['answers'][0];
 	
 	canvas_zone.innerHTML=' \
 	<div id="sound">sound icon</div> \
@@ -375,8 +377,8 @@ function check_correct(clicked_answer,correct_answer){
 			document.getElementById("answer_result").appendChild(media_objects.images['wrong.png'])
 		}
 	}
-	num_answered_activities++
-	score_answered.innerHTML=num_answered_activities
+	num_answered_activities++;
+	score_answered.innerHTML=num_answered_activities;
 	setTimeout(function(){nextActivity()}, 2000) // fire next activity after 2 seconds (time for displaying img and playing the sound)
 }
 
@@ -391,8 +393,7 @@ function nextActivity(){
 		send_session_data()
 	}else{		
 		$('#remaining_activities_num')[0].innerHTML=""+(remaining_rand_activities.length-1)	
-		if(remaining_rand_activities.length==1){	
-			remaining_rand_activities=[]
+		if(remaining_rand_activities.length==1){
 			activity(0)
 		}else{
 			activity(Math.floor(Math.random()*remaining_rand_activities.length))	

@@ -1,196 +1,203 @@
 
-// audio types. Best choice: m4a (mp4)
-var html5_audiotypes={ 
-	"mp3": "audio/mpeg",
-	"mp4": "audio/mp4",
-	"m4a": "audio/mp4",
-	"ogg": "audio/ogg",
-	"wav": "audio/wav"
-}
-
-
-// LOAD CONFIG
-var MEDIA_LOAD_TIMEOUT=15000 			// 15 sec
-var media_load_time=0 				// load time counter
-var media_load_check_status_interval=250 	// check status every 0.25 sec
-var load_progressbar
-var modal_load_window
-var modal_dialog
-var modal_dialog_msg
-var callback_function_global
-var num_images=0
-var num_sounds=0
-var not_loaded={}
-var ret_media={}
-var lazy_audio=false
-var download_lazy_audio_active = false
-
 // USER DATA
 var user_language=window.navigator.userLanguage || window.navigator.language;
 var is_iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false )
 
+// Audio types. Best choice: m4a (mp4)
+var html5_audiotypes={"mp3": "audio/mpeg","mp4": "audio/mp4","m4a": "audio/mp4","ogg": "audio/ogg","wav": "audio/wav" };
 
 
-function get_resource_name(resource_url){
-	resource_name=resource_url
-	if(resource_name.indexOf('/')!=-1) resource_name=resource_name.substring(resource_name.lastIndexOf('/')+1)
-	return resource_name
-}
+var ResourceLoader={
+	MEDIA_LOAD_TIMEOUT:15000, 		// 15 sec
+	media_load_time:0,			// load time counter
+	media_load_check_status_interval:250, 	// check status every 0.25 sec
+	load_progressbar: undefined,
+	load_interval: undefined,
+	modal_load_window: undefined,
+	modal_dialog: undefined,
+	modal_dialog_msg: undefined,
+	callback_on_load_end: undefined,
+	num_images:0,
+	num_sounds:0,
+	not_loaded:{},
+	ret_media:{},
+	lazy_audio:false,
+	download_lazy_audio_active : false,
+	
+	load_image: function (resource_url){
+		var image_object = new Image();
+		image_object.addEventListener("load", ResourceLoader.log_and_remove_from_not_loaded('load','images',resource_url));
+		image_object.src = resource_url; // after because load begins as soon as src is set
+		return image_object;
+	},
+	
+	load_sound: function (resource_url){
+		var audio_object=new Audio() 
+		if (!audio_object.canPlayType || audio_object.canPlayType("audio/mp4")==""){ 
+			return {playclip:function(){throw new Error("Your browser doesn't support HTML5 audio or mp4/m4a")}}
+		}
+		audio_object.addEventListener('canplaythrough', ResourceLoader.log_and_remove_from_not_loaded('canplaythrough','sounds',resource_url));
+		audio_object.src=resource_url;
+		audio_object.playclip=function(){
+			try{
+				console.log(audio_object.error+  " - "+audio_object.readyState+ " - "+audio_object.networkState);
+				audio_object.pause(); audio_object.currentTime=0; audio_object.play();
+			}catch(exception){alert("error playing audio")}
+		}
+		return audio_object;
+	},	
 
-function load_image(resource_url){
-	var image_object = new Image()
-	image_object.addEventListener("load", function() {load_progressbar.value+=1;not_loaded['images'].splice(not_loaded['images'].indexOf(resource_url),1)},true)
-	image_object.src = resource_url // after because load begins as soon as src is set
-	return image_object
-}
-
-function log_and_remove_from_not_loaded(){
-	console.log("canplaythrough ("+this.src+")");
-	load_progressbar.value+=1;not_loaded['sounds'].splice(not_loaded['sounds'].indexOf(this.src),1)
-}
-
-function load_sound(resource_url){
-	var audio_object=new Audio() 
-	if (!audio_object.canPlayType || audio_object.canPlayType("audio/mp4")==""){ 
-		return {playclip:function(){throw new Error("Your browser doesn't support HTML5 audio or mp4/m4a")}}
-	}
-	audio_object.addEventListener('canplaythrough', log_and_remove_from_not_loaded);
-	audio_object.src=resource_url
-	audio_object.playclip=function(){
-		try{
-			console.log(audio_object.error+  " - "+audio_object.readyState+ " - "+audio_object.networkState)
-			audio_object.pause(); audio_object.currentTime=0; audio_object.play()
-		}catch(exception){alert("error playing audio")}
-	}
-	return audio_object
-}
+	log_and_remove_from_not_loaded: function(event_name,res_type,res_url){
+		console.log(event_name+" ("+res_type+": "+res_url+")");
+		ResourceLoader.load_progressbar.value+=1;
+		ResourceLoader.not_loaded[res_type].splice(ResourceLoader.not_loaded[res_type].indexOf(res_url),1);
+	},
 
 
-function download_audio_ios(){
-		modal_load_window.removeChild(document.getElementById('confirm_div'))
-		load_interval = setInterval(function() {check_load_status()}, media_load_check_status_interval)
-		for(var i=0;i<not_loaded['sounds'].length;i++){
-			ret_media.sounds[get_resource_name(not_loaded['sounds'][i])].load(); // play()-pause() with 1ms timeout extreme alternative
+	download_audio_ios: function(){
+		this.modal_load_window.removeChild(document.getElementById('confirm_div'))
+		this.load_interval = setInterval(function() {	
+			ResourceLoader.check_load_status()},
+			this.media_load_check_status_interval);
+		for(var i=0;i<ResourceLoader.not_loaded['sounds'].length;i++){
+			ResourceLoader.ret_media.sounds[get_resource_name(ResourceLoader.not_loaded['sounds'][i])].load(); // play()-pause() with 1ms timeout extreme alternative
 		}	
-}
+	},
 
-function check_load_status() {
-	media_load_time+=media_load_check_status_interval
-	modal_dialog_msg.innerHTML='check_load_status '+media_load_time+' - progress: '+load_progressbar.value+' - max: '+load_progressbar.max
-	if (load_progressbar.value == load_progressbar.max || ( load_progressbar.value==num_images && not_loaded['images'].length==0 && is_iOS )  ) {
-		if(load_progressbar.value==num_images){
-			if(!lazy_audio && !download_lazy_audio_active){
-				clearInterval(load_interval)
-				download_lazy_audio_active=true	
-				media_load_time=0
-				var confirm_div=document.createElement("div") // we can reuse the other div
-				confirm_div.id="confirm_div"
-				var ios_media_msg="Pula Ok para empezar"
-				if(user_language=='en-US') ios_media_msg="Click Ok to start"
-				confirm_div.innerHTML=ios_media_msg+' <button onclick="download_audio_ios()">Ok</button> '
-				modal_load_window.appendChild(confirm_div)
+	check_load_status: function() {
+		ResourceLoader.media_load_time+=ResourceLoader.media_load_check_status_interval;
+		ResourceLoader.modal_dialog_msg.innerHTML='check_load_status '+ResourceLoader.media_load_time+' - progress: '+ResourceLoader.load_progressbar.value+' - max: '+ResourceLoader.load_progressbar.max
+		if (ResourceLoader.load_progressbar.value == ResourceLoader.load_progressbar.max || ( ResourceLoader.load_progressbar.value==ResourceLoader.num_images && ResourceLoader.not_loaded['images'].length==0 && is_iOS )  ) {
+			if(ResourceLoader.load_progressbar.value==ResourceLoader.num_images){
+				if(!ResourceLoader.lazy_audio && !ResourceLoader.download_lazy_audio_active){
+					clearInterval(ResourceLoader.load_interval)
+					ResourceLoader.download_lazy_audio_active=true;
+					ResourceLoader.media_load_time=0;
+					var confirm_div=document.createElement("div") // we can reuse the other div
+					confirm_div.id="confirm_div"
+					var ios_media_msg="Pula Ok para empezar"
+					if(user_language=='en-US') ios_media_msg="Click Ok to start"
+					confirm_div.innerHTML=ios_media_msg+' <button onclick="download_audio_ios()">Ok</button> '
+					ResourceLoader.modal_load_window.appendChild(confirm_div)
+				}
+				if(ResourceLoader.lazy_audio){		
+					clearInterval(ResourceLoader.load_interval);
+					document.body.removeChild(ResourceLoader.modal_load_window);
+					ResourceLoader.callback_on_load_end(); // start the app	
+					return;
+				}
+			}else{
+				clearInterval(ResourceLoader.load_interval)
+				document.body.removeChild(ResourceLoader.modal_load_window)
+				ResourceLoader.callback_on_load_end() // start the app
+				return
 			}
-			if(lazy_audio){		
-				clearInterval(load_interval)
-				document.body.removeChild(modal_load_window)
-				callback_function_global() // start the app	
-				return			
+		}
+		if (ResourceLoader.media_load_time==ResourceLoader.MEDIA_LOAD_TIMEOUT){
+			clearInterval(ResourceLoader.load_interval);
+			var retry_div=document.createElement("div") // we can reuse the other div
+			var err_msg="";
+			for(var i=0;i<ResourceLoader.not_loaded['images'].length;i++){
+				temp_obj=ResourceLoader.ret_media.images[get_resource_name(ResourceLoader.not_loaded['images'][i])]			
+				err_msg+="<br />Load complete?"+temp_obj.complete
 			}
-		}else{
-			clearInterval(load_interval)
-			document.body.removeChild(modal_load_window)
-			callback_function_global() // start the app
-			return
+			for(var i=0;i<ResourceLoader.not_loaded['sounds'].length;i++){
+				temp_obj=ResourceLoader.ret_media.sounds[get_resource_name(ResourceLoader.not_loaded['sounds'][i])]			
+				err_msg+="<br />Error: "+temp_obj.error+  " - Ready: "+temp_obj.readyState+ " - Network: "+temp_obj.networkState;
+			}		
+			// re-try by a button to reload url, previously loaded stuff should be cached (fast load)
+			retry_div.innerHTML='ERROR: Load media timeout. Not loaded ('+(ResourceLoader.not_loaded['images'].length+ResourceLoader.not_loaded['sounds'].length)+'): '+ResourceLoader.not_loaded['images']+'<br/>'+ResourceLoader.not_loaded['sounds']+' <br /> <a href="">retry</a> '+err_msg
+			ResourceLoader.modal_load_window.appendChild(retry_div)
 		}
-	}
-	if (media_load_time==MEDIA_LOAD_TIMEOUT){
-		clearInterval(load_interval);
-		var retry_div=document.createElement("div") // we can reuse the other div
-		var err_msg="";
-		for(var i=0;i<not_loaded['images'].length;i++){
-			temp_obj=ret_media.images[get_resource_name(not_loaded['images'][i])]			
-			err_msg+="<br />Load complete?"+temp_obj.complete
+	},
+
+	check_load_status_lazy_audio: function () {
+		ResourceLoader.media_load_time+=ResourceLoader.media_load_check_status_interval;
+		ResourceLoader.modal_dialog_msg.innerHTML='check_load_status '+ResourceLoader.media_load_time+' - progress: '+ResourceLoader.load_progressbar.value+' - max: '+ResourceLoader.load_progressbar.max;
+		if (ResourceLoader.load_progressbar.value == ResourceLoader.load_progressbar.max) {	//alert("done")	
+			document.body.removeChild(ResourceLoader.modal_load_window);
+			clearInterval(ResourceLoader.load_interval);
+			setTimeout(function(){ResourceLoader.callback_on_load_end()},500); // start the app
+			return;
 		}
-		for(var i=0;i<not_loaded['sounds'].length;i++){
-			temp_obj=ret_media.sounds[get_resource_name(not_loaded['sounds'][i])]			
-			err_msg+="<br />Error: "+temp_obj.error+  " - Ready: "+temp_obj.readyState+ " - Network: "+temp_obj.networkState;
-		}		
-		// re-try by a button to reload url, previously loaded stuff should be cached (fast load)
-		retry_div.innerHTML='ERROR: Load media timeout. Not loaded ('+(not_loaded['images'].length+not_loaded['sounds'].length)+'): '+not_loaded['images']+'<br/>'+not_loaded['sounds']+' <br /> <a href="">retry</a> '+err_msg
-		modal_load_window.appendChild(retry_div)
-	}
-}
+		else if (ResourceLoader.media_load_time==ResourceLoader.MEDIA_LOAD_TIMEOUT){
+			clearInterval(ResourceLoader.load_interval);
+			var retry_div=document.createElement("div"); // we can reuse the other div
+			var err_msg="";
+			// re-try by a button to reload url, previously loaded stuff should be cached (fast load)
+			retry_div.innerHTML='ERROR: Load lazy aduio timeout. Not loaded ('+ResourceLoader.not_loaded['sounds'].length+') <br /> <a href="">retry</a> '+err_msg;
+			ResourceLoader.modal_load_window.appendChild(retry_div);
+		}
+	},
 
-function check_load_status_lazy_audio() {
-	media_load_time+=media_load_check_status_interval
-	modal_dialog_msg.innerHTML='check_load_status '+media_load_time+' - progress: '+load_progressbar.value+' - max: '+load_progressbar.max
-	if (load_progressbar.value == load_progressbar.max) {
-		//alert("done")	
-		document.body.removeChild(modal_load_window)
-		clearInterval(load_interval)
-		setTimeout(function(){callback_function_global()},500) // start the app
-		return
-	}
-	else if (media_load_time==MEDIA_LOAD_TIMEOUT){
-		clearInterval(load_interval)
-		var retry_div=document.createElement("div") // we can reuse the other div
-		var err_msg="";
-		// re-try by a button to reload url, previously loaded stuff should be cached (fast load)
-		retry_div.innerHTML='ERROR: Load lazy aduio timeout. Not loaded ('+not_loaded['sounds'].length+') <br /> <a href="">retry</a> '+err_msg
-		modal_load_window.appendChild(retry_div)
-	}
-}
+	load_media: function (image_arr, sound_arr, callback_function, lazy_audio_option){
+		if(lazy_audio_option==='undefined') ResourceLoader.lazy_audio=false;
+		else ResourceLoader.lazy_audio=lazy_audio_option;
+		ResourceLoader.ret_media={};ResourceLoader.ret_media.sounds=[];ResourceLoader.ret_media.images=[];
+		ResourceLoader.callback_on_load_end=callback_function;
+		ResourceLoader.modal_load_window=document.createElement("div");
+		ResourceLoader.modal_load_window.className="js-modal-window";
+		ResourceLoader.modal_dialog=document.createElement("div");
+		ResourceLoader.modal_dialog.id="modal-dialog";
+		ResourceLoader.modal_dialog_msg=document.createElement("p");
+		ResourceLoader.modal_dialog_msg.id="modal-dialog-msg";
+		ResourceLoader.load_progressbar=document.createElement("progress");
+		ResourceLoader.num_images=image_arr.length;
+		ResourceLoader.num_sounds=sound_arr.length;
+		ResourceLoader.load_progressbar.value=0; ResourceLoader.load_progressbar.max=ResourceLoader.num_images+ResourceLoader.num_sounds;
 
+		ResourceLoader.not_loaded['images']= image_arr.slice();	
+		ResourceLoader.not_loaded['sounds']=sound_arr.slice(); // to show in case of error and lazy load (required in iOS)
+		ResourceLoader.download_lazy_audio_active = false;
 
-function load_media(image_arr, sound_arr, callback_function, lazy_audio_option){
-	if(lazy_audio_option==='undefined') lazy_audio=false
-	else lazy_audio=lazy_audio_option
-	ret_media={};ret_media.sounds=[];ret_media.images=[];
-	callback_function_global=callback_function
-	modal_load_window=document.createElement("div")
-	modal_load_window.className="js-modal-window"
-	modal_dialog=document.createElement("div")
-	modal_dialog.id="modal-dialog"
-	modal_dialog_msg=document.createElement("p")
-	modal_dialog_msg.id="modal-dialog-msg"
-	load_progressbar=document.createElement("progress")
-	num_images=image_arr.length; num_sounds=sound_arr.length
-	load_progressbar.value=0; load_progressbar.max=num_images+num_sounds
-
-	not_loaded['images']=image_arr;	not_loaded['sounds']=sound_arr // to show in case of error and lazy load (required in iOS)
-	download_lazy_audio_active = false
-
-	modal_dialog.appendChild(load_progressbar)
-	modal_dialog.appendChild(modal_dialog_msg)
-	modal_load_window.appendChild(modal_dialog)
-	document.body.appendChild(modal_load_window)
+		ResourceLoader.modal_dialog.appendChild(ResourceLoader.load_progressbar)
+		ResourceLoader.modal_dialog.appendChild(ResourceLoader.modal_dialog_msg)
+		ResourceLoader.modal_load_window.appendChild(ResourceLoader.modal_dialog)
+		document.body.appendChild(ResourceLoader.modal_load_window)
 	
-	load_interval = setInterval(function() {check_load_status()}, media_load_check_status_interval)
-	for (var i = 0; i < sound_arr.length; i++) {ret_media.sounds[get_resource_name(sound_arr[i])]=load_sound(sound_arr[i])}
-	for (var i = 0; i < image_arr.length; i++) {ret_media.images[get_resource_name(image_arr[i])]=load_image(image_arr[i])}
-	return ret_media // even if objects are not loaded yet, they are created and will point to the loaded media
-}
+		ResourceLoader.load_interval = setInterval(function() {	
+			ResourceLoader.check_load_status()},
+			ResourceLoader.media_load_check_status_interval);
+		for (var i = 0; i < sound_arr.length; i++) {	
+			ResourceLoader.ret_media.sounds[get_resource_name(sound_arr[i])]=ResourceLoader.load_sound(sound_arr[i]);
+		}
+		for (var i = 0; i < image_arr.length; i++) {
+			//console.log(image_arr);console.log(i+"/"+image_arr.length+"--"+image_arr[i]+" -- "+get_resource_name(image_arr[i]));	
+			ResourceLoader.ret_media.images[get_resource_name(image_arr[i])]=ResourceLoader.load_image(image_arr[i]);
+		}
+		return ResourceLoader.ret_media; // even if objects are not loaded yet, they are created and will point to the loaded media
+	},
 
-function load_media_wait_for_lazy_audio(callback_function){
-	callback_function_global=callback_function
-	modal_load_window=document.createElement("div")
-	modal_load_window.className="js-modal-window"
-	modal_dialog=document.createElement("div")
-	modal_dialog.id="modal-dialog"
-	modal_dialog_msg=document.createElement("p")
-	modal_dialog_msg.id="modal-dialog-msg"
-	load_progressbar=document.createElement("progress")
-	num_images=0; num_sounds=not_loaded['sounds'].length
-	load_progressbar.value=0; load_progressbar.max=num_images+num_sounds
+	load_media_wait_for_lazy_audio: function(callback_function){
+		ResourceLoader.callback_on_load_end=callback_function;
+		ResourceLoader.modal_load_window=document.createElement("div")
+		ResourceLoader.modal_load_window.className="js-modal-window"
+		ResourceLoader.modal_dialog=document.createElement("div")
+		ResourceLoader.modal_dialog.id="modal-dialog"
+		ResourceLoader.modal_dialog_msg=document.createElement("p")
+		ResourceLoader.modal_dialog_msg.id="modal-dialog-msg"
+		ResourceLoader.load_progressbar=document.createElement("progress")
+		ResourceLoader.num_images=0; ResourceLoader.num_sounds=not_loaded['sounds'].length
+		ResourceLoader.load_progressbar.value=0; ResourceLoader.load_progressbar.max=ResourceLoader.num_images+ResourceLoader.num_sounds;
 
-	modal_dialog.appendChild(load_progressbar)
-	modal_dialog.appendChild(modal_dialog_msg)
-	modal_load_window.appendChild(modal_dialog)
-	document.body.appendChild(modal_load_window)
+		ResourceLoader.modal_dialog.appendChild(ResourceLoader.load_progressbar);
+		ResourceLoader.modal_dialog.appendChild(ResourceLoader.modal_dialog_msg);
+		ResourceLoader.modal_load_window.appendChild(ResourceLoader.modal_dialog);
+		document.body.appendChild(ResourceLoader.modal_load_window);
 	
-	for(var i=0;i<not_loaded['sounds'].length;i++)	ret_media.sounds[get_resource_name(not_loaded['sounds'][i])].load()
-	load_interval = setInterval(function() {check_load_status_lazy_audio()}, media_load_check_status_interval)
-}
+		for(var i=0;i<ResourceLoader.not_loaded['sounds'].length;i++)
+			ResourceLoader.ret_media.sounds[get_resource_name(ResourceLoader.not_loaded['sounds'][i])].load();
+		ResourceLoader.load_interval = setInterval(function() {
+			ResourceLoader.check_load_status_lazy_audio()}, 
+			ResourceLoader.media_load_check_status_interval);
+	}
+
+	
+};
+
+
+
+
 
 
 
@@ -297,6 +304,21 @@ function pad_string(val, digits, pad_char){
         return pad_str + val_str;
    }else
         return val_str;
+}
+
+function get_resource_name(resource_url){
+	if(resource_url.indexOf('/')!=-1) return resource_url.substring(resource_url.lastIndexOf('/')+1);
+	return resource_url;
+}
+
+function isNumber(value) {
+    if ((undefined === value) || (null === value)) return false;
+    if (typeof value == 'number')  return true;
+    return !isNaN(value - 0);
+}
+function isInteger(value) {     // in the future javacript will have Number.isInteger, etc
+    if ((undefined === value) || (null === value))  return false;
+    return value % 1 == 0;     // or   return mixed_var === +mixed_var && isFinite(mixed_var) && !(mixed_var % 1);
 }
 
 
@@ -531,24 +553,6 @@ var DataTableSimple = function (table_config){
 	
 };
 
-function isNumber(value) {
-    if ((undefined === value) || (null === value)) {
-        return false;
-    }
-    if (typeof value == 'number') {
-        return true;
-    }
-    return !isNaN(value - 0);
-}
-
-function isInteger(value) {
-    // in the future javacript will have Number.isInteger, etc
-    if ((undefined === value) || (null === value)) {
-        return false;
-    }
-    return value % 1 == 0;
-    // or   return mixed_var === +mixed_var && isFinite(mixed_var) && !(mixed_var % 1);
-}
 
 
 function selectorExistsInCSS(styleSheetName, selector) {
