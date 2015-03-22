@@ -1,7 +1,4 @@
 
-// data (will be ajax in the server in the future)
-//".comment": "The correct answer is always the first, the app rands them, the minimum number of answers is two, the maximum is unlimited",
-
 // MEDIA
 var images = [
 //"http://www.centroafan.com/afan-app-media/img/words/abrigo.png",
@@ -12,8 +9,8 @@ var images = [
 ]
 
 var sounds = [
-	// si es online se puede usar dropbox https://dl.dropboxusercontent.com/u/188219/
-	//"http://www.centroafan.com/afan-app-media/audio/soundsSpriteVBR30-19kbps-93k.m4a"
+	// se puede usar dropbox https://dl.dropboxusercontent.com/u/188219/
+	//http://www.centroafan.com/afan-app-media/audio/...m4a"
 	"../../afan-app-media/audio/soundsSpriteVBR30-19kbps-100k.m4a"
 ]
 
@@ -32,8 +29,7 @@ $.getJSON("../data/training1-short.json", function(json) { //training1
 });
 json_activities=json_training;
 
-
-// if these are found localy (e.g., search for a local folder called ... or a file xxx), Set the url locally
+// if media not found locally, use centroafan.com
 // Otherwise use cognitionis 
 media_url='http://www.centroafan.com/afan-app-media/'
 //backend_url='http://www.centroafan.com/afan-app-backend/'
@@ -67,7 +63,7 @@ var audio_object_sprite_ref={
 	z: {id: "z50", start: 17.657, end: 18.158}, 
 	zfx_correct: {id: "zfx_correct50", start: 13.107, end: 13.610}, 
 	zfx_wrong: {id: "zfx_wrong50", start: 38.649, end: 39.150}, 
-	zsilence_start: {id: "zsilence_start", start: 0.100, end: 0.700}	
+	zsilence_start: {id: "zsilence_start", start: 0.100, end: 0.500}	
 };
 
 
@@ -84,13 +80,10 @@ var max_calls=500
 var media_objects;
 var audio_sprite;
 
-session_user="afan"
-session_subject="juan"
-session_subject_age="5"
-session_level="1"
+
 remaining_rand_activities=[];
 correct_answer='undefined'
-current_activity_type='undefined' // to avoid loading all the html pattern but just changing the values
+current_activity_type='undefined' // to avoid loading all the html
 zone_sound=null
 canvas_zone=$('#zone_canvas')[0]
 score_correct=$('#current_score_num')[0]
@@ -100,15 +93,25 @@ activity_timer_element=document.getElementById('activity_timer_span')
 activity_timer=new ActivityTimer()
 activity_timer.anchor_to_dom(activity_timer_element)
 
+current_activity_data={};
+current_activity_index=0;
 
-num_correct_activities=0
-num_answered_activities=0
-current_activity_data={}
-current_activity_index=0
-game_type='training'
 
-session_duration=0
-session_timestamp_str="0000-00-00 00:00"
+session_data={
+	user: "afan",
+	subject: "juan",
+	subject_age: "5",
+	level: "1",
+	duration: 0,
+	timestamp: "0000-00-00 00:00",
+	num_correct_activities: 0,
+	num_answered_activities: 0,
+	result: 0,
+	type: 'training',
+    action: 'send_session_data_post',
+	details: []
+};
+
 subjects_select_elem="none"
 
 var exit_app=function(){
@@ -120,12 +123,10 @@ var exit_app=function(){
 }
 
 
-// TODO HTML5 store results locally (JSON/Cache?) and communicate with DB with ajax (PHP see examples)
-// See how to login and control session with javascript frontend... Use cookies (learn)
+// See how to login and control session with js frontend... Use cookies (learn)
 	
 $(function () { // DOM ready
 	is_app=is_cordova()
-       // detectar si se està accediendo desde un navegador o desde la app para identificar al usuario con el num de movil o con la IP (por defecto se guardan estadísticas basadas en eso).
 	if(is_app){
 	        document.addEventListener('deviceready', onDeviceReady, false);
 	}else{
@@ -133,20 +134,13 @@ $(function () { // DOM ready
 	}
 });
 
-function is_cordova(){
-	if( navigator.userAgent.match(/(ios|iphone|ipod|ipad|android|blackberry|iemobile)/i)
-		&& /^file:\/{3}[^\/]/i.test(window.location.href) ){	
-		return true		
-	}
-	return false
+
+function select_fill_with_json(data,select_elem){
+	select_elem.innerHTML="";
+	$.each(data, function(key, val) {
+		select_elem.append('<option value="' + key + '">' + key + '</option>')})
 }
 
-function select_fill_with_json(json_activities,select_elem){
-	// first empty the select...
-	$.each(json_activities, function(key, val) {select_elem.append('<option value="' + key + '">' + key + '</option>')})
-}
-
-// Cordova or browser is ready
 function onDeviceReady() {
 	device_info="browser"
 	if(is_app){
@@ -169,14 +163,12 @@ function splash_screen(){
 	<div id="splash-content" class="text-center">\
 	<div id="splash-logo-div"></div> \
 	<br />  \
-	Selecciona el sujeto:<br />  \
-	<select id="subjects-select"></select> \
-	<br />Falta gestionar sesión/login, si es la app \
-	<br />o la web usar cookies para no pedir user-pass cada vez \
+	Sujeto:  <select id="subjects-select"></select> \
 	<br /><button id="start-button" disabled="true">Practicar</button> \
 	<br /><button id="start-test-button" disabled="true">Test</button> \
 	<br /><button id="add-subject" disabled="true">Añadir Niño</button> \
 	<br /><button id="results" disabled="true" onclick="explore_results()">Resultados</button> \
+	<br /><button id="test-sample" onclick="send_sample_json_post()">Test sending json data post</button> \
 	<br /><br /><button id="exit" onclick="exit_app()">Salir</button> \
 	</div>\
 	'
@@ -197,7 +189,7 @@ function splash_screen(){
 			);
 			};
 	$.getJSON(
-		backend_url+'ajaxdb.php?action=get_subjects&user='+session_user, 
+		backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user, 
 		function(data) {
 			select_fill_with_json(data,subjects_select_elem); 
 			$("#start-button")[0].disabled=false; 
@@ -205,8 +197,8 @@ function splash_screen(){
 			$("#add-subject")[0].disabled=false;
 			$("#results")[0].disabled=false;
 			// MAL pq no se puede modificar el evento... lo que hay q hacer es un objeto game y prototiparlo
-			$("#start-button")[0].onclick=function(){game_type="training";json_activities=json_training;game()};
-			$("#start-test-button")[0].onclick=function(){game_type="test";json_activities=json_test;game()};
+			$("#start-button")[0].onclick=function(){session_data.type="training";json_activities=json_training;game()};
+			$("#start-test-button")[0].onclick=function(){session_data.type="test";json_activities=json_test;game()};
 			$("#add-subject")[0].onclick=function(){
 				var cancel_function=function(){
 					var elem_to_remove=document.getElementById("js-modal-window");
@@ -227,17 +219,53 @@ function splash_screen(){
 		
 }
 
+var send_sample_json_post=function(){
+	session_data.subject=subjects_select_elem[0].options[subjects_select_elem[0].selectedIndex].value;
+
+  // construct an HTTP request
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", "http://www.centroafan.com/afan-app/www/"+backend_url+'ajaxdb.php',true);
+  xhr.responsetype="json";
+  xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+  xhr.onload=show_results;
+
+
+// adding details
+session_data.details=[{"activity":"ala","timestamp":"2015-3-22 20:22:31","duration":6,"choice":"ala","result":"correct"},{"activity":"carta","timestamp":"2015-3-22 20:22:37","duration":4,"choice":"cabra","result":"incorrect"},{"activity":"casa","timestamp":"2015-3-22 20:22:43","duration":3,"choice":"carta","result":"incorrect"},{"activity":"mesa","timestamp":"2015-3-22 20:22:48","duration":3,"choice":"seta","result":"incorrect"},{"activity":"koala","timestamp":"2015-3-22 20:22:55","duration":4,"choice":"jaula","result":"incorrect"},{"activity":"banyera","timestamp":"2015-3-22 20:23:3","duration":6,"choice":"banyera","result":"correct"}];
+
+  // send the collected data as JSON
+  xhr.send(JSON.stringify(session_data)); //... maybe that is not getting there...
+                                            // maybe there is no proper parsing?
+
+  //xhr.onloadend = function (data) {
+
+	/*$.getJSON(
+		backend_url+'ajaxdb.php?action=send_session_data_post&type=a', 
+		function(data) {
+			canvas_zone.innerHTML='<br />Server message: '+data.msg+'<br /><br />\
+			<br /><button id="go-back" onclick="splash_screen()">Volver</button>';
+		});*/
+
+};
+
+var show_results=function(){
+	alert(this.responseText);
+    canvas_zone.innerHTML='<br />Server message: '+data.msg+'<br /><br />\
+    <br /><button id="go-back" onclick="splash_screen()">Volver</button>';
+};
+
+
 var explore_results=function(){
+	session_data.subject=subjects_select_elem[0].options[subjects_select_elem[0].selectedIndex].value;
 	canvas_zone.innerHTML=' \
 	<div class="text-center">\
-	<br /><div id="user-results">resultados para user...</div> \
+	<br /><h2>Resultados</h2> \
 	<div id="results-div">aquí los resultados</div> \
 	<br /><br /><button id="go-back" onclick="splash_screen()">Volver</button> \
 	</div>\
 	';
-	session_subject=subjects_select_elem[0].options[subjects_select_elem[0].selectedIndex].value;
 	$.getJSON(
-		backend_url+'ajaxdb.php?action=get_results&user='+session_user+'&subject='+session_subject, 
+		backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject, 
 		function(data) { 
 			//alert(JSON.stringify(data,null,2));
 			//var table_sessions="";
@@ -245,7 +273,7 @@ var explore_results=function(){
 			//for(var i=0;i<data.sessions.length;i++){
 			//	table_sessions+="<tr><td>"+data.sessions[i].id+"</td><td>"+data.sessions[i].timestamp+"</td><td>"+data.sessions[i].reference+"</td><td>"+data.sessions[i].age+"</td><td>"+data.sessions[i].duration+"</td><td>"+(data.sessions[i].result*100)+"%</td><td id=\"row-"+data.sessions[i].id+"\" onclick=\"alert(this.id)\">x</td></tr>";
 			//}
-			$("#results-div")[0].innerHTML="user:"+data.general.user+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
+			$("#results-div")[0].innerHTML="user: "+data.general.user+" - subject: <b>"+data.general.subject+"</b><br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
 			//<thead><tr><td>id</td><td>timestamp</td><td>reference</td><td>age</td><td>duration</td><td>result</td><td>actions</td></tr></thead><tbody>"+table_sessions+"</tbody>
 			//"<pre>"+JSON.stringify(data,null,2)+"</pre>"
 			results_table=$("#results-table")[0];
@@ -291,14 +319,15 @@ function game(){
 
 function start_activity_set(){
 	document.body.removeChild(title_modal_window)
-	session_subject=subjects_select_elem[0].options[subjects_select_elem[0].selectedIndex].value
+	session_data.subject=subjects_select_elem[0].options[subjects_select_elem[0].selectedIndex].value
 	var session_timestamp=new Date();
-	session_timestamp_str=session_timestamp.getFullYear()+"-"+(session_timestamp.getMonth()+1) + "-" + session_timestamp.getDate() + " "
+	session_data.timestamp_str=session_timestamp.getFullYear()+"-"+
+	(session_timestamp.getMonth()+1) + "-" + session_timestamp.getDate() + " "
 		 + session_timestamp.getHours() + ":"  + session_timestamp.getMinutes()
 	// TODO calculate age of the subject ...
-	// session_subject_age=... 
-	num_answered_activities=0;
-	score_answered.innerHTML=num_answered_activities;
+	// session_data.subject_age=... 
+	session_data.num_answered_activities=0;
+	score_answered.innerHTML=session_data.num_answered_activities;
 	remaining_rand_activities=json_activities.slice();
 	$('#remaining_activities_num')[0].innerHTML=""+(remaining_rand_activities.length-1)	
 	activity(Math.floor(Math.random()*remaining_rand_activities.length))
@@ -315,7 +344,7 @@ function activity(i){
 	<div id="sound">sound icon</div> \
 	<div id="answers"></div>\
 	'	
-	answers_div=document.getElementById('answers')
+	answers_div=document.getElementById('answers');
 	used_answers=[];
 	for(var i=0; i<USE_ANSWERS ; ++i) {
 		use=Math.floor(Math.random() * USE_ANSWERS)
@@ -348,9 +377,18 @@ function activity(i){
 
 
 function check_correct(clicked_answer,correct_answer){
-	if(SoundChain.audio_chain_waiting) return // do not allow cliking while uttering
-	activity_timer.stop()
-	session_duration+=activity_timer.seconds
+	var activity_results={};
+	var timestamp=new Date();
+	var timestamp_str=timestamp.getFullYear()+"-"+
+		(timestamp.getMonth()+1) + "-" + timestamp.getDate() + " " +
+		 timestamp.getHours() + ":"  + timestamp.getMinutes() + 
+			":"  + timestamp.getSeconds();
+	if(SoundChain.audio_chain_waiting) return; // do not allow cliking while uttering
+	activity_timer.stop();
+	activity_results.activity=correct_answer;
+	activity_results.timestamp=timestamp_str;
+	activity_results.duration=activity_timer.seconds;
+	session_data.duration+=activity_timer.seconds;
 	//image_src_start_exists=clicked_answer.indexOf("src=\""+media_url)
 	if(typeof clicked_answer == "string"){ // it is not a sprite but an image
 		image_src_start_exists=clicked_answer.lastIndexOf("/")
@@ -364,54 +402,69 @@ function check_correct(clicked_answer,correct_answer){
 		clicked_answer=(clicked_answer.className.replace("wordimage wordimage-","")).trim();
 	}
 	canvas_zone.innerHTML='<div id="answer_result" style="width:100%;text-align:center"></div>'
+
+	activity_results.choice=clicked_answer;
 	if (clicked_answer==correct_answer){
-		num_correct_activities++
-		if(game_type!="test"){
+		session_data.num_correct_activities++;
+		activity_results.result="correct";
+		if(session_data.type!="test"){
 			audio_sprite.playSpriteRange("zfx_correct")
 			document.getElementById("answer_result").appendChild(media_objects.images['correct.png'])
 			score_correct.innerHTML=num_correct_activities
 		}
 	}else{
-		if(game_type!="test"){
+		activity_results.result="incorrect";
+		if(session_data.type!="test"){
 			audio_sprite.playSpriteRange("zfx_wrong",function(){console.log('wrong already played')})	
 			document.getElementById("answer_result").appendChild(media_objects.images['wrong.png'])
 		}
 	}
-	num_answered_activities++;
-	score_answered.innerHTML=num_answered_activities;
+	session_data.details.push(activity_results);
+	session_data.num_answered_activities++;
+	score_answered.innerHTML=session_data.num_answered_activities;
 	setTimeout(function(){nextActivity()}, 2000) // fire next activity after 2 seconds (time for displaying img and playing the sound)
 }
 
 function nextActivity(){
 	remaining_rand_activities.splice(current_activity_index,1) // remove current activity	
 	if(remaining_rand_activities.length==0){	
-		canvas_zone.innerHTML=' \
-		NO HAY MAS ACTIVIDADES. FIN, '+ backend_url+'ajaxdb.php?action=send_session_data&user='+session_user+'&subject='+session_subject+'&reference='+game_type+'&age='+session_subject_age+'&num_answered='+num_answered_activities+'&num_correct='+num_correct_activities+'&level='+session_level +'&duration='+session_duration+'&timestamp='+session_timestamp_str +'\
-		'
+		canvas_zone.innerHTML='NO HAY MAS ACTIVIDADES. FIN, sending...';
 		// calculate result
-		session_result=num_correct_activities/num_answered_activities
+		session_data.result=session_data.num_correct_activities/session_data.num_answered_activities
 		send_session_data()
 	}else{		
 		$('#remaining_activities_num')[0].innerHTML=""+(remaining_rand_activities.length-1)	
 		if(remaining_rand_activities.length==1){
-			activity(0)
+			activity(0);
 		}else{
-			activity(Math.floor(Math.random()*remaining_rand_activities.length))	
+			activity(Math.floor(Math.random()*remaining_rand_activities.length));
 		}		
 	}
 }
 
 function send_session_data(){
-	//alert(backend_url+'ajaxdb.php?action=send_session_data&user='+session_user+'&subject='+session_subject+'&age='+session_subject_age+'&num_answered='+num_answered_activities+'&num_correct='+num_correct_activities+'&level='+session_level +'&duration='+session_duration+'&session_timestamp='+session_timestamp_str)
 	
-	// TODO USE "REFERENCE" TO DECIDE WHICH TEST IS THIS...
-	
-	msg=$.getJSON(
+	console.log(JSON.stringify(session_data));
+	/*msg=$.getJSON(
 		backend_url+'ajaxdb.php?action=send_session_data&user='+session_user+'&subject='+session_subject+'&reference='+game_type+'&age='+session_subject_age+'&num_answered='+num_answered_activities+'&num_correct='+num_correct_activities+'&level='+session_level +'&duration='+session_duration+'&timestamp='+session_timestamp_str,
-		function(data) { canvas_zone.innerHTML+='<br />Server message: '+data.msg+'<br /><br /><button id="go-back" onclick="splash_screen()">Volver</button>'; }
-		);
-		
+		function(data) { canvas_zone.innerHTML+='<br />Server message: '+data.msg+'<br /><br />'+other_str+'<br /><button id="go-back" onclick="splash_screen()">Volver</button>'; }
+		);*/
 	
+	
+  // construct an HTTP request
+  var xhr = new XMLHttpRequest();
+  xhr.open('get', backend_url+'ajaxdb.php',true);
+  xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+
+  // send the collected data as JSON
+  xhr.send(JSON.stringify(session_data));
+
+  xhr.onloadend = function (data) {
+    canvas_zone.innerHTML+='<br />Server message: '+data.msg+'<br /><br />\
+    <br /><button id="go-back" onclick="splash_screen()">Volver</button>';
+  };
+
+
 }
 
 

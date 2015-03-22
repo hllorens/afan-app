@@ -2,9 +2,17 @@
 // USER DATA
 var user_language=window.navigator.userLanguage || window.navigator.language;
 var is_iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false )
+function is_cordova(){
+	if( navigator.userAgent.match(/(i(os|phone|pod|pad|emobile)|android|blackberry)/i)
+		&& /^file:\/{3}[^\/]/i.test(window.location.href) ){	
+		return true		
+	}
+	return false
+}
 
 // Audio types. Best choice: m4a (mp4)
-var html5_audiotypes={"mp3": "audio/mpeg","mp4": "audio/mp4","m4a": "audio/mp4","ogg": "audio/ogg","wav": "audio/wav" };
+var html5_audiotypes={"mp3": "audio/mpeg","mp4": "audio/mp4","m4a": "audio/mp4",
+					  "ogg": "audio/ogg","wav": "audio/wav" };
 
 
 var ResourceLoader={
@@ -529,25 +537,27 @@ var DataTableSimple = function (table_config){
 		}
 	}
 	if(table_config.hasOwnProperty('pagination') && isInteger(table_config.pagination) && table_config.pagination > 0){
-		$('#'+this.id).after('<div id="nav"></div>');	
+		$('#'+this.id).after('<div id="'+this.id+'-nav"></div>');	
 		var rowsShown = table_config.pagination;
 		var rowsTotal = table_config.data.length;
 		var numPages = rowsTotal/rowsShown;
 		for(i = 0;i < numPages;i++) {
 		    var pageNum = i + 1;
-		    $('#nav').append('<a href="#" rel="'+i+'">'+pageNum+'</a> ');
+		    $('#'+this.id+'-nav').append('<a href="#" rel="'+i+'">'+pageNum+'</a> ');
 		}
 		$('#'+this.id+' tbody tr').hide();
 		$('#'+this.id+' tbody tr').slice(0, rowsShown).show();
-		$('#nav a:first').addClass('active');
-		$('#nav a').bind('click', function(){
-		    $('#nav a').removeClass('active');
+		$('#'+this.id+'-nav a:first').addClass('active');
+		$('#'+this.id+'-nav a').bind('click', function(){
+		    $('#'+this.id+'-nav a').removeClass('active');
 		    $(this).addClass('active');
 		    var currPage = $(this).attr('rel');
 		    var startItem = currPage * rowsShown;
 		    var endItem = startItem + rowsShown;
-		    $('#'+this.id+' tbody tr').css('opacity','0.0').hide().slice(startItem, endItem).
-		            css('display','table-row').animate({opacity:1}, 300);
+			//console.log(currPage+"  "+startItem+"-"+endItem);
+		    $('#'+this.parentNode.id.replace("-nav","")+' tbody tr')
+					.css('opacity','0.0').hide().slice(startItem, endItem)
+					.css('display','table-row').animate({opacity:1}, 300);
 		});
 	}
 	

@@ -3,8 +3,13 @@
 date_default_timezone_set('Europe/Madrid');
 
 function get_value($name){
-	if( !isset($_GET[$name]) ) exit("Error: $name not set");
-	return 	$_GET[$name];
+	if( !isset($_REQUEST[$name]) ){
+		$output['msg']="Error: $name not set. REQUEST: ".$_REQUEST;
+		header('Content-type: application/json');
+		echo json_encode( $output );
+		exit();
+	}
+	return 	$_REQUEST[$name];
 }
 
 $action=get_value("action");
@@ -39,10 +44,7 @@ if ($action == "get_subjects"){
 	echo json_encode( $output );
 	//print_r($output);
 
-}
-
-
-if ($action == "add_subject"){
+}else if ($action == "add_subject"){
 	$user=get_value('user');
 	$alias=get_value('alias');
 	$name=get_value('name');
@@ -54,9 +56,7 @@ if ($action == "add_subject"){
 	if(!$rResult){header('HTTP/1.1 500 Internal Server Error');die("Error: Exists. ".mysql_error()." -- ".$sQuery);}		
 	header('Content-type: application/json');
 	echo json_encode( '{"success":"$user"}' );
-}
-
-if ($action == "send_session_data"){
+}else if ($action == "send_session_data"){
 	$output["msg"]="success";
 	$reference=get_value("reference");
 	$user=get_value("user");
@@ -79,9 +79,35 @@ if ($action == "send_session_data"){
 	echo json_encode( $output );
 	//print_r($output);
 
-}
+}else if ($action == "send_session_data_post"){
+	/*$output["msg"]="success";
+	$reference=get_value("reference");
+	$user=get_value("user");
+	$subject=get_value("subject");
+	$age=get_value("age");
+	$num_answered=get_value("num_answered");
+	$num_correct=get_value("num_correct");
+	$result= ((int) $num_correct) / ((int) $num_answered);
+	$level=get_value("level");
+	$duration=get_value("duration");
+	$timestamp=get_value("timestamp");
 
-if ($action == "get_results"){
+	$sQuery = "INSERT INTO sessions(reference,user,subject,age,num_answered,num_correct,result,level,duration,timestamp)  VALUES ('$reference','$user','$subject','$age','$num_answered','$num_correct','$result','$level','$duration','$timestamp');"; 
+	$rResult = mysql_query( $sQuery, $db_connection );
+	if(!$rResult){ $output["msg"]=mysql_error()." -- ".$sQuery; }
+	else{ $output["msg"]="Success. Data session stored in the server. --"; }	
+	//else{$output='{"msg":"Success. Data session stored in the server. -- '.$sQuery.'"}';}	
+
+	$output['msg'].=get_value("details");*/
+
+	// WRITE A LOG IN A FILE, TEST WITH JQUERY AJAX
+
+	$output["msg"]="hoooola ".get_value("type");
+	header('Content-type: application/json');
+	echo json_encode( $output );
+	//print_r($output);
+
+}else if ($action == "get_results"){
 	$user=get_value("user");
 	$subject=get_value("subject");
 
@@ -112,9 +138,7 @@ if ($action == "get_results"){
 	echo json_encode( $output );
 	//print_r($output);
 
-}
-
-if ($action == "delete_session"){
+}else if ($action == "delete_session"){
 	$id=get_value("id");
 	$subject=get_value("subject");
 
@@ -129,7 +153,12 @@ if ($action == "delete_session"){
 	echo json_encode( $output );
 	//print_r($output);
 
+}else{
+	$output['msg']="unsupported action";
+	header('Content-type: application/json');
+	echo json_encode( $output );	
 }
+
 
 
 ?>
