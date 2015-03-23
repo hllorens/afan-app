@@ -531,7 +531,12 @@ var DataTableSimple = function (table_config){
 			var table_row   = table_body.insertRow(table_body.rows.length);
 			for(var table_column=0;table_column<table_config.columns.length;table_column++){
 				var table_cell  = table_row.insertCell(table_column);
-				var cell_text  = document.createTextNode(table_config.data[i][table_config.columns[table_column].data]);
+				var text=table_config.data[i][table_config.columns[table_column].data];
+				if (table_config.columns[table_column].hasOwnProperty('format') && DataTableSimple.formats[table_config.columns[table_column].format]!=='undefined'){
+					//alert (table_config.columns[table_column].format);
+					text=DataTableSimple.formats[table_config.columns[table_column].format](text); 
+				}
+				var cell_text  = document.createTextNode(text);
 				table_cell.appendChild(cell_text);
 			}
 		}
@@ -562,7 +567,16 @@ var DataTableSimple = function (table_config){
 	}
 	
 };
-
+DataTableSimple.formats={};
+DataTableSimple.formats.percentage_int=function (data){
+	if(data==='undefined') return "-";
+	data=data*100;
+	return data.toString().split(".")[0]+"%";
+};
+DataTableSimple.formats.time_from_seconds=function (data){
+	if(data==='undefined') return "-";
+	return pad_string( (data / 3600) >> 0,2,"0")+":"+pad_string( (data / 60) >> 0,2,"0")+":"+pad_string(data % 60,2,"0")
+};
 
 
 function selectorExistsInCSS(styleSheetName, selector) {

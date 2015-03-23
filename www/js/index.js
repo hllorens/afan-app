@@ -104,10 +104,11 @@ session_data={
 	level: "1",
 	duration: 0,
 	timestamp: "0000-00-00 00:00",
-	num_correct_activities: 0,
-	num_answered_activities: 0,
+	num_correct: 0,
+	num_answered: 0,
 	result: 0,
-	type: 'training',
+	type: 'ord_fonemas',
+	mode: 'training',
     action: 'send_session_data_post',
 	details: []
 };
@@ -157,7 +158,7 @@ function onDeviceReady() {
 
 function splash_screen(){
 	console.log('userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info)
-	console.log('not_loaded sounds: '+ResourceLoader.not_loaded['sounds'].length)
+	console.log('not_loaded sounds: '+ResourceLoader.not_loaded['sounds'].length);
 	canvas_zone.innerHTML=' \
 	<br />\
 	<div id="splash-content" class="text-center">\
@@ -197,8 +198,8 @@ function splash_screen(){
 			$("#add-subject")[0].disabled=false;
 			$("#results")[0].disabled=false;
 			// MAL pq no se puede modificar el evento... lo que hay q hacer es un objeto game y prototiparlo
-			$("#start-button")[0].onclick=function(){session_data.type="training";json_activities=json_training;game()};
-			$("#start-test-button")[0].onclick=function(){session_data.type="test";json_activities=json_test;game()};
+			$("#start-button")[0].onclick=function(){session_data.mode="training";json_activities=json_training;game()};
+			$("#start-test-button")[0].onclick=function(){session_data.mode="test";json_activities=json_test;game()};
 			$("#add-subject")[0].onclick=function(){
 				var cancel_function=function(){
 					var elem_to_remove=document.getElementById("js-modal-window");
@@ -221,36 +222,18 @@ function splash_screen(){
 
 var send_sample_json_post=function(){
 	session_data.subject=subjects_select_elem[0].options[subjects_select_elem[0].selectedIndex].value;
-
-  // construct an HTTP request
   var xhr = new XMLHttpRequest();
-  xhr.open("POST", "http://www.centroafan.com/afan-app/www/"+backend_url+'ajaxdb.php',true);
+  xhr.open("POST", backend_url+'ajaxdb.php',true);
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   xhr.responsetype="json";
-  xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
   xhr.onload=show_results;
-
-
-// adding details
-session_data.details=[{"activity":"ala","timestamp":"2015-3-22 20:22:31","duration":6,"choice":"ala","result":"correct"},{"activity":"carta","timestamp":"2015-3-22 20:22:37","duration":4,"choice":"cabra","result":"incorrect"},{"activity":"casa","timestamp":"2015-3-22 20:22:43","duration":3,"choice":"carta","result":"incorrect"},{"activity":"mesa","timestamp":"2015-3-22 20:22:48","duration":3,"choice":"seta","result":"incorrect"},{"activity":"koala","timestamp":"2015-3-22 20:22:55","duration":4,"choice":"jaula","result":"incorrect"},{"activity":"banyera","timestamp":"2015-3-22 20:23:3","duration":6,"choice":"banyera","result":"correct"}];
-
-  // send the collected data as JSON
-  xhr.send(JSON.stringify(session_data)); //... maybe that is not getting there...
-                                            // maybe there is no proper parsing?
-
-  //xhr.onloadend = function (data) {
-
-	/*$.getJSON(
-		backend_url+'ajaxdb.php?action=send_session_data_post&type=a', 
-		function(data) {
-			canvas_zone.innerHTML='<br />Server message: '+data.msg+'<br /><br />\
-			<br /><button id="go-back" onclick="splash_screen()">Volver</button>';
-		});*/
-
+ session_data.details=[{"activity":"ala","timestamp":"2015-3-22 20:22:31","duration":6,"choice":"ala","result":"correct"},{"activity":"carta","timestamp":"2015-3-22 20:22:37","duration":4,"choice":"cabra","result":"incorrect"},{"activity":"casa","timestamp":"2015-3-22 20:22:43","duration":3,"choice":"carta","result":"incorrect"},{"activity":"mesa","timestamp":"2015-3-22 20:22:48","duration":3,"choice":"seta","result":"incorrect"},{"activity":"koala","timestamp":"2015-3-22 20:22:55","duration":4,"choice":"jaula","result":"incorrect"},{"activity":"banyera","timestamp":"2015-3-22 20:23:03","duration":6,"choice":"banyera","result":"correct"}];
+  xhr.send("action=send_session_data_post&json_string="+(JSON.stringify(session_data))); 
 };
 
 var show_results=function(){
-	alert(this.responseText);
-    canvas_zone.innerHTML='<br />Server message: '+data.msg+'<br /><br />\
+	var data=JSON.parse(this.responseText);
+    canvas_zone.innerHTML='<br />Server message: <pre>'+data.msg+'</pre><br /><br />\
     <br /><button id="go-back" onclick="splash_screen()">Volver</button>';
 };
 
@@ -285,10 +268,11 @@ var explore_results=function(){
 				columns: [
 					{ data: 'id' },
 					{ data: 'timestamp' },
-					{ data: 'reference' },
+					{ data: 'type' },
+					{ data: 'mode' },
 					{ data: 'age' },
-					{ data: 'duration' }, // TODO: function that transforms the string e.g., time
-					{ data: 'result' } // TODO: function that transforms the string e.g., percentage
+					{ data: 'duration',  format: 'time_from_seconds'}, 
+					{ data: 'result', format: 'percentage_int' } 
 				]
 			} );
 		});	
@@ -320,14 +304,14 @@ function game(){
 function start_activity_set(){
 	document.body.removeChild(title_modal_window)
 	session_data.subject=subjects_select_elem[0].options[subjects_select_elem[0].selectedIndex].value
-	var session_timestamp=new Date();
-	session_data.timestamp_str=session_timestamp.getFullYear()+"-"+
-	(session_timestamp.getMonth()+1) + "-" + session_timestamp.getDate() + " "
-		 + session_timestamp.getHours() + ":"  + session_timestamp.getMinutes()
+	var timestamp=new Date();
+	session_data.timestamp=timestamp.getFullYear()+"-"+
+		pad_string((timestamp.getMonth()+1),2,"0") + "-" + pad_string(timestamp.getDate(),2,"0") + " " +
+		 pad_string(timestamp.getHours(),2,"0") + ":"  + pad_string(timestamp.getMinutes(),2,"0");
 	// TODO calculate age of the subject ...
 	// session_data.subject_age=... 
-	session_data.num_answered_activities=0;
-	score_answered.innerHTML=session_data.num_answered_activities;
+	session_data.num_answered=0;
+	score_answered.innerHTML=session_data.num_answered;
 	remaining_rand_activities=json_activities.slice();
 	$('#remaining_activities_num')[0].innerHTML=""+(remaining_rand_activities.length-1)	
 	activity(Math.floor(Math.random()*remaining_rand_activities.length))
@@ -380,11 +364,14 @@ function check_correct(clicked_answer,correct_answer){
 	var activity_results={};
 	var timestamp=new Date();
 	var timestamp_str=timestamp.getFullYear()+"-"+
-		(timestamp.getMonth()+1) + "-" + timestamp.getDate() + " " +
-		 timestamp.getHours() + ":"  + timestamp.getMinutes() + 
-			":"  + timestamp.getSeconds();
+		pad_string((timestamp.getMonth()+1),2,"0") + "-" + pad_string(timestamp.getDate(),2,"0") + " " +
+		 pad_string(timestamp.getHours(),2,"0") + ":"  + pad_string(timestamp.getMinutes(),2,"0") + 
+			":"  + pad_string(timestamp.getSeconds(),2,"0");
 	if(SoundChain.audio_chain_waiting) return; // do not allow cliking while uttering
 	activity_timer.stop();
+	activity_results.type=session_data.type;
+	activity_results.mode=session_data.mode;
+	activity_results.level=session_data.level;
 	activity_results.activity=correct_answer;
 	activity_results.timestamp=timestamp_str;
 	activity_results.duration=activity_timer.seconds;
@@ -405,23 +392,23 @@ function check_correct(clicked_answer,correct_answer){
 
 	activity_results.choice=clicked_answer;
 	if (clicked_answer==correct_answer){
-		session_data.num_correct_activities++;
+		session_data.num_correct++;
 		activity_results.result="correct";
-		if(session_data.type!="test"){
-			audio_sprite.playSpriteRange("zfx_correct")
-			document.getElementById("answer_result").appendChild(media_objects.images['correct.png'])
-			score_correct.innerHTML=num_correct_activities
+		if(session_data.mode!="test"){
+			audio_sprite.playSpriteRange("zfx_correct");
+			document.getElementById("answer_result").appendChild(media_objects.images['correct.png']);
+			score_correct.innerHTML=num_correct;
 		}
 	}else{
 		activity_results.result="incorrect";
-		if(session_data.type!="test"){
-			audio_sprite.playSpriteRange("zfx_wrong",function(){console.log('wrong already played')})	
-			document.getElementById("answer_result").appendChild(media_objects.images['wrong.png'])
+		if(session_data.mode!="test"){
+			audio_sprite.playSpriteRange("zfx_wrong",function(){console.log('wrong already played')});
+			document.getElementById("answer_result").appendChild(media_objects.images['wrong.png']);
 		}
 	}
 	session_data.details.push(activity_results);
-	session_data.num_answered_activities++;
-	score_answered.innerHTML=session_data.num_answered_activities;
+	session_data.num_answered++;
+	score_answered.innerHTML=session_data.num_answered;
 	setTimeout(function(){nextActivity()}, 2000) // fire next activity after 2 seconds (time for displaying img and playing the sound)
 }
 
@@ -430,7 +417,7 @@ function nextActivity(){
 	if(remaining_rand_activities.length==0){	
 		canvas_zone.innerHTML='NO HAY MAS ACTIVIDADES. FIN, sending...';
 		// calculate result
-		session_data.result=session_data.num_correct_activities/session_data.num_answered_activities
+		if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
 		send_session_data()
 	}else{		
 		$('#remaining_activities_num')[0].innerHTML=""+(remaining_rand_activities.length-1)	
@@ -438,32 +425,23 @@ function nextActivity(){
 			activity(0);
 		}else{
 			activity(Math.floor(Math.random()*remaining_rand_activities.length));
-		}		
+		}
 	}
 }
 
 function send_session_data(){
-	
-	console.log(JSON.stringify(session_data));
-	/*msg=$.getJSON(
-		backend_url+'ajaxdb.php?action=send_session_data&user='+session_user+'&subject='+session_subject+'&reference='+game_type+'&age='+session_subject_age+'&num_answered='+num_answered_activities+'&num_correct='+num_correct_activities+'&level='+session_level +'&duration='+session_duration+'&timestamp='+session_timestamp_str,
-		function(data) { canvas_zone.innerHTML+='<br />Server message: '+data.msg+'<br /><br />'+other_str+'<br /><button id="go-back" onclick="splash_screen()">Volver</button>'; }
-		);*/
-	
-	
-  // construct an HTTP request
+  console.log(JSON.stringify(session_data));
   var xhr = new XMLHttpRequest();
-  xhr.open('get', backend_url+'ajaxdb.php',true);
-  xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+  xhr.open("POST", "http://www.centroafan.com/afan-app/www/"+backend_url+'ajaxdb.php',true);
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  xhr.responsetype="json";
+  xhr.send("action=send_session_data_post&json_string="+(JSON.stringify(session_data))); 
 
-  // send the collected data as JSON
-  xhr.send(JSON.stringify(session_data));
-
-  xhr.onloadend = function (data) {
+  xhr.onload = function () {
+    var data=JSON.parse(this.responseText);
     canvas_zone.innerHTML+='<br />Server message: '+data.msg+'<br /><br />\
     <br /><button id="go-back" onclick="splash_screen()">Volver</button>';
   };
-
 
 }
 

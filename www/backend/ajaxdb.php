@@ -4,7 +4,7 @@ date_default_timezone_set('Europe/Madrid');
 
 function get_value($name){
 	if( !isset($_REQUEST[$name]) ){
-		$output['msg']="Error: $name not set. REQUEST: ".$_REQUEST;
+		$output['msg']="Error: $name not set. REQUEST: ".implode(',',$_REQUEST);
 		header('Content-type: application/json');
 		echo json_encode( $output );
 		exit();
@@ -64,7 +64,8 @@ if ($action == "get_subjects"){
 	$age=get_value("age");
 	$num_answered=get_value("num_answered");
 	$num_correct=get_value("num_correct");
-	$result= ((int) $num_correct) / ((int) $num_answered);
+	$result=0;
+	if(((int) $num_answered)!=0) $result= ((int) $num_correct) / ((int) $num_answered);
 	$level=get_value("level");
 	$duration=get_value("duration");
 	$timestamp=get_value("timestamp");
@@ -80,29 +81,37 @@ if ($action == "get_subjects"){
 	//print_r($output);
 
 }else if ($action == "send_session_data_post"){
-	/*$output["msg"]="success";
-	$reference=get_value("reference");
-	$user=get_value("user");
-	$subject=get_value("subject");
-	$age=get_value("age");
-	$num_answered=get_value("num_answered");
-	$num_correct=get_value("num_correct");
-	$result= ((int) $num_correct) / ((int) $num_answered);
-	$level=get_value("level");
-	$duration=get_value("duration");
-	$timestamp=get_value("timestamp");
+	$str_json=json_decode($_POST['json_string'],true);
+	$output["msg"]="success";
+	$type=$str_json["type"];
+	$mode=$str_json["mode"];
+	$user=$str_json["user"];
+	$subject=$str_json["subject"];
+	$age=$str_json["age"];
+	$num_answered=$str_json["num_answered"];
+	$num_correct=$str_json["num_correct"];
+	$result=0;
+	if(((int) $num_answered)!=0) $result= ((int) $num_correct) / ((int) $num_answered);
+	$level=$str_json["level"];
+	$duration=$str_json["duration"];
+	$timestamp=$str_json["timestamp"];
 
-	$sQuery = "INSERT INTO sessions(reference,user,subject,age,num_answered,num_correct,result,level,duration,timestamp)  VALUES ('$reference','$user','$subject','$age','$num_answered','$num_correct','$result','$level','$duration','$timestamp');"; 
+	$error=0;
+	
+	$sQuery = "INSERT INTO sessions(type,mode,user,subject,age,num_answered,num_correct,result,level,duration,timestamp)  VALUES ('$type','$mode','$user','$subject','$age','$num_answered','$num_correct','$result','$level','$duration','$timestamp');"; 
 	$rResult = mysql_query( $sQuery, $db_connection );
-	if(!$rResult){ $output["msg"]=mysql_error()." -- ".$sQuery; }
-	else{ $output["msg"]="Success. Data session stored in the server. --"; }	
-	//else{$output='{"msg":"Success. Data session stored in the server. -- '.$sQuery.'"}';}	
+	if(!$rResult){ $output["msg"]=mysql_error()." -- ".$sQuery; $error=1;}
+	else{ 
+		$session_id=mysql_insert_id();
+		foreach ($str_json["details"] as $detail){
+			$sQuery = "INSERT INTO session_activities(type,mode,user,subject,session,activity,choice,result,level,duration,timestamp)  VALUES ('$type','$mode','$user','$subject','$session_id','".$detail["activity"]."','".$detail["choice"]."','".$detail["result"]."','$level','".$detail["duration"]."','".$detail["timestamp"]."')"; 
+			$rResult = mysql_query( $sQuery, $db_connection );
+			if(!$rResult){ $output["msg"]=mysql_error()." -- ".$sQuery; $error=1; break;}
+		}
+		if($error==0) $output["msg"]="Success. Data session stored in the server. --"; // -- '.$sQuery.'"}';}
+	}
 
-	$output['msg'].=get_value("details");*/
 
-	// WRITE A LOG IN A FILE, TEST WITH JQUERY AJAX
-
-	$output["msg"]="hoooola ".get_value("type");
 	header('Content-type: application/json');
 	echo json_encode( $output );
 	//print_r($output);
@@ -123,7 +132,8 @@ if ($action == "get_subjects"){
 	while ( $aRow = mysql_fetch_array( $rResult ) )	{
 		$output['sessions'][]=array();
 		$output['sessions'][$session_count]['id'] = $aRow['id'];
-		$output['sessions'][$session_count]['reference']=$aRow['reference'];
+		$output['sessions'][$session_count]['type']=$aRow['type'];
+		$output['sessions'][$session_count]['mode']=$aRow['mode'];
 		$output['sessions'][$session_count]['age']=$aRow['age'];
 		$output['sessions'][$session_count]['num_answered']=$aRow['num_answered'];
 		$output['sessions'][$session_count]['num_correct']=$aRow['num_correct'];
