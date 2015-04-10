@@ -55,7 +55,8 @@ if ($action == "get_subjects"){
 	$rResult = mysql_query( $sQuery, $db_connection );
 	if(!$rResult){header('HTTP/1.1 500 Internal Server Error');die("Error: Exists. ".mysql_error()." -- ".$sQuery);}		
 	header('Content-type: application/json');
-	echo json_encode( '{"success":"$user"}' );
+	$output["success"]=$alias;
+	echo json_encode( $output );
 }else if ($action == "send_session_data"){
 	$output["msg"]="success";
 	$reference=get_value("reference");
@@ -125,23 +126,54 @@ if ($action == "get_subjects"){
 	$output['general'] = array();
 	$output['general']['user'] = $user;
 	$output['general']['subject'] = $subject;
-	$output['sessions'] = array();
+	$output['elements'] = array();
 
 	$rResult = mysql_query( $sQuery, $db_connection ) or die(mysql_error());
-	$session_count=0;	
+	$element_count=0;	
 	while ( $aRow = mysql_fetch_array( $rResult ) )	{
-		$output['sessions'][]=array();
-		$output['sessions'][$session_count]['id'] = $aRow['id'];
-		$output['sessions'][$session_count]['type']=$aRow['type'];
-		$output['sessions'][$session_count]['mode']=$aRow['mode'];
-		$output['sessions'][$session_count]['age']=$aRow['age'];
-		$output['sessions'][$session_count]['num_answered']=$aRow['num_answered'];
-		$output['sessions'][$session_count]['num_correct']=$aRow['num_correct'];
-		$output['sessions'][$session_count]['result']=$aRow['result'];
-		$output['sessions'][$session_count]['level']=$aRow['level'];
-		$output['sessions'][$session_count]['duration']=$aRow['duration'];
-		$output['sessions'][$session_count]['timestamp']=$aRow['timestamp'];
-		$session_count++;		
+		$output['elements'][]=array();
+		$output['elements'][$element_count]['id'] = $aRow['id'];
+		$output['elements'][$element_count]['type']=$aRow['type'];
+		$output['elements'][$element_count]['mode']=$aRow['mode'];
+		$output['elements'][$element_count]['age']=$aRow['age'];
+		$output['elements'][$element_count]['num_answered']=$aRow['num_answered'];
+		$output['elements'][$element_count]['num_correct']=$aRow['num_correct'];
+		$output['elements'][$element_count]['result']=$aRow['result'];
+		$output['elements'][$element_count]['level']=$aRow['level'];
+		$output['elements'][$element_count]['duration']=$aRow['duration'];
+		$output['elements'][$element_count]['timestamp']=$aRow['timestamp'];
+		$element_count++;		
+	}
+
+	header('Content-type: application/json');
+	echo json_encode( $output );
+	//print_r($output);
+
+}else if ($action == "get_result_detail"){
+	$session=get_value("session");
+
+	$sQuery = "SELECT * FROM session_activities WHERE session='$session';";
+	//echo "query: $sQuery ";
+	$output['general'] = array();
+	$output['general']['session'] = $session;
+	$output['elements'] = array();
+
+	$rResult = mysql_query( $sQuery, $db_connection ) or die(mysql_error());
+	$element_count=0;	
+	while ( $aRow = mysql_fetch_array( $rResult ) )	{
+		$output['elements'][]=array();
+		$output['elements'][$element_count]['id'] = $aRow['id'];
+		$output['elements'][$element_count]['type']=$aRow['type'];
+		$output['elements'][$element_count]['mode']=$aRow['mode'];
+		$output['elements'][$element_count]['user']=$aRow['user'];
+		$output['elements'][$element_count]['subject']=$aRow['subject'];
+		$output['elements'][$element_count]['activity']=$aRow['activity'];
+		$output['elements'][$element_count]['choice']=$aRow['choice'];
+		$output['elements'][$element_count]['result']=$aRow['result'];
+		$output['elements'][$element_count]['level']=$aRow['level'];
+		$output['elements'][$element_count]['duration']=$aRow['duration'];
+		$output['elements'][$element_count]['timestamp']=$aRow['timestamp'];
+		$element_count++;		
 	}
 
 	header('Content-type: application/json');

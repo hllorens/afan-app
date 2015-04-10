@@ -26,4 +26,24 @@ progress {
 }
 /* -------------------------------------------------------------------------- */
 
+/*FORM VALIDATION*/
+.errorMessages {
+    background-color: #f2dede;
+    border: 2px solid #eed3d7;
+    border-radius: 4px;
+    color: #b94a48;
+    display: none;
+    list-style-type: disc;
+    margin: 0 10px 15px;
+    padding: 8px 35px 8px 30px;
+}
+
+.errorMessages span {
+    font-weight: bold;
+}
+
+
+
+table { margin: 1em; border-collapse: collapse; }
+td, th { padding: .3em;  } 
 

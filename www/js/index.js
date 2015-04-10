@@ -19,14 +19,14 @@ var sounds = [
 var json_activities;
 var json_test;
 var json_training;
-$.getJSON("../data/test1.tsv.json", function(json) {
-    //console.log(json)
-    json_test=json; 
+
+ajax_request_json("../data/test1.tsv.json",function(json){
+    json_test=json; //console.log(json)
 });
-$.getJSON("../data/training1-short.json", function(json) { //training1
-    //console.log(json)
-    json_training=json; 
+ajax_request_json("../data/training1-short.json", function(json) { //training1
+    json_training=json; //console.log(json)
 });
+
 json_activities=json_training;
 
 // if media not found locally, use centroafan.com
@@ -85,9 +85,9 @@ remaining_rand_activities=[];
 correct_answer='undefined'
 current_activity_type='undefined' // to avoid loading all the html
 zone_sound=null
-canvas_zone=$('#zone_canvas')[0]
-score_correct=$('#current_score_num')[0]
-score_answered=$('#current_answered_num')[0]
+canvas_zone=document.getElementById('zone_canvas')
+score_correct=document.getElementById('current_score_num')
+score_answered=document.getElementById('current_answered_num')
 activity_timer_element=document.getElementById('activity_timer_span')
 
 activity_timer=new ActivityTimer()
@@ -113,7 +113,8 @@ session_data={
 	details: []
 };
 
-subjects_select_elem="none"
+var subjects_select_elem="none"
+var user_subjects={};
 
 var exit_app=function(){
 		if(is_app){
@@ -126,20 +127,24 @@ var exit_app=function(){
 
 // See how to login and control session with js frontend... Use cookies (learn)
 	
-$(function () { // DOM ready
-	is_app=is_cordova()
-	if(is_app){
-	        document.addEventListener('deviceready', onDeviceReady, false);
-	}else{
-		onDeviceReady()
-	}
-});
+// DOM is ready because js is at the bottom of body
+is_app=is_cordova();
+//preventHistoryBack(); //you need cordova to prevent this on device button..
+if(is_app){
+		document.addEventListener('deviceready', onDeviceReady, false);
+}else{
+	onDeviceReady();
+}
+
 
 
 function select_fill_with_json(data,select_elem){
 	select_elem.innerHTML="";
-	$.each(data, function(key, val) {
-		select_elem.append('<option value="' + key + '">' + key + '</option>')})
+	for(var key in data){
+		if (data.hasOwnProperty(key)) {
+			select_elem.innerHTML+='<option value="' + key + '">' + key + '</option>';	
+		}
+	}
 }
 
 function onDeviceReady() {
@@ -157,6 +162,7 @@ function onDeviceReady() {
 
 
 function splash_screen(){
+	allowBackExit();
 	console.log('userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info)
 	console.log('not_loaded sounds: '+ResourceLoader.not_loaded['sounds'].length);
 	canvas_zone.innerHTML=' \
@@ -169,49 +175,76 @@ function splash_screen(){
 	<br /><button id="start-test-button" disabled="true">Test</button> \
 	<br /><button id="add-subject" disabled="true">Añadir Niño</button> \
 	<br /><button id="results" disabled="true" onclick="explore_results()">Resultados</button> \
-	<br /><button id="test-sample" onclick="send_sample_json_post()">Test sending json data post</button> \
 	<br /><br /><button id="exit" onclick="exit_app()">Salir</button> \
 	</div>\
-	'
+	';
+	//<br /><button id="test-sample" onclick="send_sample_json_post()">Test sending json data post</button> \
 
 
 	//document.getElementById("splash-logo-div").appendChild(media_objects.images['key.png'])
-	subjects_select_elem=$("#subjects-select")
-		var accept_function=function(){		
-			$.getJSON(
-			backend_url+'ajaxdb.php?action=add_subject&user='+$('#new-user').val()+'&alias='+$('#new-alias').val()+'&name='+$('#new-name').val()+'&birthdate='+$('#new-birthdate').val()+'&comments='+$('#new-comments').val(), 
+	subjects_select_elem=document.getElementById('subjects-select')
+	var accept_function=function(){
+		var myform=document.getElementById('my-form');
+		var myformsubmit=document.getElementById('my-form-submit');
+		if (!myform.checkValidity()){
+			console.log("form error");
+			// TODO se puede abstraer merjor...
+		    myform.removeEventListener("submit", formValidationSafariSupport);
+		    myform.addEventListener("submit", formValidationSafariSupport);
+
+		    myformsubmit.removeEventListener("click", showFormAllErrorMessages);
+		    myformsubmit.addEventListener("click", showFormAllErrorMessages);
+
+
+
+			myformsubmit.click(); // won't submit (invalid), but show errors
+		}else{
+			ajax_request_json(
+			backend_url+'ajaxdb.php?action=add_subject&user='+document.getElementById('new-user').value+'&alias='+document.getElementById('new-alias').value+'&name='+document.getElementById('new-name').value+'&birthdate='+document.getElementById('new-birthdate').value+'&comments='+document.getElementById('new-comments').value, 
 			function(data) {
+				var modal_text=document.getElementById("js-modal-window-text");
 				if(data['success']!='undefined'){
-					subjects_select_elem.append('<option value="' + data['success'] + '">' + data['success'] + '</option>')
-				}	
-				var elem_to_remove=document.getElementById("js-modal-window");
-				elem_to_remove.parentNode.removeChild(elem_to_remove);
+					//modal_text.innerHTML="Añadido con éxito!!";
+					subjects_select_elem.innerHTML+='<option value="' + data['success'] + '">' + data['success'] + '</option>';
+					var elem_to_remove=document.getElementById("js-modal-window");
+					//setTimeout(function(){
+					alert("Sujeto añadido con éxito");
+						elem_to_remove.parentNode.removeChild(elem_to_remove);
+						//}, 1000)
+				}else{
+					alert(JSON.stringify(data));
+				}
 			}
 			);
-			};
-	$.getJSON(
+		}
+	};
+	ajax_request_json(
 		backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user, 
 		function(data) {
+			user_subjects=data;
 			select_fill_with_json(data,subjects_select_elem); 
-			$("#start-button")[0].disabled=false; 
-			$("#start-test-button")[0].disabled=false;
-			$("#add-subject")[0].disabled=false;
-			$("#results")[0].disabled=false;
+			document.getElementById("start-button").disabled=false; 
+			document.getElementById("start-test-button").disabled=false;
+			document.getElementById("add-subject").disabled=false;
+			document.getElementById("results").disabled=false;
 			// MAL pq no se puede modificar el evento... lo que hay q hacer es un objeto game y prototiparlo
-			$("#start-button")[0].onclick=function(){session_data.mode="training";json_activities=json_training;game()};
-			$("#start-test-button")[0].onclick=function(){session_data.mode="test";json_activities=json_test;game()};
-			$("#add-subject")[0].onclick=function(){
+			document.getElementById("start-button").onclick=function(){session_data.mode="training";json_activities=json_training;game()};
+			document.getElementById("start-test-button").onclick=function(){session_data.mode="test";json_activities=json_test;game()};
+			document.getElementById("add-subject").onclick=function(){
 				var cancel_function=function(){
 					var elem_to_remove=document.getElementById("js-modal-window");
 					elem_to_remove.parentNode.removeChild(elem_to_remove);
 				};	
-				form_html='<form id="my-form"> \
-						<label>Usuario</label><input id="new-user" type="text" value="afan" /><br /> \
-						<label>Alias</label><input id="new-alias" type="text" value="" /><br /> \
-						<label>Nombre</label><input id="new-name" type="text" value="" /><br /> \
-						<label>Fecha Nac. (yyyy-mm-dd)</label><input id="new-birthdate" type="date" value="yyyy-mm-dd" /><br /> \
+				form_html='<form id="my-form" action="javascript:void(0);"> \
+					    <ul class="errorMessages"></ul>\
+						<label for="new-user">Usuario</label><input id="new-user" type="text" value="afan" /><br /> \
+						<label for="new-alias">Alias</label><input id="new-alias" type="text" required="required" /><br /> \
+						<label for="new-name">Nombre</label><input id="new-name" type="text" required="required" /><br /> \
+						<label for="new-birthdate">Fecha Nac.</label><input id="new-birthdate" type="date" placeholder="yyyy-mm-dd" required="required" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"  /><br /> \
 						<label>Comentarios</label><textarea id="new-comments"></textarea><br /> \
-						</form>';
+						<input id="my-form-submit" type="submit" style="visibility:hidden;display:none" />\
+						</form>'; //title="Error: yyyy-mm-dd"
+						
 				open_js_modal_alert("Añadir Niño",form_html,accept_function,cancel_function)
 			};
 		});
@@ -220,8 +253,8 @@ function splash_screen(){
 		
 }
 
-var send_sample_json_post=function(){
-	session_data.subject=subjects_select_elem[0].options[subjects_select_elem[0].selectedIndex].value;
+/*var send_sample_json_post=function(){
+	session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
   var xhr = new XMLHttpRequest();
   xhr.open("POST", backend_url+'ajaxdb.php',true);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -229,9 +262,10 @@ var send_sample_json_post=function(){
   xhr.onload=show_results;
  session_data.details=[{"activity":"ala","timestamp":"2015-3-22 20:22:31","duration":6,"choice":"ala","result":"correct"},{"activity":"carta","timestamp":"2015-3-22 20:22:37","duration":4,"choice":"cabra","result":"incorrect"},{"activity":"casa","timestamp":"2015-3-22 20:22:43","duration":3,"choice":"carta","result":"incorrect"},{"activity":"mesa","timestamp":"2015-3-22 20:22:48","duration":3,"choice":"seta","result":"incorrect"},{"activity":"koala","timestamp":"2015-3-22 20:22:55","duration":4,"choice":"jaula","result":"incorrect"},{"activity":"banyera","timestamp":"2015-3-22 20:23:03","duration":6,"choice":"banyera","result":"correct"}];
   xhr.send("action=send_session_data_post&json_string="+(JSON.stringify(session_data))); 
-};
+};*/
 
 var show_results=function(){
+	preventBackExit();
 	var data=JSON.parse(this.responseText);
     canvas_zone.innerHTML='<br />Server message: <pre>'+data.msg+'</pre><br /><br />\
     <br /><button id="go-back" onclick="splash_screen()">Volver</button>';
@@ -239,7 +273,8 @@ var show_results=function(){
 
 
 var explore_results=function(){
-	session_data.subject=subjects_select_elem[0].options[subjects_select_elem[0].selectedIndex].value;
+	preventBackExit();
+	session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
 	canvas_zone.innerHTML=' \
 	<div class="text-center">\
 	<br /><h2>Resultados</h2> \
@@ -247,7 +282,7 @@ var explore_results=function(){
 	<br /><br /><button id="go-back" onclick="splash_screen()">Volver</button> \
 	</div>\
 	';
-	$.getJSON(
+	ajax_request_json(
 		backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject, 
 		function(data) { 
 			//alert(JSON.stringify(data,null,2));
@@ -256,18 +291,18 @@ var explore_results=function(){
 			//for(var i=0;i<data.sessions.length;i++){
 			//	table_sessions+="<tr><td>"+data.sessions[i].id+"</td><td>"+data.sessions[i].timestamp+"</td><td>"+data.sessions[i].reference+"</td><td>"+data.sessions[i].age+"</td><td>"+data.sessions[i].duration+"</td><td>"+(data.sessions[i].result*100)+"%</td><td id=\"row-"+data.sessions[i].id+"\" onclick=\"alert(this.id)\">x</td></tr>";
 			//}
-			$("#results-div")[0].innerHTML="user: "+data.general.user+" - subject: <b>"+data.general.subject+"</b><br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
+			document.getElementById("results-div").innerHTML="user: "+data.general.user+" - subject: <b>"+data.general.subject+"</b><br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
 			//<thead><tr><td>id</td><td>timestamp</td><td>reference</td><td>age</td><td>duration</td><td>result</td><td>actions</td></tr></thead><tbody>"+table_sessions+"</tbody>
 			//"<pre>"+JSON.stringify(data,null,2)+"</pre>"
-			results_table=$("#results-table")[0];
+			results_table=document.getElementById("results-table");
 			//results_table.DataTableSimple( {  // to make this possible you have to extend all Table DOM elements with this function
 			// e.g., ...table.prototype.DataTableSimple=DataTableSimple;
 			DataTableSimple.call(results_table, {
-				data: data.sessions,
+				data: data.elements,
 				pagination: 5,
 				columns: [
-					{ data: 'id' },
-					{ data: 'timestamp' },
+					//{ data: 'id' },
+					{ data: 'timestamp', special: 'link_session_details' },
 					{ data: 'type' },
 					{ data: 'mode' },
 					{ data: 'age' },
@@ -278,9 +313,37 @@ var explore_results=function(){
 		});	
 };
 
+var explore_result_detail=function(session_id){
+	preventBackExit();
+	canvas_zone.innerHTML=' \
+	<div class="text-center">\
+	<br /><h2>Resultado: '+session_id+'</h2> \
+	<div id="results-div">aquí los resultados</div> \
+	<br /><br /><button id="go-back" onclick="explore_results()">Volver</button> \
+	</div>\
+	';
+	ajax_request_json(
+		backend_url+'ajaxdb.php?action=get_result_detail&session='+session_id, 
+		function(data) { 
+			document.getElementById("results-div").innerHTML="session: "+data.general.session+" - subject: "+data.elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
+			results_table=document.getElementById("results-table");
+			DataTableSimple.call(results_table, {
+				data: data.elements,
+				pagination: 10,
+				columns: [
+					//{ data: 'id' },
+					{ data: 'activity' },
+					{ data: 'choice' },
+					{ data: 'result' },
+					{ data: 'duration',  format: 'time_from_seconds'}
+				]
+			} );
+		});	
+};
 
 
 function game(){
+	preventBackExit();
 	if(ResourceLoader.not_loaded['sounds'].length!=0){	
 		console.log(ResourceLoader.not_loaded['sounds'].length+"  "+ResourceLoader.not_loaded['sounds']);
 		ResourceLoader.load_media_wait_for_lazy_audio(game);
@@ -303,7 +366,8 @@ function game(){
 
 function start_activity_set(){
 	document.body.removeChild(title_modal_window)
-	session_data.subject=subjects_select_elem[0].options[subjects_select_elem[0].selectedIndex].value
+	session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
+	session_data.age=calculateAge(user_subjects[session_data.subject]); 
 	var timestamp=new Date();
 	session_data.timestamp=timestamp.getFullYear()+"-"+
 		pad_string((timestamp.getMonth()+1),2,"0") + "-" + pad_string(timestamp.getDate(),2,"0") + " " +
@@ -313,7 +377,7 @@ function start_activity_set(){
 	session_data.num_answered=0;
 	score_answered.innerHTML=session_data.num_answered;
 	remaining_rand_activities=json_activities.slice();
-	$('#remaining_activities_num')[0].innerHTML=""+(remaining_rand_activities.length-1)	
+	document.getElementById('remaining_activities_num').innerHTML=""+(remaining_rand_activities.length-1)	
 	activity(Math.floor(Math.random()*remaining_rand_activities.length))
 }
 
@@ -335,7 +399,7 @@ function activity(i){
 		while(used_answers.indexOf(use) != -1) use=Math.floor(Math.random() * USE_ANSWERS);
 		//answers_div.innerHTML+='<div id="answer'+i+'" class="hover_red_border" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"></div>'
 		var answer_i=current_activity_data['answers'][use];
-		answers_div.innerHTML+='<div id="answer'+i+'" class="hover_red_border"  style="float:left;"></div>'; //onclick="check_correct(this,correct_answer)"
+		answers_div.innerHTML+='<div id="answer'+i+'" onclick=\"check_correct(this.firstChild,correct_answer)\" class="hover_red_border"  style="float:left;"></div>'; //onclick="check_correct(this,correct_answer)"
 		//if(media_objects.images[current_activity_data['answers'][use]+'.png']==undefined){
 		if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+current_activity_data['answers'][use])){
 			console.log("ERROR: .wordimage-"+current_activity_data['answers'][use]+" not found in wordimg-sprite.css.");
@@ -343,19 +407,22 @@ function activity(i){
 		}else{	
 			//document.getElementById("answer"+i).appendChild(media_objects.images[current_activity_data['answers'][use]+'.png']);		
 			//document.getElementById("answer"+i).className += " wordimage wordimage-"+current_activity_data['answers'][use];		
-			document.getElementById("answer"+i).innerHTML += "<div onclick=\"check_correct(this,correct_answer)\" class=\"wordimage wordimage-"+current_activity_data['answers'][use]+"\"></div>";		
+			document.getElementById("answer"+i).innerHTML += "<div class=\"wordimage wordimage-"+current_activity_data['answers'][use]+"\"></div>";		
 		}
 		used_answers[used_answers.length]=use
 	 }
 	
-	zone_sound=$('#sound')[0]
+	zone_sound=document.getElementById('sound');
 	zone_sound.innerHTML="starting..."
 	//sound_array=current_activity_data['sounds'];
-	SoundChain.play_sound_arr(current_activity_data['sounds'],audio_sprite);
+	setTimeout(function(){
+		SoundChain.play_sound_arr(current_activity_data['sounds'],audio_sprite);
+		activity_timer.start();
+	}, 2000);
 	//TODO provide a callback function to show re-play and to make elements clikable
 	// show playing...
 	// show replay callback zone_sound.innerHTML='<button onclick="play_sound_arr(current_activity_data.sounds)">re-play</button>'
-	activity_timer.start()
+
 }
 
 
@@ -397,7 +464,7 @@ function check_correct(clicked_answer,correct_answer){
 		if(session_data.mode!="test"){
 			audio_sprite.playSpriteRange("zfx_correct");
 			document.getElementById("answer_result").appendChild(media_objects.images['correct.png']);
-			score_correct.innerHTML=num_correct;
+			score_correct.innerHTML=session_data.num_correct;
 		}
 	}else{
 		activity_results.result="incorrect";
@@ -409,7 +476,9 @@ function check_correct(clicked_answer,correct_answer){
 	session_data.details.push(activity_results);
 	session_data.num_answered++;
 	score_answered.innerHTML=session_data.num_answered;
-	setTimeout(function(){nextActivity()}, 2000) // fire next activity after 2 seconds (time for displaying img and playing the sound)
+	var waiting_time=500;
+	if(session_data.mode!="test") waiting_time=2000; // fire next activity after 2 seconds (time for displaying img and playing the sound)
+	setTimeout(function(){nextActivity()}, waiting_time) 
 }
 
 function nextActivity(){
@@ -420,7 +489,7 @@ function nextActivity(){
 		if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
 		send_session_data()
 	}else{		
-		$('#remaining_activities_num')[0].innerHTML=""+(remaining_rand_activities.length-1)	
+		document.getElementById('remaining_activities_num').innerHTML=""+(remaining_rand_activities.length-1)	
 		if(remaining_rand_activities.length==1){
 			activity(0);
 		}else{

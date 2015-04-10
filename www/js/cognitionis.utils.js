@@ -243,7 +243,7 @@ function open_js_modal_alert_demo(){  //(title_text, text_text){
 	document.body.appendChild(modal_window)
 }
 
-
+// it would be great to objectify this to easily interact with it (e.g., modify text)
 function open_js_modal_alert(title_text, text_text, accept_function, cancel_function){
 	var modal_window=document.createElement("div")
 	modal_window.id="js-modal-window"; modal_window.className="js-modal-window"
@@ -261,6 +261,7 @@ function open_js_modal_alert(title_text, text_text, accept_function, cancel_func
 	title_elem.innerHTML=title_text
 
 	var text_elem=document.createElement('p')
+	text_elem.id="js-modal-window-text";
 	text_elem.innerHTML=text_text
 
 
@@ -500,7 +501,7 @@ var SoundChain={
 Data tables
 <table cellpadding="0" cellspacing="0" border="0" class="display" id="example"></table>
 
-$('#example').DataTable( {
+document.getElementById('example').DataTable( {
     data: data,
     columns: [
         { data: 'name' },
@@ -520,9 +521,11 @@ var DataTableSimple = function (table_config){
 	if(table_config.hasOwnProperty('columns')){
 		var table_row=table_head.insertRow(table_head.rows.length);
 		for(var table_column=0;table_column<table_config.columns.length;table_column++){
-				var table_cell  = table_row.insertCell(table_column);
+				//var table_cell  = table_row.insertCell(table_column);
+				var th = document.createElement('th');
 				var cell_text  = document.createTextNode(table_config.columns[table_column].data);
-				table_cell.appendChild(cell_text);
+				th.appendChild(cell_text);
+				table_row.appendChild(th);
 		}
 	}
 	if(table_config.hasOwnProperty('data')){
@@ -532,42 +535,54 @@ var DataTableSimple = function (table_config){
 			for(var table_column=0;table_column<table_config.columns.length;table_column++){
 				var table_cell  = table_row.insertCell(table_column);
 				var text=table_config.data[i][table_config.columns[table_column].data];
-				if (table_config.columns[table_column].hasOwnProperty('format') && DataTableSimple.formats[table_config.columns[table_column].format]!=='undefined'){
+				if (table_config.columns[table_column].hasOwnProperty('format') && DataTableSimple.formats.hasOwnProperty(table_config.columns[table_column].format)){
 					//alert (table_config.columns[table_column].format);
 					text=DataTableSimple.formats[table_config.columns[table_column].format](text); 
 				}
 				var cell_text  = document.createTextNode(text);
 				table_cell.appendChild(cell_text);
+				if (table_config.columns[table_column].hasOwnProperty('special') && DataTableSimple.specials[table_config.columns[table_column].special]!=='undefined'){
+					//alert (table_config.columns[table_column].format);
+					table_cell.innerHTML=DataTableSimple.specials[table_config.columns[table_column].special](table_config, i); 
+				}
 			}
 		}
 	}
 	if(table_config.hasOwnProperty('pagination') && isInteger(table_config.pagination) && table_config.pagination > 0){
-		$('#'+this.id).after('<div id="'+this.id+'-nav"></div>');	
+		this.insertAdjacentHTML('afterend', '<div id="'+this.id+'-nav"></div>');
+		var tabpagination=document.getElementById(this.id+'-nav');
 		var rowsShown = table_config.pagination;
 		var rowsTotal = table_config.data.length;
 		var numPages = rowsTotal/rowsShown;
-		for(i = 0;i < numPages;i++) {
+		for(var i=0;i < numPages;i++) {
 		    var pageNum = i + 1;
-		    $('#'+this.id+'-nav').append('<a href="#" rel="'+i+'">'+pageNum+'</a> ');
+		    tabpagination.innerHTML +='<a href="#" rel="'+i+'">'+pageNum+'</a> ';
 		}
-		$('#'+this.id+' tbody tr').hide();
-		$('#'+this.id+' tbody tr').slice(0, rowsShown).show();
-		$('#'+this.id+'-nav a:first').addClass('active');
-		$('#'+this.id+'-nav a').bind('click', function(){
-		    $('#'+this.id+'-nav a').removeClass('active');
-		    $(this).addClass('active');
-		    var currPage = $(this).attr('rel');
-		    var startItem = currPage * rowsShown;
-		    var endItem = startItem + rowsShown;
-			//console.log(currPage+"  "+startItem+"-"+endItem);
-		    $('#'+this.parentNode.id.replace("-nav","")+' tbody tr')
-					.css('opacity','0.0').hide().slice(startItem, endItem)
-					.css('display','table-row').animate({opacity:1}, 300);
-		});
+		var tr_rows=document.querySelectorAll('#'+this.id+' tbody tr');
+		for(var i=0;i<tr_rows.length;i++){tr_rows[i].style.display="none";}
+		for(var i=0;i<tr_rows.length;i++){tr_rows[i].style.display=""; if(i>rowsShown) break;}
+		document.querySelector('#'+this.id+'-nav a').classList.add('active');
+		
+		tabpaglinks=document.querySelectorAll('#'+this.id+'-nav a');
+		for(var i=0;i<tabpaglinks.length;i++){
+			tabpaglinks[i].addEventListener('click', function(){
+				var tabpaglinks=document.querySelectorAll('#'+this.id+'-nav a');
+				for(var i=0;i<tabpaglinks.length;i++){tabpaglinks[i].classList.remove('active');}
+				this.classList.add('active');
+				var currPage = this.rel;
+				var startItem = currPage * rowsShown;
+				var endItem = startItem + rowsShown;
+				//console.log(currPage+"  "+startItem+"-"+endItem);
+				var tr_rows=document.querySelectorAll('#'+this.parentNode.id.replace("-nav","")+' tbody tr');
+				for(var i=0;i<tr_rows.length;i++){tr_rows[i].style.display="none";}
+				for(var i=startItem;i<tr_rows.length;i++){tr_rows[i].style.display="";if(i>endItem) break;}
+			});
+		}
 	}
 	
 };
 DataTableSimple.formats={};
+DataTableSimple.specials={};
 DataTableSimple.formats.percentage_int=function (data){
 	if(data==='undefined') return "-";
 	data=data*100;
@@ -576,6 +591,12 @@ DataTableSimple.formats.percentage_int=function (data){
 DataTableSimple.formats.time_from_seconds=function (data){
 	if(data==='undefined') return "-";
 	return pad_string( (data / 3600) >> 0,2,"0")+":"+pad_string( (data / 60) >> 0,2,"0")+":"+pad_string(data % 60,2,"0")
+};
+DataTableSimple.specials.link_session_details=function (table_config,i){
+	if(table_config==='undefined' || i==='undefined') return "error!";
+	var id=table_config.data[i].id;
+	var text=table_config.data[i].timestamp;
+	return '<a href="javascript:void(0)" onclick="explore_result_detail(\''+table_config.data[i].id+'\')">'+text+'</a>';
 };
 
 
@@ -595,3 +616,166 @@ function selectorExistsInCSS(styleSheetName, selector) {
     }
     return false;
 }
+
+
+var showFormAllErrorMessages = function() {
+	var form=this.form;	
+	var errorList = form.getElementsByClassName("errorMessages")[0];
+    errorList.innerHTML="";
+
+    // Find all invalid fields within the form.
+    var invalidFields = form.querySelectorAll(":invalid");
+	if(invalidFields.length!=0){
+		for(var i=0;i<invalidFields.length;i++){
+		    // Find the field's corresponding label
+		    var label = form.querySelector( "label[for=" + invalidFields[i].id + "] ");
+		    // Opera incorrectly does not fill the validationMessage property.
+		    var message = invalidFields[i].validationMessage || 'Invalid value.';
+		    errorList.innerHTML+="<li><span>" + label.innerHTML + "</span>: " + message + "</li>";
+			invalidFields[i].removeEventListener("keyup", showFormAllErrorMessagesOnChange);
+		    invalidFields[i].addEventListener("keyup", showFormAllErrorMessagesOnChange);			
+
+		}
+		errorList.style.display = "block"; /*show*/
+	}else{errorList.style.display = "none"; /*hide*/}
+};
+
+// To be added to form (on 'submit')
+var formValidationSafariSupport= function( event ) {
+	if ( this.checkValidity && !this.checkValidity() ) {
+	    this.querySelector( ":invalid" )[0].focus(); // Optional
+	    event.preventDefault();
+	}
+}
+
+/* To be added to each input on validable all messages forms*/
+var showFormAllErrorMessagesOnChange=function( event ) {
+    var type = this.type;
+    if ( /date|email|month|number|search|tel|text|time|url|week/.test ( type ) ){
+      //&& event.keyCode == 13 ) { // stands for 'return' or 'enter'
+        showFormAllErrorMessages.call(this);
+    }
+}
+
+
+var calculateAge=function (dateString) {
+    var today = new Date();
+    var birthDate = new Date(dateString);
+    var age = today.getFullYear() - birthDate.getFullYear();
+    var m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+}
+
+//window.addEventListener("navigate", function(event,data){alert("navigate!");preventBack(event,data)});
+//window.addEventListener('android:back',function(e) {alert("android back"); e.preventDefault();});
+
+// cordova/phonegap, it is necessary to have the native code... and access to 
+// these events, it can be done with just javascript...
+document.addEventListener("backbutton", onBackKeyDown, false);
+function onBackKeyDown(e) {
+  alert("cordova back key down");
+  e.preventDefault();
+}
+
+//keycode 27?
+// event.keyCode == 27 //thats for escape 
+// event.keyCode == 8 // backspace
+//13 enter
+/*document.addEventListener("keydown", keyDownTextField, false);
+function keyDownTextField(e) {
+  if(e.keyCode==27) {
+  alert("You hit the esc key.");
+  }
+	console.log("keydown");
+}*/
+
+/* Prevent browser and mobile back button 
+var preventBack=function (event, data) {
+  var direction = data.state.direction;
+  if (direction == 'back') {
+		event.preventDefault();
+		confirm_on_back();
+  }
+  //if (direction == 'forward') { do something else}
+}*/
+
+
+var confirm_on_back=function(){
+	var r=confirm("Seguro que quieres cancelar?");
+	if(r==true){
+		alert("cancelando...");
+		return true;
+	}else{
+		return false;
+	}
+}
+
+// does not seem to work for mobile..., you need cordova/phonegap to control
+// device buttons behavior
+var history_api = typeof history.pushState !== 'undefined' // optional
+function preventHistoryBack(){
+	console.log("preventing history back");
+	if ( history_api ) history.pushState(null, '', '#no-'); // optional
+	else location.hash='#no-'; // push a new history state (limit)
+	if ( history_api ) history.pushState(null, '', '#_'); //optional 
+	else location.hash='#_'; // push another new history state (current)
+	window.onhashchange=function(){
+		if(location.hash == '#no-' && confirm_on_back()==false){
+			if ( history_api ) history.pushState(null, '', '#_'); //optional 
+			location.hash='#_'; // #_ removed, we are at #no- so push #_ again
+		} 
+	}
+}
+
+var confirmOnPageExit = function (e) {
+    // If we haven't been passed the event get the window.event
+    e = e || window.event;
+    // Standardization/security:
+    //  most browsers ignore msg and use a localized standard msg
+    var msg = 'Desea salir?'; 
+    // For IE6-8 and Firefox prior to version 4
+    if (e) { e.returnValue = msg;  }
+    // For Chrome, Safari, IE8+ and Opera 12+
+    return msg;
+};
+
+// Turn it on - assign the function that returns the string
+var preventBackExit=function(){
+	window.onbeforeunload = confirmOnPageExit;
+}
+// Turn it off - remove the function entirely
+var allowBackExit=function(){
+	window.onbeforeunload = null;
+}
+
+// BASIC AJAX
+// Abstraction (type and method are optional)
+function ajax_request(url, callback, type, method) {
+	if(typeof(method)==="undefined") method = "GET";
+	if(typeof(type)==="undefined") type = "text";
+	var xhr=new XMLHttpRequest();
+	xhr.responsetype=type;
+	xhr.onreadystatechange = function(){
+		if (xhr.readyState ===4) { // XMLHttpRequest.DONE value
+			if (xhr.status === 200) {
+	            if(type=="json"){
+	                callback(JSON.parse(xhr.responseText));
+				}else{
+	                callback(xhr.responseText);
+				}
+			} else {
+				alert("AJAX ERROR: "+xhr.status);
+			}
+		}
+	}
+	xhr.open(method, url, true);
+	xhr.send()
+}
+
+function ajax_request_json(url, callback) {ajax_request(url,callback,"json");}
+
+
+
