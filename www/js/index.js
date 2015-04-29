@@ -1,39 +1,40 @@
 
 // MEDIA
 var images = [
-//"http://www.centroafan.com/afan-app-media/img/words/abrigo.png",
+"../../afan-app-media/img/spacer158.png",
 "../../afan-app-media/img/wordimg-sprite.png",
-"../../afan-app-media/img/key.png",
 "../../afan-app-media/img/correct.png",
 "../../afan-app-media/img/wrong.png"
-]
+];
 
 var sounds = [
-	// se puede usar dropbox https://dl.dropboxusercontent.com/u/188219/
-	//http://www.centroafan.com/afan-app-media/audio/...m4a"
+	// it can be dropbox https://dl.dropboxusercontent.com/u/188219/
+	//or absolute http://www.centroafan.com/afan-app-media/audio/...m4a"
+	// relative is the best to reuse it in the cordova app
 	"../../afan-app-media/audio/soundsSpriteVBR30-19kbps-100k.m4a"
-]
+];
 
+// Check for debug mode
+var QueryString=get_query_string();
+var debug=false;
+if(QueryString.hasOwnProperty('debug') && QueryString.debug=='true') debug=true;
 
-// ACTIVITIES
-var json_activities;
-var json_test;
-var json_training;
-
+// LOAD ACTIVITIES
+var json_test, json_training;
 ajax_request_json("../data/test1.tsv.json",function(json){
     json_test=json; //console.log(json)
 });
 ajax_request_json("../data/training1-short.json", function(json) { //training1
     json_training=json; //console.log(json)
 });
+var json_activities=json_training;
 
-json_activities=json_training;
-
-// if media not found locally, use centroafan.com
-// Otherwise use cognitionis 
-media_url='http://www.centroafan.com/afan-app-media/'
+// if media not found locally, url
+//image_src_start_exists=clicked_answer.indexOf("src=\""+media_url)
+//clicked_answer=clicked_answer.substring(image_src_start_exists+media_url.length+15,img_src_end)
+//media_url='http://www.centroafan.com/afan-app-media/'
 //backend_url='http://www.centroafan.com/afan-app-backend/'
-backend_url='backend/' //../backend
+var backend_url='backend/' //../backend
 
 
 var audio_object_sprite_ref={
@@ -67,12 +68,9 @@ var audio_object_sprite_ref={
 };
 
 
-
-
-
 // constants
-var USE_ANSWERS = 3
-var max_calls=500
+var USE_ANSWERS = 3;
+var MAX_PLAYS=2;
 
 
 
@@ -80,24 +78,27 @@ var max_calls=500
 var media_objects;
 var audio_sprite;
 
+var header_zone=document.getElementById('header');
+var canvas_zone=document.getElementById('zone_canvas');
 
-remaining_rand_activities=[];
-correct_answer='undefined'
-current_activity_type='undefined' // to avoid loading all the html
-zone_sound=null
-canvas_zone=document.getElementById('zone_canvas')
-score_correct=document.getElementById('current_score_num')
-score_answered=document.getElementById('current_answered_num')
-activity_timer_element=document.getElementById('activity_timer_span')
+var remaining_rand_activities=[];
+var correct_answer='undefined';
+var current_activity_type='undefined'; // to avoid loading all the html
 
-activity_timer=new ActivityTimer()
-activity_timer.anchor_to_dom(activity_timer_element)
-
-current_activity_data={};
-current_activity_index=0;
+//optional??
+var zone_sound=null;
+var dom_score_correct;
+var dom_score_answered;
 
 
-session_data={
+var activity_timer=new ActivityTimer();
+
+var current_activity_data={};
+var current_activity_index=0;
+var current_activity_played_times=0;
+
+
+var session_data={
 	user: "afan",
 	subject: "juan",
 	subject_age: "5",
@@ -113,29 +114,29 @@ session_data={
 	details: []
 };
 
-var subjects_select_elem="none"
+var subjects_select_elem="none";
 var user_subjects={};
 
 var exit_app=function(){
 		if(is_app){
 			navigator.app.exitApp();
 		}else{
-			 window.location = "http://www.centroafan.com";
+			location.href = "http://www.centroafan.com";
 		}
 }
 
 
 // See how to login and control session with js frontend... Use cookies (learn)
-	
+
 // DOM is ready because js is at the bottom of body
-is_app=is_cordova();
 //preventHistoryBack(); //you need cordova to prevent this on device button..
+
+var is_app=is_cordova();
 if(is_app){
-		document.addEventListener('deviceready', onDeviceReady, false);
+	document.addEventListener('deviceready', onDeviceReady, false);
 }else{
 	onDeviceReady();
 }
-
 
 
 function select_fill_with_json(data,select_elem){
@@ -157,37 +158,59 @@ function onDeviceReady() {
                         'Ver='  + device.version
 		
 	}
-	media_objects=ResourceLoader.load_media(images,sounds,splash_screen,true)
+	media_objects=ResourceLoader.load_media(images,sounds,splash_screen,false,debug);
 }
 
 
 function splash_screen(){
 	allowBackExit();
-	console.log('userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info)
-	console.log('not_loaded sounds: '+ResourceLoader.not_loaded['sounds'].length);
+	header_zone.innerHTML='<h1>Conciencia Fonológica</h1>';
+	if(debug){
+		console.log('userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info);
+		console.log('not_loaded sounds: '+ResourceLoader.not_loaded['sounds'].length);
+	}
 	canvas_zone.innerHTML=' \
 	<br />\
 	<div id="splash-content" class="text-center">\
 	<div id="splash-logo-div"></div> \
 	<br />  \
 	Sujeto:  <select id="subjects-select"></select> \
+	<nav id="responsive_menu">\
 	<br /><button id="start-button" disabled="true">Practicar</button> \
 	<br /><button id="start-test-button" disabled="true">Test</button> \
-	<br /><button id="add-subject" disabled="true">Añadir Niño</button> \
+	<br /><button id="add-subject" disabled="true" onclick="add_subject()">Añadir Niño</button> \
 	<br /><button id="results" disabled="true" onclick="explore_results()">Resultados</button> \
 	<br /><br /><button id="exit" onclick="exit_app()">Salir</button> \
+	</nav>\
 	</div>\
 	';
-	//<br /><button id="test-sample" onclick="send_sample_json_post()">Test sending json data post</button> \
-
 
 	//document.getElementById("splash-logo-div").appendChild(media_objects.images['key.png'])
-	subjects_select_elem=document.getElementById('subjects-select')
+	subjects_select_elem=document.getElementById('subjects-select');
+
+	ajax_request_json(
+		backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user, 
+		function(data) {
+			user_subjects=data;
+			select_fill_with_json(data,subjects_select_elem); 
+			document.getElementById("start-button").disabled=false; 
+			document.getElementById("start-test-button").disabled=false;
+			document.getElementById("add-subject").disabled=false;
+			document.getElementById("results").disabled=false;
+			// MAL pq no se puede modificar el evento... lo que hay q hacer es un objeto game y prototiparlo
+			document.getElementById("start-button").onclick=function(){session_data.mode="training";json_activities=json_training;game()};
+			document.getElementById("start-test-button").onclick=function(){session_data.mode="test";json_activities=json_test;game()};
+		}
+	);
+}
+
+
+var add_subject=function(){
 	var accept_function=function(){
 		var myform=document.getElementById('my-form');
 		var myformsubmit=document.getElementById('my-form-submit');
 		if (!myform.checkValidity()){
-			console.log("form error");
+			if(debug) console.log("form error");
 			// TODO se puede abstraer merjor...
 		    myform.removeEventListener("submit", formValidationSafariSupport);
 		    myform.addEventListener("submit", formValidationSafariSupport);
@@ -218,85 +241,39 @@ function splash_screen(){
 			);
 		}
 	};
-	ajax_request_json(
-		backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user, 
-		function(data) {
-			user_subjects=data;
-			select_fill_with_json(data,subjects_select_elem); 
-			document.getElementById("start-button").disabled=false; 
-			document.getElementById("start-test-button").disabled=false;
-			document.getElementById("add-subject").disabled=false;
-			document.getElementById("results").disabled=false;
-			// MAL pq no se puede modificar el evento... lo que hay q hacer es un objeto game y prototiparlo
-			document.getElementById("start-button").onclick=function(){session_data.mode="training";json_activities=json_training;game()};
-			document.getElementById("start-test-button").onclick=function(){session_data.mode="test";json_activities=json_test;game()};
-			document.getElementById("add-subject").onclick=function(){
-				var cancel_function=function(){
-					var elem_to_remove=document.getElementById("js-modal-window");
-					elem_to_remove.parentNode.removeChild(elem_to_remove);
-				};	
-				form_html='<form id="my-form" action="javascript:void(0);"> \
-					    <ul class="errorMessages"></ul>\
-						<label for="new-user">Usuario</label><input id="new-user" type="text" value="afan" /><br /> \
-						<label for="new-alias">Alias</label><input id="new-alias" type="text" required="required" /><br /> \
-						<label for="new-name">Nombre</label><input id="new-name" type="text" required="required" /><br /> \
-						<label for="new-birthdate">Fecha Nac.</label><input id="new-birthdate" type="date" placeholder="yyyy-mm-dd" required="required" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"  /><br /> \
-						<label>Comentarios</label><textarea id="new-comments"></textarea><br /> \
-						<input id="my-form-submit" type="submit" style="visibility:hidden;display:none" />\
-						</form>'; //title="Error: yyyy-mm-dd"
-						
-				open_js_modal_alert("Añadir Niño",form_html,accept_function,cancel_function)
-			};
-		});
-		
-		
-		
-}
-
-/*var send_sample_json_post=function(){
-	session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
-  var xhr = new XMLHttpRequest();
-  xhr.open("POST", backend_url+'ajaxdb.php',true);
-  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  xhr.responsetype="json";
-  xhr.onload=show_results;
- session_data.details=[{"activity":"ala","timestamp":"2015-3-22 20:22:31","duration":6,"choice":"ala","result":"correct"},{"activity":"carta","timestamp":"2015-3-22 20:22:37","duration":4,"choice":"cabra","result":"incorrect"},{"activity":"casa","timestamp":"2015-3-22 20:22:43","duration":3,"choice":"carta","result":"incorrect"},{"activity":"mesa","timestamp":"2015-3-22 20:22:48","duration":3,"choice":"seta","result":"incorrect"},{"activity":"koala","timestamp":"2015-3-22 20:22:55","duration":4,"choice":"jaula","result":"incorrect"},{"activity":"banyera","timestamp":"2015-3-22 20:23:03","duration":6,"choice":"banyera","result":"correct"}];
-  xhr.send("action=send_session_data_post&json_string="+(JSON.stringify(session_data))); 
-};*/
-
-var show_results=function(){
-	preventBackExit();
-	var data=JSON.parse(this.responseText);
-    canvas_zone.innerHTML='<br />Server message: <pre>'+data.msg+'</pre><br /><br />\
-    <br /><button id="go-back" onclick="splash_screen()">Volver</button>';
+	var cancel_function=function(){
+		var elem_to_remove=document.getElementById("js-modal-window");
+		elem_to_remove.parentNode.removeChild(elem_to_remove);
+	};	
+	var form_html='<form id="my-form" action="javascript:void(0);"> \
+			<ul class="errorMessages"></ul>\
+			<label for="new-user">Usuario</label><input id="new-user" type="text" value="afan" /><br /> \
+			<label for="new-alias">Alias</label><input id="new-alias" type="text" required="required" /><br /> \
+			<label for="new-name">Nombre</label><input id="new-name" type="text" required="required" /><br /> \
+			<label for="new-birthdate">Fecha Nac.</label><input id="new-birthdate" type="date" placeholder="yyyy-mm-dd" required="required" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"  /><br /> \
+			<label>Comentarios</label><textarea id="new-comments"></textarea><br /> \
+			<input id="my-form-submit" type="submit" style="visibility:hidden;display:none" />\
+			</form>'; //title="Error: yyyy-mm-dd"		
+	open_js_modal_alert("Añadir Niño",form_html,accept_function,cancel_function);
 };
 
 
 var explore_results=function(){
 	preventBackExit();
+	header_zone.innerHTML='<h1 onclick="splash_screen()"> < Conciencia Fonológica</h1>';
 	session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
 	canvas_zone.innerHTML=' \
 	<div class="text-center">\
 	<br /><h2>Resultados</h2> \
-	<div id="results-div">aquí los resultados</div> \
+	<div id="results-div">cargando...</div> \
 	<br /><br /><button id="go-back" onclick="splash_screen()">Volver</button> \
 	</div>\
 	';
 	ajax_request_json(
 		backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject, 
 		function(data) { 
-			//alert(JSON.stringify(data,null,2));
-			//var table_sessions="";
-			//global_data=data;
-			//for(var i=0;i<data.sessions.length;i++){
-			//	table_sessions+="<tr><td>"+data.sessions[i].id+"</td><td>"+data.sessions[i].timestamp+"</td><td>"+data.sessions[i].reference+"</td><td>"+data.sessions[i].age+"</td><td>"+data.sessions[i].duration+"</td><td>"+(data.sessions[i].result*100)+"%</td><td id=\"row-"+data.sessions[i].id+"\" onclick=\"alert(this.id)\">x</td></tr>";
-			//}
 			document.getElementById("results-div").innerHTML="user: "+data.general.user+" - subject: <b>"+data.general.subject+"</b><br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
-			//<thead><tr><td>id</td><td>timestamp</td><td>reference</td><td>age</td><td>duration</td><td>result</td><td>actions</td></tr></thead><tbody>"+table_sessions+"</tbody>
-			//"<pre>"+JSON.stringify(data,null,2)+"</pre>"
 			results_table=document.getElementById("results-table");
-			//results_table.DataTableSimple( {  // to make this possible you have to extend all Table DOM elements with this function
-			// e.g., ...table.prototype.DataTableSimple=DataTableSimple;
 			DataTableSimple.call(results_table, {
 				data: data.elements,
 				pagination: 5,
@@ -315,10 +292,11 @@ var explore_results=function(){
 
 var explore_result_detail=function(session_id){
 	preventBackExit();
+	header_zone.innerHTML='<h1 onclick="splash_screen()"> < Conciencia Fonológica</h1>';
 	canvas_zone.innerHTML=' \
 	<div class="text-center">\
 	<br /><h2>Resultado: '+session_id+'</h2> \
-	<div id="results-div">aquí los resultados</div> \
+	<div id="results-div">cargando...</div> \
 	<br /><br /><button id="go-back" onclick="explore_results()">Volver</button> \
 	</div>\
 	';
@@ -344,8 +322,9 @@ var explore_result_detail=function(session_id){
 
 function game(){
 	preventBackExit();
-	if(ResourceLoader.not_loaded['sounds'].length!=0){	
-		console.log(ResourceLoader.not_loaded['sounds'].length+"  "+ResourceLoader.not_loaded['sounds']);
+	header_zone.innerHTML='<h1 onclick="splash_screen()"> < Conciencia Fonológica</h1>';
+	if(ResourceLoader.not_loaded['sounds'].length!=0){
+		if(debug) console.log("Not loaded sounds: "+ResourceLoader.not_loaded['sounds'].length+"  "+ResourceLoader.not_loaded['sounds']);
 		ResourceLoader.load_media_wait_for_lazy_audio(game);
 	}else{
 		// logic
@@ -355,86 +334,129 @@ function game(){
 		//
 
 		// load audio in the object 
-		audio_sprite_object=media_objects.sounds['soundsSpriteVBR30-19kbps-100k.m4a'];
+		var audio_sprite_object=media_objects.sounds['soundsSpriteVBR30-19kbps-100k.m4a'];
 		audio_sprite_object.removeEventListener('canplaythrough', ResourceLoader.log_and_remove_from_not_loaded);
-		audio_sprite=new AudioSprite(audio_sprite_object,audio_object_sprite_ref,true);
+		audio_sprite=new AudioSprite(audio_sprite_object,audio_object_sprite_ref,debug);
 		
-		title_modal_window=open_js_modal_title("Nivel 1")
-		audio_sprite.playSpriteRange('zsilence_start',start_activity_set)		
+		title_modal_window=open_js_modal_content('<h1>Nivel 1</h1>');
+		audio_sprite.playSpriteRange('zsilence_start',start_activity_set);
 	}
 }
 
 function start_activity_set(){
-	document.body.removeChild(title_modal_window)
+	remove_modal();
 	session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
 	session_data.age=calculateAge(user_subjects[session_data.subject]); 
 	var timestamp=new Date();
 	session_data.timestamp=timestamp.getFullYear()+"-"+
 		pad_string((timestamp.getMonth()+1),2,"0") + "-" + pad_string(timestamp.getDate(),2,"0") + " " +
 		 pad_string(timestamp.getHours(),2,"0") + ":"  + pad_string(timestamp.getMinutes(),2,"0");
-	// TODO calculate age of the subject ...
-	// session_data.subject_age=... 
 	session_data.num_answered=0;
-	score_answered.innerHTML=session_data.num_answered;
+
+	canvas_zone.innerHTML=' \
+		<div id="zone_score" class="cf">\
+		  <div class="col_left">\
+		    <div id="activity_timer_div">\
+		      Tiempo : <span id="activity_timer_span">00:00:00</span>\
+		    </div>\
+		    <div id="current_score">\
+		      Correct : <span id="current_score_num">0</span>\
+		    </div>\
+		  </div>\
+		  <div class="col_right">\
+		    <div id="remaining_activities">\
+		      remaining activs : <span id="remaining_activities_num">0</span>\
+		    </div>\
+		    <div id="current_answered">\
+		      Answered : <span id="current_answered_num">0</span>\
+		    </div>\
+		  </div>\
+		  <div class="col_moves">\
+		    <span id="moves"></span>\
+		  </div>\
+		</div> <!-- /#zone_score -->\
+	<div id="answers"></div><br class="clear" />\
+	<div id="sound">sound icon</div><br /> \
+	';
+	//get elements
+	dom_score_correct=document.getElementById('current_score_num');
+	dom_score_answered=document.getElementById('current_answered_num');
+	activity_timer.anchor_to_dom(document.getElementById('activity_timer_span'));
+	dom_score_answered.innerHTML=session_data.num_answered;
 	remaining_rand_activities=json_activities.slice();
-	document.getElementById('remaining_activities_num').innerHTML=""+(remaining_rand_activities.length-1)	
-	activity(Math.floor(Math.random()*remaining_rand_activities.length))
+	document.getElementById('remaining_activities_num').innerHTML=""+(remaining_rand_activities.length-1);
+	activity(Math.floor(Math.random()*remaining_rand_activities.length));
 }
 
 function activity(i){
-	activity_timer.reset()
+	document.getElementById('remaining_activities_num').innerHTML=""+(remaining_rand_activities.length-1);
+
+	activity_timer.reset();
 	current_activity_index=i;
-	console.log(i+"--"+remaining_rand_activities);
+	current_activity_played_times=0;
+	if(debug) console.log(i+"--"+remaining_rand_activities);
 	current_activity_data=remaining_rand_activities[i]; //json_activities[i]
 	correct_answer=current_activity_data['answers'][0];
 	
-	canvas_zone.innerHTML=' \
-	<div id="sound">sound icon</div> \
-	<div id="answers"></div>\
-	'	
-	answers_div=document.getElementById('answers');
+
+	//TODO TODO TODO USAR IMAGENES EN VEZ DE DIVS CON FONDOS? I USAR -100% ETC.. SOLO DE UNA DIMENSION...
+	// breakpoint a partir de widh menor q 500 usar img sprite small (e.g., 80x80px)??
+
+	var answers_div=document.getElementById('answers');
+	answers_div.innerHTML="";
 	used_answers=[];
 	for(var i=0; i<USE_ANSWERS ; ++i) {
 		use=Math.floor(Math.random() * USE_ANSWERS)
 		while(used_answers.indexOf(use) != -1) use=Math.floor(Math.random() * USE_ANSWERS);
 		//answers_div.innerHTML+='<div id="answer'+i+'" class="hover_red_border" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"></div>'
 		var answer_i=current_activity_data['answers'][use];
-		answers_div.innerHTML+='<div id="answer'+i+'" onclick=\"check_correct(this.firstChild,correct_answer)\" class="hover_red_border"  style="float:left;"></div>'; //onclick="check_correct(this,correct_answer)"
+		answers_div.innerHTML+='<div id="answer'+i+'" onclick="check_correct(this.firstChild,correct_answer)" class="hover_red_border"  ></div>'; //onclick="check_correct(this,correct_answer)"  style="float:left;" stretchy no-limit-250
 		//if(media_objects.images[current_activity_data['answers'][use]+'.png']==undefined){
 		if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+current_activity_data['answers'][use])){
-			console.log("ERROR: .wordimage-"+current_activity_data['answers'][use]+" not found in wordimg-sprite.css.");
+			alert("ERROR: .wordimage-"+current_activity_data['answers'][use]+" not found in wordimg-sprite.css.");
 			document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png'])
 		}else{	
-			//document.getElementById("answer"+i).appendChild(media_objects.images[current_activity_data['answers'][use]+'.png']);		
-			//document.getElementById("answer"+i).className += " wordimage wordimage-"+current_activity_data['answers'][use];		
-			document.getElementById("answer"+i).innerHTML += "<div class=\"wordimage wordimage-"+current_activity_data['answers'][use]+"\"></div>";		
+			////document.getElementById("answer"+i).appendChild(media_objects.images[current_activity_data['answers'][use]+'.png']);		
+			////document.getElementById("answer"+i).className += " wordimage wordimage-"+current_activity_data['answers'][use];		
+			document.getElementById("answer"+i).innerHTML += '<div class="wordimage wordimage-'+current_activity_data['answers'][use]+'"></div>';
+			//document.getElementById("answer"+i).innerHTML += '<img class="spacer"  src="spacer158.png"><img class="spritev wordimg-'+current_activity_data['answers'][use]+'" src="../../../afan-app-media/img/wordimg-sprite.png" />';		
 		}
 		used_answers[used_answers.length]=use
 	 }
 	
 	zone_sound=document.getElementById('sound');
-	zone_sound.innerHTML="starting..."
-	//sound_array=current_activity_data['sounds'];
-	setTimeout(function(){
-		SoundChain.play_sound_arr(current_activity_data['sounds'],audio_sprite);
-		activity_timer.start();
-	}, 2000);
-	//TODO provide a callback function to show re-play and to make elements clikable
-	// show playing...
-	// show replay callback zone_sound.innerHTML='<button onclick="play_sound_arr(current_activity_data.sounds)">re-play</button>'
-
+	zone_sound.innerHTML='<button id="playb" onclick="play_activity_sound()">PLAY</button> <button id="go-back" onclick="splash_screen()">Salir</button>';
+	/*setTimeout(function(){play_activity_sound();	}, 2000);*/
 }
 
+var play_activity_sound_finished=function(){
+	activity_timer.start();
+	current_activity_played_times++;
+	if(current_activity_played_times < MAX_PLAYS){
+		document.getElementById('playb').innerHTML="RE-PLAY"; // use icons (fixed % size) &#11208; &#11118; &#10704;
+		document.getElementById('playb').disabled=false;
+	}else{
+		document.getElementById('playb').innerHTML="---"; // use empty icon (to keep size)
+	}
+};
+
+
+var play_activity_sound=function(){
+	document.getElementById('playb').disabled=true;
+	activity_timer.stop();
+	SoundChain.play_sound_arr(current_activity_data['sounds'],audio_sprite,play_activity_sound_finished);
+};
 
 
 function check_correct(clicked_answer,correct_answer){
+	// do not allow cliking before or while uttering
+	if(current_activity_played_times==0 || SoundChain.audio_chain_waiting) return; 
 	var activity_results={};
 	var timestamp=new Date();
 	var timestamp_str=timestamp.getFullYear()+"-"+
 		pad_string((timestamp.getMonth()+1),2,"0") + "-" + pad_string(timestamp.getDate(),2,"0") + " " +
 		 pad_string(timestamp.getHours(),2,"0") + ":"  + pad_string(timestamp.getMinutes(),2,"0") + 
 			":"  + pad_string(timestamp.getSeconds(),2,"0");
-	if(SoundChain.audio_chain_waiting) return; // do not allow cliking while uttering
 	activity_timer.stop();
 	activity_results.type=session_data.type;
 	activity_results.mode=session_data.mode;
@@ -443,19 +465,17 @@ function check_correct(clicked_answer,correct_answer){
 	activity_results.timestamp=timestamp_str;
 	activity_results.duration=activity_timer.seconds;
 	session_data.duration+=activity_timer.seconds;
-	//image_src_start_exists=clicked_answer.indexOf("src=\""+media_url)
 	if(typeof clicked_answer == "string"){ // it is not a sprite but an image
 		image_src_start_exists=clicked_answer.lastIndexOf("/")
 		if(image_src_start_exists==-1) image_src_start_exists=clicked_answer.indexOf("src=\"")
 		if (image_src_start_exists > -1){
 			img_src_end=clicked_answer.indexOf(".png\"",image_src_start_exists+1)
-			//clicked_answer=clicked_answer.substring(image_src_start_exists+media_url.length+15,img_src_end)
 			clicked_answer=clicked_answer.substring(image_src_start_exists+1,img_src_end)
 		}
 	}else{
 		clicked_answer=(clicked_answer.className.replace("wordimage wordimage-","")).trim();
 	}
-	canvas_zone.innerHTML='<div id="answer_result" style="width:100%;text-align:center"></div>'
+
 
 	activity_results.choice=clicked_answer;
 	if (clicked_answer==correct_answer){
@@ -463,33 +483,33 @@ function check_correct(clicked_answer,correct_answer){
 		activity_results.result="correct";
 		if(session_data.mode!="test"){
 			audio_sprite.playSpriteRange("zfx_correct");
-			document.getElementById("answer_result").appendChild(media_objects.images['correct.png']);
-			score_correct.innerHTML=session_data.num_correct;
+			dom_score_correct.innerHTML=session_data.num_correct;
+			open_js_modal_content('<div class="js-modal-img"><img src="'+media_objects.images['correct.png'].src+'"/></div>');
 		}
 	}else{
 		activity_results.result="incorrect";
 		if(session_data.mode!="test"){
-			audio_sprite.playSpriteRange("zfx_wrong",function(){console.log('wrong already played')});
-			document.getElementById("answer_result").appendChild(media_objects.images['wrong.png']);
+			audio_sprite.playSpriteRange("zfx_wrong"); // add a callback to move forward after the sound plays...
+			open_js_modal_content('<div class="js-modal-img"><img src="'+media_objects.images['wrong.png'].src+'"/></div>');
 		}
 	}
 	session_data.details.push(activity_results);
 	session_data.num_answered++;
-	score_answered.innerHTML=session_data.num_answered;
+	dom_score_answered.innerHTML=session_data.num_answered;
 	var waiting_time=500;
 	if(session_data.mode!="test") waiting_time=2000; // fire next activity after 2 seconds (time for displaying img and playing the sound)
-	setTimeout(function(){nextActivity()}, waiting_time) 
+	setTimeout(function(){nextActivity()}, waiting_time);
 }
 
 function nextActivity(){
-	remaining_rand_activities.splice(current_activity_index,1) // remove current activity	
-	if(remaining_rand_activities.length==0){	
+	remaining_rand_activities.splice(current_activity_index,1); // remove current activity
+	if(session_data.mode!="test") remove_modal();
+	if(remaining_rand_activities.length==0){
 		canvas_zone.innerHTML='NO HAY MAS ACTIVIDADES. FIN, sending...';
 		// calculate result
 		if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
 		send_session_data()
-	}else{		
-		document.getElementById('remaining_activities_num').innerHTML=""+(remaining_rand_activities.length-1)	
+	}else{
 		if(remaining_rand_activities.length==1){
 			activity(0);
 		}else{
@@ -499,7 +519,7 @@ function nextActivity(){
 }
 
 function send_session_data(){
-  console.log(JSON.stringify(session_data));
+  if(debug) console.log(JSON.stringify(session_data));
   var xhr = new XMLHttpRequest();
   xhr.open("POST", "http://www.centroafan.com/afan-app/www/"+backend_url+'ajaxdb.php',true);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');

@@ -1,13 +1,13 @@
 
 // USER DATA
 var user_language=window.navigator.userLanguage || window.navigator.language;
-var is_iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false )
+var is_iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false );
 function is_cordova(){
 	if( navigator.userAgent.match(/(i(os|phone|pod|pad|emobile)|android|blackberry)/i)
-		&& /^file:\/{3}[^\/]/i.test(window.location.href) ){	
-		return true		
+		&& /^file:\/{3}[^\/]/i.test(window.location.href) ){
+		return true;
 	}
-	return false
+	return false;
 }
 
 // Audio types. Best choice: m4a (mp4)
@@ -15,6 +15,11 @@ var html5_audiotypes={"mp3": "audio/mpeg","mp4": "audio/mp4","m4a": "audio/mp4",
 					  "ogg": "audio/ogg","wav": "audio/wav" };
 
 
+/*
+* Load media
+* lazy audio means that if some browsers do not load it inmediatly we let the load process finish when images are loaded
+*
+*/
 var ResourceLoader={
 	MEDIA_LOAD_TIMEOUT:15000, 		// 15 sec
 	media_load_time:0,			// load time counter
@@ -31,6 +36,7 @@ var ResourceLoader={
 	ret_media:{},
 	lazy_audio:false,
 	download_lazy_audio_active : false,
+	debug: false,
 	
 	load_image: function (resource_url){
 		var image_object = new Image();
@@ -56,7 +62,7 @@ var ResourceLoader={
 	},	
 
 	log_and_remove_from_not_loaded: function(event_name,res_type,res_url){
-		console.log(event_name+" ("+res_type+": "+res_url+")");
+		if(ResourceLoader.debug) console.log(event_name+" ("+res_type+": "+res_url+")");
 		ResourceLoader.load_progressbar.value+=1;
 		ResourceLoader.not_loaded[res_type].splice(ResourceLoader.not_loaded[res_type].indexOf(res_url),1);
 	},
@@ -88,10 +94,10 @@ var ResourceLoader={
 					confirm_div.innerHTML=ios_media_msg+' <button onclick="download_audio_ios()">Ok</button> '
 					ResourceLoader.modal_load_window.appendChild(confirm_div)
 				}
-				if(ResourceLoader.lazy_audio){		
+				if(ResourceLoader.lazy_audio){
 					clearInterval(ResourceLoader.load_interval);
 					document.body.removeChild(ResourceLoader.modal_load_window);
-					ResourceLoader.callback_on_load_end(); // start the app	
+					ResourceLoader.callback_on_load_end(); // start the app even if audio is not loaded
 					return;
 				}
 			}else{
@@ -138,35 +144,38 @@ var ResourceLoader={
 		}
 	},
 
-	load_media: function (image_arr, sound_arr, callback_function, lazy_audio_option){
+	load_media: function (image_arr, sound_arr, callback_function, lazy_audio_option, activate_debug){
 		if(lazy_audio_option==='undefined') ResourceLoader.lazy_audio=false;
+		ResourceLoader.debug=false;
+		if(typeof(activate_debug)!=='undefined' && activate_debug==true) ResourceLoader.debug=activate_debug;
 		else ResourceLoader.lazy_audio=lazy_audio_option;
 		ResourceLoader.ret_media={};ResourceLoader.ret_media.sounds=[];ResourceLoader.ret_media.images=[];
 		ResourceLoader.callback_on_load_end=callback_function;
 		ResourceLoader.modal_load_window=document.createElement("div");
 		ResourceLoader.modal_load_window.className="js-modal-window";
 		ResourceLoader.modal_dialog=document.createElement("div");
-		ResourceLoader.modal_dialog.id="modal-dialog";
+		ResourceLoader.modal_dialog.id="js-modal-dialog";
+		ResourceLoader.modal_dialog.className="js-modal-dialog";
 		ResourceLoader.modal_dialog_msg=document.createElement("p");
-		ResourceLoader.modal_dialog_msg.id="modal-dialog-msg";
+		ResourceLoader.modal_dialog_msg.id="js-modal-dialog-msg";
 		ResourceLoader.load_progressbar=document.createElement("progress");
 		ResourceLoader.num_images=image_arr.length;
 		ResourceLoader.num_sounds=sound_arr.length;
 		ResourceLoader.load_progressbar.value=0; ResourceLoader.load_progressbar.max=ResourceLoader.num_images+ResourceLoader.num_sounds;
 
-		ResourceLoader.not_loaded['images']= image_arr.slice();	
+		ResourceLoader.not_loaded['images']= image_arr.slice();
 		ResourceLoader.not_loaded['sounds']=sound_arr.slice(); // to show in case of error and lazy load (required in iOS)
 		ResourceLoader.download_lazy_audio_active = false;
 
-		ResourceLoader.modal_dialog.appendChild(ResourceLoader.load_progressbar)
-		ResourceLoader.modal_dialog.appendChild(ResourceLoader.modal_dialog_msg)
-		ResourceLoader.modal_load_window.appendChild(ResourceLoader.modal_dialog)
-		document.body.appendChild(ResourceLoader.modal_load_window)
+		ResourceLoader.modal_dialog.appendChild(ResourceLoader.load_progressbar);
+		ResourceLoader.modal_dialog.appendChild(ResourceLoader.modal_dialog_msg);
+		ResourceLoader.modal_load_window.appendChild(ResourceLoader.modal_dialog);
+		document.body.appendChild(ResourceLoader.modal_load_window);
 	
-		ResourceLoader.load_interval = setInterval(function() {	
+		ResourceLoader.load_interval = setInterval(function() {
 			ResourceLoader.check_load_status()},
 			ResourceLoader.media_load_check_status_interval);
-		for (var i = 0; i < sound_arr.length; i++) {	
+		for (var i = 0; i < sound_arr.length; i++) {
 			ResourceLoader.ret_media.sounds[get_resource_name(sound_arr[i])]=ResourceLoader.load_sound(sound_arr[i]);
 		}
 		for (var i = 0; i < image_arr.length; i++) {
@@ -221,6 +230,7 @@ function open_js_modal_alert_demo(){  //(title_text, text_text){
 	modal_window.id="js-modal-window"; modal_window.className="js-modal-window"
 
 	var modal_dialog=document.createElement("div")
+	modal_dialog.className="js-modal-dialog";
 	var close_elem=document.createElement('a')
 	close_elem.innerHTML="x"
 	close_elem.href="javascript:void(0)"
@@ -246,9 +256,10 @@ function open_js_modal_alert_demo(){  //(title_text, text_text){
 // it would be great to objectify this to easily interact with it (e.g., modify text)
 function open_js_modal_alert(title_text, text_text, accept_function, cancel_function){
 	var modal_window=document.createElement("div")
-	modal_window.id="js-modal-window"; modal_window.className="js-modal-window"
+	modal_window.id="js-modal-window"; modal_window.className="js-modal-window";
 
-	var modal_dialog=document.createElement("div")
+	var modal_dialog=document.createElement("div");
+	modal_dialog.className="js-modal-dialog";
 	var close_elem=document.createElement('a')
 	close_elem.innerHTML="x"
 	close_elem.href="javascript:void(0)"
@@ -290,19 +301,18 @@ function open_js_modal_alert(title_text, text_text, accept_function, cancel_func
 
 
 
-function open_js_modal_title(title_text){  
+function open_js_modal_content(html_content){  
 	var modal_window=document.createElement("div")
 	modal_window.id="js-modal-window"; modal_window.className="js-modal-window"
-
-	var modal_title=document.createElement("h1")
-	modal_title.style.color="#FFF"
-	modal_title.innerHTML=title_text
-
-	modal_window.appendChild(modal_title)
-	document.body.appendChild(modal_window)
-	return modal_window
+	modal_window.innerHTML=html_content;
+	document.body.appendChild(modal_window);
+	return modal_window;
 }
 
+var remove_modal=function (){
+	var modal_window=document.getElementById('js-modal-window');
+	if(modal_window!=null) modal_window.parentNode.removeChild(modal_window);
+}
 
 
 // STRING UTILS ///////////////////////////////////
@@ -333,17 +343,16 @@ function isInteger(value) {     // in the future javacript will have Number.isIn
 
 //////////////////// TIMER FOR A USER ACTIVITY OF ANY KIND ////////////// 
 var ActivityTimer=function (){	
-	this.seconds=0
-	this.started=false
-	this.dom_anchor='undefined'
-	this.advance_timeout=null
+	this.seconds=0;
+	this.started=false;
+	this.dom_anchor='undefined';
+	this.advance_timeout=null;
 	//var that=this // bad hack to store reference scopes
 }
-ActivityTimer.prototype.anchor_to_dom=function(elem){this.dom_anchor=elem}
+ActivityTimer.prototype.anchor_to_dom=function(elem){this.dom_anchor=elem;}
 
 ActivityTimer.prototype.start=function(){
-	if(this.dom_anchor=='undefined'){alert("ERROR: Starging an activity_timer without defining it first"); return}
-
+	if(this.dom_anchor=='undefined'){alert("ERROR: Starging an activity_timer without defining it first"); return;}
 	if(this.started){
 		console.log("ERROR: activity_timer already started")	
 	}else{
@@ -362,20 +371,20 @@ ActivityTimer.prototype.advance=function(){
 		this.dom_anchor.innerHTML="00:"+pad_string( (this.seconds / 60) >> 0,2,"0")+":"+pad_string(this.seconds % 60,2,"0")
 		this.advance_timeout=setTimeout(function(){this.advance()}.bind(this),1000)
 	}else{
-		console.log("ERROR: activity_timer not started. Starting it.")
-		this.start()
+		console.log("ERROR: activity_timer not started. Starting it.");
+		this.start();
 	}
 }
 
 ActivityTimer.prototype.stop=function(){
-	clearTimeout(this.advance_timeout)
-	this.started=false
+	clearTimeout(this.advance_timeout);
+	this.started=false;
 }
 
 ActivityTimer.prototype.reset=function (){	
-	this.stop()
-	this.dom_anchor.innerHTML="00:00:00"
-	this.seconds=0 // this.minutes=0
+	this.stop();
+	this.dom_anchor.innerHTML="00:00:00";
+	this.seconds=0; // this.minutes=0
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -386,44 +395,72 @@ var AudioSprite=function(audio_object, sprite_ref, activate_debug){
 	this.sound_range_ref=sprite_ref;	// index of sounds in sprite (as ranges)
 	this.currentSpriteRange = {}; 	// current sprite being played
 	this.range_ended=true;
-	this.audio_obj.removeEventListener('timeupdate', this.onAudioSpriteTimeUpdate, false); // for safety
-	this.audio_obj.addEventListener('timeupdate', this.onAudioSpriteTimeUpdate.bind(this), false);	
+	//this.audio_obj.removeEventListener('timeupdate', this.onAudioSpriteTimeUpdate, false); // for safety
+	//this.audio_obj.addEventListener('timeupdate', this.onAudioSpriteTimeUpdate.bind(this), false);
 	this.debug=false;
-	if(typeof(debug)!=='undefined') debug=activate_debug;
+	if(typeof(activate_debug)!=='undefined' && activate_debug==true) this.debug=activate_debug;
 }
 AudioSprite.FLOAT_THRESHOLD=0.005;	// for millisec comparison
-AudioSprite.AUDIO_RALENTIZATION_LAG=0.040; // margin for sound range ended check
+AudioSprite.AUDIO_RALENTIZATION_LAG=0.040; // margin for sound range ended check (default 0.040)
+AudioSprite.CHECK_SOUND_POSITION_TIMEOUT=100; // verify if sprite ended timeout (ms)
 AudioSprite.prototype.playSpriteRange = function(range_id,callback_function) {
 	if(this.range_ended==false || !this.audio_obj.paused) alert("ERROR: trying to play a sprite range while other not ended");
 	if(callback_function==='undefined') delete this.audio_obj.callback_on_end;
 	else this.audio_obj.callback_on_end=callback_function;
+	// effectless in data-connections----
 	this.audio_obj.currentTime = 0;
-        this.wait_seeked_and_paused();
+	this.wait_seeked_and_paused();
+	//------------------------------------
 	if (this.sound_range_ref[range_id]) { // assumes the array is correct (contains start and end)
-		if(this.debug) console.log("range_id ("+range_id+") found")
-		this.currentSpriteRange = this.sound_range_ref[range_id]
-		this.audio_obj.currentTime = this.currentSpriteRange.start // currentTime not supported on IE9 (DOM Exception INVALID_STATE_ERR)
-		this.range_ended=false
-		this.play_safe(this.currentSpriteRange.start)
+		if(this.debug) alert("range_id ("+range_id+") found");
+		this.currentSpriteRange = this.sound_range_ref[range_id];
+		this.audio_obj.currentTime = this.currentSpriteRange.start; // currentTime not supported on IE9 (DOM Exception INVALID_STATE_ERR)
+		this.range_ended=false;
+		// HACK: for data connections ---------
+		setTimeout(function(){this.audioSpritePositionCheck();}.bind(this),AudioSprite.CHECK_SOUND_POSITION_TIMEOUT);
+		this.audio_obj.play();
+		// -----------------------
+		//this.play_safe(this.currentSpriteRange.start); doesn't work on data-connections (no seeking until play())
 	}else{
-		if(this.debug) console.log("ERROR: Sprite ("+range_id+") not found!")
-		this.range_ended=true
+		if(this.debug) alert("ERROR: Sprite ("+range_id+") not found!");
+		this.range_ended=true;
 	}
 };
 AudioSprite.prototype.play_safe=function(seek_position){ // wait until paused and not seekeing
+	// PROBLEM, on mobiles with data-conntection (not wifi), audio won't start to seek until play() event
 	if(this.audio_obj.paused && !this.audio_obj.seekeing && 
-		Math.abs(this.audio_obj.currentTime-seek_position)<AudioSprite.FLOAT_THRESHOLD) this.audio_obj.play() 
+		Math.abs(this.audio_obj.currentTime-seek_position)<AudioSprite.FLOAT_THRESHOLD){
+			setTimeout(function(){this.audioSpritePositionCheck();}.bind(this),AudioSprite.CHECK_SOUND_POSITION_TIMEOUT);
+			this.audio_obj.play();
+		}
 	else setTimeout(function(){ // more efficien could be trying to use events... but complicates things...
-				if(this.debug) console.log("waiting to play safe ct:"+this.audio_obj.currentTime+" - seek: "+seek_position);
-				this.play_safe(seek_position)
+				if(this.debug) alert("waiting to play safe ct:"+this.audio_obj.currentTime+" - seeking-pos: "+seek_position+" - is-paused: "+this.audio_obj.paused+" - is-seeking: "+this.audio_obj.seekeing+" - abs(currenttime-seekpos): "+Math.abs(this.audio_obj.currentTime-seek_position));
+				this.play_safe(seek_position);
 			}.bind(this),250);
 }
 AudioSprite.prototype.wait_seeked_and_paused=function(){// wait until paused and not seekeing
-	if(this.audio_obj.paused && !this.audio_obj.seekeing) return 
+	// Although 'seeking' is undefined in data-connections it works since it is evaluated to false in js
+	if(this.audio_obj.paused && !this.audio_obj.seekeing) return;
 	else setTimeout(function(){
+				if(this.debug) alert("waiting to seek safe ct:"+this.audio_obj.currentTime);
 				this.wait_seeked_and_paused();
 			}.bind(this),250)
 }
+AudioSprite.prototype.audioSpritePositionCheck = function() {// time update handler to ensure we stop when a sprite is complete
+	if(this.debug)console.log("playing: "+this.audio_obj.currentSrc+" time:"+this.audio_obj.currentTime+" ended:"+this.audio_obj.ended);
+	if (this.ended || (!this.range_ended && this.audio_obj.currentTime >= (this.currentSpriteRange.end+AudioSprite.AUDIO_RALENTIZATION_LAG)) ) {
+		if(this.debug) console.log("Sprite range play ended!!");
+		this.audio_obj.pause();
+		this.wait_seeked_and_paused();
+		//this.currentTime=0; // probably unnecessary
+		//this.wait_seeked_and_paused();
+		this.range_ended=true
+		if(this.audio_obj.hasOwnProperty("callback_on_end") && typeof(this.audio_obj.callback_on_end) === 'function' ) this.audio_obj.callback_on_end();
+	}else{ // keep-playing-and check again later
+		setTimeout(function(){this.audioSpritePositionCheck();}.bind(this),AudioSprite.CHECK_SOUND_POSITION_TIMEOUT);
+	}
+};
+// DEPRECATED... TOO MUCH CHECKINGS... DO NOT DELETE IN CASE WE NEED IT...
 AudioSprite.prototype.onAudioSpriteTimeUpdate = function() {// time update handler to ensure we stop when a sprite is complete
    if(this.debug)console.log("playing: "+this.audio_obj.currentSrc+" time:"+audio_obj.currentTime+" ended:"+audio_obj.ended)
     if (this.ended || (!this.range_ended && this.audio_obj.currentTime >= (this.currentSpriteRange.end+AudioSprite.AUDIO_RALENTIZATION_LAG)) ) { 
@@ -443,42 +480,42 @@ AudioSprite.prototype.onAudioSpriteTimeUpdate = function() {// time update handl
 
 ////////////////////////////////////////////////
 var SoundChain={
-	// initial initialization
 	audio_chain_waiting: false,
 	audio_chain_position: 0,
 	calls: 0,
 	sound_array: undefined,
 	audio_sprite: undefined,
+	debug_mode: false,
+	callback_func: null,
 
-	play_sound_arr: function(sound_arr, audio_sprt, callback_func){
+	play_sound_arr: function(sound_arr, audio_sprt, callback_func, debug_mode){
 		if(this.audio_chain_waiting==true){
 			throw new Error("SoundChain.play_sound_arr is already playing");
-		}else if(sound_arr==='undefined' || audio_sprt==='undefined' || callback_func==='undefined'){
+		}else if(typeof(sound_arr)==='undefined' || typeof(audio_sprt)==='undefined' || typeof(callback_func)==='undefined'){
 			throw new Error("SoundChain.play_sound_arr required arguments: sound_arr, audio_sprite, callback_function");
-			//TODO why does not this halt???
 		}else{
-			
-			console.log(callback_func +"---"+(callback_func==='undefined'));	
+			if(typeof(debug_mode)!=='undefined') this.debug_mode=debug_mode;
+			if(this.debug_mode) console.log("callback: "+callback_func);	
 			this.sound_array=sound_arr;
 			this.audio_sprite=audio_sprt;
 			this.audio_chain_waiting=true;
 			this.audio_chain_position=0;
+			this.callback_func=callback_func;
 			this.play_sprite_chain();
 		}
 	},
 
 	play_sprite_chain: function(){
+		if(this.callback_func==null) throw new Error("callback not defined");
 		if(this.audio_chain_position>=this.sound_array.length){
 			this.sound_array=undefined;	
 			this.audio_chain_waiting=false;
 			this.audio_chain_position=0;
 			this.calls=0;
-			// TODO use callback instead of this
-			zone_sound.innerHTML='<button onclick="SoundChain.play_sound_arr(current_activity_data.sounds,audio_sprite)">re-play</button>'
+			this.callback_func();			
 		}else{
 			while (this.sound_array[this.audio_chain_position]=="/") {this.audio_chain_position++;} // ignore /	
-			// TODO if this debug... and optinal argument (DOM elem) to show status
-			console.log("playing: "+this.audio_sprite.audio_obj.currentSrc+" time:"+this.audio_sprite.audio_obj.currentTime+" ended:"+this.audio_sprite.audio_obj.ended+" paused:"+this.audio_sprite.audio_obj.paused+" calls:"+this.calls+" range_id:"+this.sound_array[this.audio_chain_position]+" audio_chain_position:"+this.audio_chain_position+" audio_chain_waiting:"+this.audio_chain_waiting);
+			if(this.debug_mode) console.log("playing: "+this.audio_sprite.audio_obj.currentSrc+" time:"+this.audio_sprite.audio_obj.currentTime+" ended:"+this.audio_sprite.audio_obj.ended+" paused:"+this.audio_sprite.audio_obj.paused+" calls:"+this.calls+" range_id:"+this.sound_array[this.audio_chain_position]+" audio_chain_position:"+this.audio_chain_position+" audio_chain_waiting:"+this.audio_chain_waiting);
 			this.calls++;
 			this.audio_sprite.playSpriteRange(this.sound_array[this.audio_chain_position],this.audio_chain_callback.bind(this))
 		}
@@ -744,7 +781,7 @@ var confirmOnPageExit = function (e) {
 
 // Turn it on - assign the function that returns the string
 var preventBackExit=function(){
-	window.onbeforeunload = confirmOnPageExit;
+	window.onbeforeunload = confirmOnPageExit; // maybe use remove and add event listner
 }
 // Turn it off - remove the function entirely
 var allowBackExit=function(){
@@ -777,5 +814,15 @@ function ajax_request(url, callback, type, method) {
 
 function ajax_request_json(url, callback) {ajax_request(url,callback,"json");}
 
-
+// QUERY STRING location.search
+var get_query_string = function () {
+	var query_string = {};
+	var query = window.location.search.substring(1); // query except ?
+	var vars = query.split("&");
+	for (var i=0;i<vars.length;i++) {
+		var pair = vars[i].split("=");
+		query_string[pair[0]] = pair[1];
+	}
+	return query_string;
+};
 
