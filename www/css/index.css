@@ -4,14 +4,32 @@
 }
 
 
+/*
 
+afan colors:
+green: #6a6   pastel: #aea
+yellow: #fa1  pastel: #fc5
+granate: #400;pastel: #faa
+white: #eee
+
+*/
 
 
 html{margin:0; padding:0; background: #111;}
-body{margin:0 auto; padding:0; font:normal 12px arial, sans-serif; color:#333; width:100%;
+body{margin:0 auto; padding:0; font:normal 28px Monospace, Arial, sans-serif; color:#555; width:100%;
     -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
     -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
     -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
+}
+
+#splash_screen {
+	position: fixed;
+	top: 0; right: 0; bottom: 0; left: 0;
+	margin:0 auto;
+	padding-top:80px;
+	text-align:center;
+	background: #aea;
+	z-index: 99999; /* could work without this. Just to make sure in case other elements have also positioning and positive z-indez */
 }
 
 img{border:none;}
@@ -34,7 +52,7 @@ nav a, button {min-width:48px;min-height:48px}
 	width:100%; max-width:1000px; min-width:320px;   
 	position: absolute; bottom:0px; top:0px; left:0px; right:0px;
 	overflow-x:hidden; /*disallow horizontal scrolling*/ 
-	background:#965;
+	background-color:#fa1;/*background:#662;*/
 	margin: 0 auto;
     /*margin-left:auto;  margin-right:auto;  */
 	/*height:100%;*/
@@ -43,14 +61,15 @@ min-height: 80%; CANNOT BE A PERCENTAGE :() min-width:640px; */
 	/*min-height: 600px;*/ /*BEST SOLUTION WOULD BE ADAPT PER DEVICE MAXHEIGHT*/
 }
 
-/*h1{font: normal 35px VanillaRegular,Arial,sans-serif; text-align: center; margin: 10px 0 5px 0; color: #eaa;}*/
+h1{font: normal 26px Monospace,Arial,sans-serif; margin: 5px; color: #722;}
 
-#header{display:block;position:absolute;top:0px; height:80px;width:100%;} /*overflow:hidden;*/
-#zone_canvas{position:absolute; overflow: hidden;background:#fee; top:80px; bottom:1%; width:100%;} 
+#header{display:block;position:absolute;top:0px; height:80px;width:100%;background-color:#fc5} /*overflow:hidden;*/
+#zone_canvas{position:absolute; overflow: hidden;background:#aea;top:80px; bottom:1%; width:100%;} /*#fee*/
 /*HEIGHT perhaps use variables? css3?*/
 
+select, button {font-family:inherit;font-size:inherit;}
 
-#zone_score{font: bold 14px Arial,sans-serif; padding: 5px;}
+#zone_score{font: bold 14px Monospace, Verdana,Arial,sans-serif; padding: 5px;}
 .col_left{float: left;margin-left:10px;}
 .col_right{float: right; text-align: right; margin-right:10px;}
 #best_score{color: #111;}
@@ -60,15 +79,35 @@ min-height: 80%; CANNOT BE A PERCENTAGE :() min-width:640px; */
 .col_moves{text-align: center; color: #d63;}
 .col_moves .critical{color: #c33;}
 
+div.button{
+	border:2px solid #733;
+    background-color: #eee;
+	min-width:48px;min-height:48px;
+	display:inline-block; /*make the div adjust to the content*/
+	vertical-align: middle;
+	text-align:center;
+}
+
+button.button{
+	/*font-size:30px;*/
+	border:2px solid #733;
+    background-color: #eee;
+	min-width:48px;min-height:48px;
+	margin:2px;
+}
+
+
+
 
 #sound{/*height:40%;*/
 	width:100%;align:center;margin:0;padding:1px;
 }
 #answers{/*height:60%;*/
-	width:98%;
-	/*width:100%;text-align:center;display:table;display:inline;display:inline-block;*/
+	width:100%;
+	text-align:center;
+	/*width:100%;display:table;display:inline;display:inline-block;*/
 	margin:0 auto;/*padding:0 5px;*/
-	background:#fee;
+	/*background:#fee;*/
 }
 /*
 #answers ul{height:100%;width:100%;align:center;margin:0;padding:0;decoration:none;border:1px solid black;decoration:none;}
@@ -76,6 +115,7 @@ min-height: 80%; CANNOT BE A PERCENTAGE :() min-width:640px; */
 */
 /*#answers ul li:hover{background:#5b6;border:1px solid red;}*/
 
+#menu-logo-div{height:10px;}
 
 .text-center{
 	text-align:center;
@@ -85,15 +125,28 @@ min-height: 80%; CANNOT BE A PERCENTAGE :() min-width:640px; */
 	width:31%; max-width:250px;
  	text-align:center;
 	margin:0 1px; padding:1px;
-	float:left;
+	/*float:left;*/
+	display:inline-block;
 	border:2px solid #a55; /*original border color #fee*/
-	background-color: #d99;
+	background-color: #eee; /*d99, fbb*/
 }
 
 .hover_red_border div{
 	margin: 0 auto;
 	/*width:30%;  seems to default to 100 that is what we want...*/
 	padding-top:100%;  /*force square shape */
+}
+
+.bsprite {
+	border:2px solid #733;
+    background-color: #eee;
+    width: 30%;
+    padding: 30% 0 0;
+	display:inline-block;
+    height: 0;
+    margin: 0;
+    overflow: hidden;
+    text-align: center;
 }
 
 /*.hover_red_border:hover{
@@ -129,12 +182,15 @@ th{
 	#zone_canvas{top:48px;}
 }
 
+/* Small Landscape (e.g., Galaxy S4)*/
 @media screen and (max-height: 400px) and (min-width: 420px) {
-	#header{}
+	#header{height:38px;}
+	#zone_canvas{top:38px;}
+	#h1{font-size:16px;}
 	#zone_canvas{bottom:0;}
-	#answers{
-		width:60%;
-	}
+	#answers{width:60%;}
+	body{font-size:18px;}
+	#menu-logo-div{display:none;height:0;margin:0;padding:0;}
 }
 
 

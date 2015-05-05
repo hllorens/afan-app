@@ -24,7 +24,7 @@ var json_test, json_training;
 ajax_request_json("../data/test1.tsv.json",function(json){
     json_test=json; //console.log(json)
 });
-ajax_request_json("../data/training1-short.json", function(json) { //training1
+ajax_request_json("../data/training1.json", function(json) { //training1, training1-short
     json_training=json; //console.log(json)
 });
 var json_activities=json_training;
@@ -71,6 +71,7 @@ var audio_object_sprite_ref={
 // constants
 var USE_ANSWERS = 3;
 var MAX_PLAYS=2;
+var MAX_TRAINING_ACTIVITIES=10;
 
 
 
@@ -158,29 +159,34 @@ function onDeviceReady() {
                         'Ver='  + device.version
 		
 	}
-	media_objects=ResourceLoader.load_media(images,sounds,splash_screen,false,debug);
+	splash_screen();
 }
 
-
 function splash_screen(){
+	// the default index.html might contain splash screen directly (more efficient)
+	media_objects=ResourceLoader.load_media(images,sounds,menu_screen,false,debug);
+}
+
+function menu_screen(){
 	allowBackExit();
+	var splash=document.getElementById("splash_screen");
+	if(splash!=null) splash.parentNode.removeChild(splash);
+
 	header_zone.innerHTML='<h1>Conciencia Fonológica</h1>';
 	if(debug){
 		console.log('userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info);
 		console.log('not_loaded sounds: '+ResourceLoader.not_loaded['sounds'].length);
 	}
 	canvas_zone.innerHTML=' \
-	<br />\
-	<div id="splash-content" class="text-center">\
-	<div id="splash-logo-div"></div> \
-	<br />  \
+	<div id="menu-content" class="text-center">\
+	<div id="menu-logo-div"></div> \
 	Sujeto:  <select id="subjects-select"></select> \
 	<nav id="responsive_menu">\
-	<br /><button id="start-button" disabled="true">Practicar</button> \
-	<br /><button id="start-test-button" disabled="true">Test</button> \
-	<br /><button id="add-subject" disabled="true" onclick="add_subject()">Añadir Niño</button> \
-	<br /><button id="results" disabled="true" onclick="explore_results()">Resultados</button> \
-	<br /><br /><button id="exit" onclick="exit_app()">Salir</button> \
+	<br /><button id="start-button" class="button" disabled="true">Practicar</button> \
+	<br /><button id="start-test-button" class="button" disabled="true">Test</button> \
+	<br /><button id="add-subject" disabled="true" class="button" onclick="add_subject()">Añadir Participante</button> \
+	<br /><button id="results" disabled="true" class="button" onclick="explore_results()">Resultados</button> \
+	<br /><button id="exit" class="button exit" onclick="exit_app()">Salir</button> \
 	</nav>\
 	</div>\
 	';
@@ -254,19 +260,19 @@ var add_subject=function(){
 			<label>Comentarios</label><textarea id="new-comments"></textarea><br /> \
 			<input id="my-form-submit" type="submit" style="visibility:hidden;display:none" />\
 			</form>'; //title="Error: yyyy-mm-dd"		
-	open_js_modal_alert("Añadir Niño",form_html,accept_function,cancel_function);
+	open_js_modal_alert("Añadir Participante",form_html,accept_function,cancel_function);
 };
 
 
 var explore_results=function(){
 	preventBackExit();
-	header_zone.innerHTML='<h1 onclick="splash_screen()"> < Conciencia Fonológica</h1>';
+	header_zone.innerHTML='<h1 onclick="menu_screen()"> < Conciencia Fonológica</h1>';
 	session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
 	canvas_zone.innerHTML=' \
 	<div class="text-center">\
 	<br /><h2>Resultados</h2> \
 	<div id="results-div">cargando...</div> \
-	<br /><br /><button id="go-back" onclick="splash_screen()">Volver</button> \
+	<br /><br /><button id="go-back" onclick="menu_screen()">Volver</button> \
 	</div>\
 	';
 	ajax_request_json(
@@ -292,7 +298,7 @@ var explore_results=function(){
 
 var explore_result_detail=function(session_id){
 	preventBackExit();
-	header_zone.innerHTML='<h1 onclick="splash_screen()"> < Conciencia Fonológica</h1>';
+	header_zone.innerHTML='<h1 onclick="menu_screen()"> < Conciencia Fonológica</h1>';
 	canvas_zone.innerHTML=' \
 	<div class="text-center">\
 	<br /><h2>Resultado: '+session_id+'</h2> \
@@ -322,7 +328,7 @@ var explore_result_detail=function(session_id){
 
 function game(){
 	preventBackExit();
-	header_zone.innerHTML='<h1 onclick="splash_screen()"> < Conciencia Fonológica</h1>';
+	header_zone.innerHTML='<h1 onclick="menu_screen()"> < Conciencia Fonológica</h1>';
 	if(ResourceLoader.not_loaded['sounds'].length!=0){
 		if(debug) console.log("Not loaded sounds: "+ResourceLoader.not_loaded['sounds'].length+"  "+ResourceLoader.not_loaded['sounds']);
 		ResourceLoader.load_media_wait_for_lazy_audio(game);
@@ -338,7 +344,7 @@ function game(){
 		audio_sprite_object.removeEventListener('canplaythrough', ResourceLoader.log_and_remove_from_not_loaded);
 		audio_sprite=new AudioSprite(audio_sprite_object,audio_object_sprite_ref,debug);
 		
-		title_modal_window=open_js_modal_content('<h1>Nivel 1</h1>');
+		title_modal_window=open_js_modal_content('<h1>Nivel 1: '+session_data.mode+'</h1>');
 		audio_sprite.playSpriteRange('zsilence_start',start_activity_set);
 	}
 }
@@ -383,9 +389,18 @@ function start_activity_set(){
 	dom_score_answered=document.getElementById('current_answered_num');
 	activity_timer.anchor_to_dom(document.getElementById('activity_timer_span'));
 	dom_score_answered.innerHTML=session_data.num_answered;
-	remaining_rand_activities=json_activities.slice();
+	if(session_data.mode=="training"){ 
+		var start=Math.floor(Math.random()*(json_activities.length-(MAX_TRAINING_ACTIVITIES+1)));
+		remaining_rand_activities=json_activities.slice(start,start+MAX_TRAINING_ACTIVITIES);
+	}else{
+		remaining_rand_activities=json_activities.slice();
+	}
 	document.getElementById('remaining_activities_num').innerHTML=""+(remaining_rand_activities.length-1);
-	activity(Math.floor(Math.random()*remaining_rand_activities.length));
+	if(session_data.mode=="training"){
+		activity(Math.floor(Math.random()*remaining_rand_activities.length));
+	}else{
+		activity(0);
+	}
 }
 
 function activity(i){
@@ -425,7 +440,7 @@ function activity(i){
 	 }
 	
 	zone_sound=document.getElementById('sound');
-	zone_sound.innerHTML='<button id="playb" onclick="play_activity_sound()">PLAY</button> <button id="go-back" onclick="splash_screen()">Salir</button>';
+	zone_sound.innerHTML='<button id="playb" class="button" onclick="play_activity_sound()">PLAY</button> <button id="go-back" onclick="menu_screen()">Salir</button>';
 	/*setTimeout(function(){play_activity_sound();	}, 2000);*/
 }
 
@@ -506,11 +521,10 @@ function nextActivity(){
 	if(session_data.mode!="test") remove_modal();
 	if(remaining_rand_activities.length==0){
 		canvas_zone.innerHTML='NO HAY MAS ACTIVIDADES. FIN, sending...';
-		// calculate result
 		if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
-		send_session_data()
+		send_session_data();
 	}else{
-		if(remaining_rand_activities.length==1){
+		if(remaining_rand_activities.length==1 || session_data.mode=="test"){
 			activity(0);
 		}else{
 			activity(Math.floor(Math.random()*remaining_rand_activities.length));
@@ -529,7 +543,7 @@ function send_session_data(){
   xhr.onload = function () {
     var data=JSON.parse(this.responseText);
     canvas_zone.innerHTML+='<br />Server message: '+data.msg+'<br /><br />\
-    <br /><button id="go-back" onclick="splash_screen()">Volver</button>';
+    <br /><button id="go-back" onclick="menu_screen()">Volver</button>';
   };
 
 }

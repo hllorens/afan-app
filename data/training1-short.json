@@ -3,8 +3,6 @@
 {"type":"sounds","sounds":["p","e","z"],"level":"1","answers":["pez","tren","sol","sal","col"]},
 {"type":"sounds","sounds":["s","a","l"],"level":"1","answers":["sal","sol","col","pez","tren"]},
 {"type":"sounds","sounds":["k","o","l"],"level":"1","answers":["col","sol","sal","pez","tren"]},
-{"type":"sounds","sounds":["t","r","e","n"],"level":"1","answers":["tren","pez","sol","sal","col"]},
-{"type":"sounds","sounds":["k","a","\/","s","a"],"level":"1","answers":["casa","cama","canya","cabra","carta","bala"]},
-{"type":"sounds","sounds":["a","\/","l","a"],"level":"1","answers":["ala","bala","casa","rama","cama","palo"]}
+{"type":"sounds","sounds":["t","r","e","n"],"level":"1","answers":["tren","pez","sol","sal","col"]}
 ]
 

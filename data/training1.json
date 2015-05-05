@@ -1,2 +1,543 @@
-[{"type":"sounds","sounds":["s","o","l"],"level":"1","answers":["sol","col","sal","pez","tren"]},{"type":"sounds","sounds":["p","e","z"],"level":"1","answers":["pez","tren","sol","sal","col"]},{"type":"sounds","sounds":["s","a","l"],"level":"1","answers":["sal","sol","col","pez","tren"]},{"type":"sounds","sounds":["k","o","l"],"level":"1","answers":["col","sol","sal","pez","tren"]},{"type":"sounds","sounds":["t","r","e","n"],"level":"1","answers":["tren","pez","sol","sal","col"]},{"type":"sounds","sounds":["k","a","\/","s","a"],"level":"1","answers":["casa","cama","canya","cabra","carta","bala"]},{"type":"sounds","sounds":["a","\/","l","a"],"level":"1","answers":["ala","bala","casa","rama","cama","palo"]},{"type":"sounds","sounds":["b","a","\/","l","a"],"level":"1","answers":["bala","ala","casa","rama","cama","palo"]},{"type":"sounds","sounds":["k","o","\/","p","a"],"level":"1","answers":["copa","ropa","sopa","goma","sofa","sofa"]},{"type":"sounds","sounds":["rr","o","\/","p","a"],"level":"1","answers":["ropa","copa","sopa","goma","sofa","sofa"]},{"type":"sounds","sounds":["s","o","\/","p","a"],"level":"1","answers":["sopa","copa","ropa","sofa","sofa","sapo"]},{"type":"sounds","sounds":["g","a","\/","t","o"],"level":"1","answers":["gato","pato","raton","mano","sapo","palo"]},{"type":"sounds","sounds":["m","e","\/","s","a"],"level":"1","answers":["mesa","seta","reja","casa","ala","percha"]},{"type":"sounds","sounds":["m","a","\/","n","o"],"level":"1","answers":["mano","mono","marco","gato","pato","sapo"]},{"type":"sounds","sounds":["p","a","\/","t","o"],"level":"1","answers":["pato","gato","palo","gato","plato","sapo"]},{"type":"sounds","sounds":["rr","a","\/","m","a"],"level":"1","answers":["rama","cama","casa","bala","ropa","goma"]},{"type":"sounds","sounds":["k","a","\/","m","a"],"level":"1","answers":["cama","casa","rama","canya","carta","bala"]},{"type":"sounds","sounds":["s","a","\/","p","o"],"level":"1","answers":["sapo","pato","palo","sopa","gato","mano"]},{"type":"sounds","sounds":["s","e","\/","t","a"],"level":"1","answers":["seta","mesa","reja","sopa","sofa","sofa"]},{"type":"sounds","sounds":["p","i","\/","n","o"],"level":"1","answers":["pino","vino","plano","mano","pato","mono"]},{"type":"sounds","sounds":["m","o","\/","n","o"],"level":"1","answers":["mono","mano","pino","rojo","vino","goma"]},{"type":"sounds","sounds":["p","i","\/","\u00f1","a"],"level":"1","answers":["pinya","pino","canya","ala","piedra","copa"]},{"type":"sounds","sounds":["p","a","\/","l","o"],"level":"1","answers":["palo","pato","sapo","plato","plano","gato"]},{"type":"sounds","sounds":["rr","o","\/","j","o"],"level":"1","answers":["rojo","ropa","mono","perro","reja","raton"]},{"type":"sounds","sounds":["f","a","\/","r","o"],"level":"1","answers":["faro","gato","mano","pato","sapo","palo"]},{"type":"sounds","sounds":["g","o","\/","m","a"],"level":"1","answers":["goma","copa","ropa","sopa","sofa","sofa"]},{"type":"sounds","sounds":["l","e","\/","ch","e"],"level":"1","answers":["leche","percha","verde","mesa","seta","perro"]},{"type":"sounds","sounds":["s","o","\/","f","a"],"level":"1","answers":["sofa","sopa","copa","ropa","goma","seta"]},{"type":"sounds","sounds":["g","a","\/","t","o"],"level":"1","answers":["gato","pato","raton","mano","sapo","palo"]},{"type":"sounds","sounds":["s","o","\/","f","a"],"level":"1","answers":["sofa","sopa","copa","ropa","goma","seta"]},{"type":"sounds","sounds":["b","i","\/","n","o"],"level":"1","answers":["vino","pino","mano","mono","plano","barco"]},{"type":"sounds","sounds":["k","a","\/","\u00f1","a"],"level":"1","answers":["canya","casa","cama","carta","bala","copa"]},{"type":"sounds","sounds":["p","i","e","\/","d","r","a"],"level":"1","answers":["piedra","pino","pinya","cabra","noria","percha"]},{"type":"sounds","sounds":["m","a","r","\/","k","o"],"level":"1","answers":["marco","mano","arco","barco","gato","pato"]},{"type":"sounds","sounds":["k","a","\/","m","i","o","n"],"level":"1","answers":["camion","cama","casa","maiz","rama","canya"]},{"type":"sounds","sounds":["p","e","\/","rr","o"],"level":"1","answers":["perro","pato","pino","palo","reloj","sapo"]},{"type":"sounds","sounds":["a","r","\/","k","o"],"level":"1","answers":["arco","marco","arbol","brazo","faro","barco"]},{"type":"sounds","sounds":["p","l","a","\/","t","o"],"level":"1","answers":["plato","plano","pato","palo","gato","pino"]},{"type":"sounds","sounds":["l","i","\/","b","r","o","s"],"level":"1","answers":["libros","arbol","vino","cabra","pino","pinya"]},{"type":"sounds","sounds":["m","a","\/","i","z"],"level":"1","answers":["maiz","mano","lapiz","casa","rama","cama"]},{"type":"sounds","sounds":["k","a","\/","b","r","a"],"level":"1","answers":["cabra","casa","cama","faro","canya","cuatro"]},{"type":"sounds","sounds":["p","a","s","\/","t","e","l"],"level":"1","answers":["pastel","papel","pato","plato","gato","palo"]},{"type":"sounds","sounds":["p","l","a","\/","n","o"],"level":"1","answers":["plano","plato","pino","palo","mano","pato"]},{"type":"sounds","sounds":["rr","e","\/","j","a"],"level":"1","answers":["reja","mesa","seta","ropa","rama","ala"]},{"type":"sounds","sounds":["p","u","e","n","\/","t","e"],"level":"1","answers":["puente","pastel","dulce","pato","plato","percha"]},{"type":"sounds","sounds":["rr","a","\/","t","o","n"],"level":"1","answers":["raton","gato","pato","gato","mano","sapo"]},{"type":"sounds","sounds":["k","a","r","\/","t","a"],"level":"1","answers":["carta","casa","cama","canya","bala","copa"]},{"type":"sounds","sounds":["b","a","r","\/","c","o"],"level":"1","answers":["barco","brazo","marco","gato","mano","pato"]},{"type":"sounds","sounds":["p","e","r","\/","ch","a"],"level":"1","answers":["percha","mesa","seta","reja","pinya","leche"]},{"type":"sounds","sounds":["r","e","\/","l","o","j"],"level":"1","answers":["reloj","perro","palo","arco","arbol","ala"]},{"type":"sounds","sounds":["b","r","a","\/","z","o"],"level":"1","answers":["brazo","barco","marco","arco","vino","arbol"]},{"type":"sounds","sounds":["k","o","m","\/","p","r","a","r"],"level":"1","answers":["comprar","copa","cabra","noria","ropa","sopa"]},{"type":"sounds","sounds":["k","u","a","\/","t","r","o"],"level":"1","answers":["cuatro","carta","plato","cabra","casa","libros"]},{"type":"sounds","sounds":["b","e","r","\/","d","e"],"level":"1","answers":["verde","leche","percha","mesa","seta","piedra"]},{"type":"sounds","sounds":["l","a","\/","p","i","z"],"level":"1","answers":["lapiz","sapo","maiz","palo","papel","casa"]},{"type":"sounds","sounds":["d","u","l","\/","z","e"],"level":"1","answers":["dulce","puente","leche","verde","pluma","azul"]},{"type":"sounds","sounds":["p","a","\/","p","e","l"],"level":"1","answers":["papel","pastel","pato","sapo","palo","lapiz"]},{"type":"sounds","sounds":["a","\/","z","u","l"],"level":"1","answers":["azul","ala","arbol","maiz","papel","casa"]},{"type":"sounds","sounds":["u","\/","b","a","s"],"level":"1","answers":["uvas","ala","bala","casa","copa","ropa"]},{"type":"sounds","sounds":["c","a","\/","y","a"],"level":"1","answers":["calla","casa","bala","rama","cama","canya"]},{"type":"sounds","sounds":["p","l","u","\/","m","a"],"level":"1","answers":["pluma","rama","cama","pinya","goma","plato"]},{"type":"sounds","sounds":["a","r","\/","b","o","l"],"level":"1","answers":["arbol","arco","brazo","barco","reloj","faro"]},{"type":"sounds","sounds":["n","o","\/","r","i","a"],"level":"1","answers":["noria","mono","copa","ropa","sopa","rojo"]},{"type":"sounds","sounds":["a","\/","b","e","\/","j","a"],"level":"1","answers":["abeja","oreja","almeja","banyera","ballena","aceite"]},{"type":"sounds","sounds":["k","a","\/","m","i","\/","n","o"],"level":"1","answers":["camino","camisa","candado","cortina","camara","sandia"]},{"type":"sounds","sounds":["k","o","\/","n","e","\/","j","o"],"level":"1","answers":["conejo","oreja","abeja","camino","candado","almeja"]},{"type":"sounds","sounds":["p","a","\/","j","a","\/","r","o"],"level":"1","answers":["pajaro","pantano","platano","camara","patata","candado"]},{"type":"sounds","sounds":["o","\/","r","e","\/","j","a"],"level":"1","answers":["oreja","abeja","almeja","conejo","banyera","naranja"]},{"type":"sounds","sounds":["s","a","n","\/","d","i","\/","a"],"level":"1","answers":["sandia","camisa","candado","lluvia","camino","manzana"]},{"type":"sounds","sounds":["k","o","r","\/","b","a","\/","t","a"],"level":"1","answers":["corbata","cortina","silbato","cuchara","camara","patata"]},{"type":"sounds","sounds":["a","n","\/","z","i","a","\/","n","a"],"level":"1","answers":["anciana","manzana","camino","cortina","naranja","aceite"]},{"type":"sounds","sounds":["s","o","r","\/","p","r","e","\/","s","a"],"level":"1","answers":["sorpresa","sombrilla","sombrero","corbata","cortina"]},{"type":"sounds","sounds":["k","a","n","\/","d","a","\/","d","o"],"level":"1","answers":["candado","pantano","sandia","pescado","camino","pajaro"]},{"type":"sounds","sounds":["s","i","l","\/","b","a","\/","t","o"],"level":"1","answers":["silbato","corbata","platano","pescado"]},{"type":"sounds","sounds":["a","\/","b","r","i","\/","g","o"],"level":"1","answers":["abrigo","sombrilla","abeja","pajaro","oreja","aceite"]},{"type":"sounds","sounds":["l","a","m","\/","p","a","\/","r","a"],"level":"1","answers":["lampara","camara","pajaro","patata","manzana","cuchara"]},{"type":"sounds","sounds":["p","l","a","\/","t","a","\/","n","o"],"level":"1","answers":["platano","pantano","silbato","pajaro","pescado","candado"]},{"type":"sounds","sounds":["a","l","\/","m","e","\/","j","a"],"level":"1","answers":["almeja","abeja","oreja","banyera","ballena","camisa"]},{"type":"sounds","sounds":["k","o","r","\/","t","i","\/","n","a"],"level":"1","answers":["cortina","corbata","camino","camisa","anciana","sombrilla"]},{"type":"sounds","sounds":["k","u","\/","ch","a","\/","r","a"],"level":"1","answers":["cuchara","camara","corbata","lampara","pajaro","oreja"]},{"type":"sounds","sounds":["n","a","\/","r","a","n","\/","j","a"],"level":"1","answers":["naranja","oreja","maracas","camara","patata","manzana"]},{"type":"sounds","sounds":["a","\/","z","e","i","\/","t","e"],"level":"1","answers":["aceite","abeja","oreja","almeja","anciana","abrigo"]},{"type":"sounds","sounds":["p","e","s","\/","k","a","\/","d","o"],"level":"1","answers":["pescado","pajaro","candado","platano","pantano","silbato"]},{"type":"sounds","sounds":["t","i","\/","j","e","\/","r","a","s"],"level":"1","answers":["tijeras","oreja","abeja","banyera","almeja"]},{"type":"sounds","sounds":["k","a","\/","m","i","\/","s","a"],"level":"1","answers":["camisa","camino","camara","almeja","cortina","maracas"]},{"type":"sounds","sounds":["p","a","n","\/","t","a","\/","n","o"],"level":"1","answers":["pantano","platano","pajaro","candado","patata","manzana"]},{"type":"sounds","sounds":["m","a","\/","r","a","\/","k","a","s"],"level":"1","answers":["maracas","camara","lampara","naranja","manzana","patata"]},{"type":"sounds","sounds":["k","a","\/","m","a","\/","r","a"],"level":"1","answers":["camara","cuchara","camisa","lampara","maracas","camino"]},{"type":"sounds","sounds":["s","o","m","\/","b","r","i","\/","y","a"],"level":"1","answers":["sombrilla","sombrero","sorpresa","abrigo","corbata"]},{"type":"sounds","sounds":["p","a","\/","t","a","\/","t","a"],"level":"1","answers":["patata","pantano","platano","pajaro","camara","corbata"]},{"type":"sounds","sounds":["m","a","n","\/","z","a","\/","n","a"],"level":"1","answers":["manzana","anciana","pantano","lampara","maracas","camara"]},{"type":"sounds","sounds":["s","o","m","\/","b","r","e","\/","r","o"],"level":"1","answers":["sombrero","sombrilla","sorpresa","abrigo"]},{"type":"sounds","sounds":["b","a","\/","\u00f1","e","\/","r","a"],"level":"1","answers":["banyera","ballena","abeja","oreja","almeja","camara"]},{"type":"sounds","sounds":["b","a","\/","ll","e","\/","n","a"],"level":"1","answers":["ballena","banyera","abeja","almeja","oreja","manzana"]},{"type":"sounds","sounds":["ll","u","\/","b","i","\/","a"],"level":"1","answers":["lluvia","abeja","sandia","abrigo","cuchara","camisa"]}]
+[
+	{
+		"type" : "sounds",
+		"sounds" : ["s", "o", "l"],
+		"level" : "1",
+		"answers" : ["sol", "col", "sal", "pez", "tren"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "e", "z"],
+		"level" : "1",
+		"answers" : ["pez", "tren", "sol", "sal", "col"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["s", "a", "l"],
+		"level" : "1",
+		"answers" : ["sal", "sol", "col", "pez", "tren"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["k", "o", "l"],
+		"level" : "1",
+		"answers" : ["col", "sol", "sal", "pez", "tren"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["t", "r", "e", "n"],
+		"level" : "1",
+		"answers" : ["tren", "pez", "sol", "sal", "col"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["b", "a", "\/", "l", "a"],
+		"level" : "1",
+		"answers" : ["bala", "ala", "casa", "rama", "cama", "palo"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["k", "o", "\/", "p", "a"],
+		"level" : "1",
+		"answers" : ["copa", "ropa", "sopa", "goma", "sofa", "sofa"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["rr", "o", "\/", "p", "a"],
+		"level" : "1",
+		"answers" : ["ropa", "copa", "sopa", "goma", "sofa", "sofa"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["s", "o", "\/", "p", "a"],
+		"level" : "1",
+		"answers" : ["sopa", "copa", "ropa", "sofa", "sofa", "sapo"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["g", "a", "\/", "t", "o"],
+		"level" : "1",
+		"answers" : ["gato", "pato", "raton", "mano", "sapo", "palo"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["m", "a", "\/", "n", "o"],
+		"level" : "1",
+		"answers" : ["mano", "mono", "marco", "gato", "pato", "sapo"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "a", "\/", "t", "o"],
+		"level" : "1",
+		"answers" : ["pato", "gato", "palo", "gato", "plato", "sapo"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["rr", "a", "\/", "m", "a"],
+		"level" : "1",
+		"answers" : ["rama", "cama", "casa", "bala", "ropa", "goma"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["k", "a", "\/", "m", "a"],
+		"level" : "1",
+		"answers" : ["cama", "casa", "rama", "canya", "carta", "bala"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["s", "a", "\/", "p", "o"],
+		"level" : "1",
+		"answers" : ["sapo", "pato", "palo", "sopa", "gato", "mano"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["s", "e", "\/", "t", "a"],
+		"level" : "1",
+		"answers" : ["seta", "mesa", "reja", "sopa", "sofa", "sofa"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "i", "\/", "n", "o"],
+		"level" : "1",
+		"answers" : ["pino", "vino", "plano", "mano", "pato", "mono"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["m", "o", "\/", "n", "o"],
+		"level" : "1",
+		"answers" : ["mono", "mano", "pino", "rojo", "vino", "goma"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "i", "\/", "\u00f1", "a"],
+		"level" : "1",
+		"answers" : ["pinya", "pino", "canya", "ala", "piedra", "copa"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "a", "\/", "l", "o"],
+		"level" : "1",
+		"answers" : ["palo", "pato", "sapo", "plato", "plano", "gato"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["rr", "o", "\/", "j", "o"],
+		"level" : "1",
+		"answers" : ["rojo", "ropa", "mono", "perro", "reja", "raton"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["f", "a", "\/", "r", "o"],
+		"level" : "1",
+		"answers" : ["faro", "gato", "mano", "pato", "sapo", "palo"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["g", "o", "\/", "m", "a"],
+		"level" : "1",
+		"answers" : ["goma", "copa", "ropa", "sopa", "sofa", "sofa"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["l", "e", "\/", "ch", "e"],
+		"level" : "1",
+		"answers" : ["leche", "percha", "verde", "mesa", "seta", "perro"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["s", "o", "\/", "f", "a"],
+		"level" : "1",
+		"answers" : ["sofa", "sopa", "copa", "ropa", "goma", "seta"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["g", "a", "\/", "t", "o"],
+		"level" : "1",
+		"answers" : ["gato", "pato", "raton", "mano", "sapo", "palo"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["s", "o", "\/", "f", "a"],
+		"level" : "1",
+		"answers" : ["sofa", "sopa", "copa", "ropa", "goma", "seta"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["b", "i", "\/", "n", "o"],
+		"level" : "1",
+		"answers" : ["vino", "pino", "mano", "mono", "plano", "barco"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["k", "a", "\/", "\u00f1", "a"],
+		"level" : "1",
+		"answers" : ["canya", "casa", "cama", "carta", "bala", "copa"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "i", "e", "\/", "d", "r", "a"],
+		"level" : "1",
+		"answers" : ["piedra", "pino", "pinya", "cabra", "noria", "percha"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["m", "a", "r", "\/", "k", "o"],
+		"level" : "1",
+		"answers" : ["marco", "mano", "arco", "barco", "gato", "pato"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["k", "a", "\/", "m", "i", "o", "n"],
+		"level" : "1",
+		"answers" : ["camion", "cama", "casa", "maiz", "rama", "canya"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "e", "\/", "rr", "o"],
+		"level" : "1",
+		"answers" : ["perro", "pato", "pino", "palo", "reloj", "sapo"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["a", "r", "\/", "k", "o"],
+		"level" : "1",
+		"answers" : ["arco", "marco", "arbol", "brazo", "faro", "barco"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "l", "a", "\/", "t", "o"],
+		"level" : "1",
+		"answers" : ["plato", "plano", "pato", "palo", "gato", "pino"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["l", "i", "\/", "b", "r", "o", "s"],
+		"level" : "1",
+		"answers" : ["libros", "arbol", "vino", "cabra", "pino", "pinya"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["m", "a", "\/", "i", "z"],
+		"level" : "1",
+		"answers" : ["maiz", "mano", "lapiz", "casa", "rama", "cama"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["k", "a", "\/", "b", "r", "a"],
+		"level" : "1",
+		"answers" : ["cabra", "casa", "cama", "faro", "canya", "cuatro"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "a", "s", "\/", "t", "e", "l"],
+		"level" : "1",
+		"answers" : ["pastel", "papel", "pato", "plato", "gato", "palo"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "l", "a", "\/", "n", "o"],
+		"level" : "1",
+		"answers" : ["plano", "plato", "pino", "palo", "mano", "pato"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["rr", "e", "\/", "j", "a"],
+		"level" : "1",
+		"answers" : ["reja", "mesa", "seta", "ropa", "rama", "ala"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "u", "e", "n", "\/", "t", "e"],
+		"level" : "1",
+		"answers" : ["puente", "pastel", "dulce", "pato", "plato", "percha"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["rr", "a", "\/", "t", "o", "n"],
+		"level" : "1",
+		"answers" : ["raton", "gato", "pato", "gato", "mano", "sapo"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["b", "a", "r", "\/", "c", "o"],
+		"level" : "1",
+		"answers" : ["barco", "brazo", "marco", "gato", "mano", "pato"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "e", "r", "\/", "ch", "a"],
+		"level" : "1",
+		"answers" : ["percha", "mesa", "seta", "reja", "pinya", "leche"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["r", "e", "\/", "l", "o", "j"],
+		"level" : "1",
+		"answers" : ["reloj", "perro", "palo", "arco", "arbol", "ala"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["b", "r", "a", "\/", "z", "o"],
+		"level" : "1",
+		"answers" : ["brazo", "barco", "marco", "arco", "vino", "arbol"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["k", "o", "m", "\/", "p", "r", "a", "r"],
+		"level" : "1",
+		"answers" : ["comprar", "copa", "cabra", "noria", "ropa", "sopa"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["k", "u", "a", "\/", "t", "r", "o"],
+		"level" : "1",
+		"answers" : ["cuatro", "carta", "plato", "cabra", "casa", "libros"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["b", "e", "r", "\/", "d", "e"],
+		"level" : "1",
+		"answers" : ["verde", "leche", "percha", "mesa", "seta", "piedra"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["l", "a", "\/", "p", "i", "z"],
+		"level" : "1",
+		"answers" : ["lapiz", "sapo", "maiz", "palo", "papel", "casa"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["d", "u", "l", "\/", "z", "e"],
+		"level" : "1",
+		"answers" : ["dulce", "puente", "leche", "verde", "pluma", "azul"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "a", "\/", "p", "e", "l"],
+		"level" : "1",
+		"answers" : ["papel", "pastel", "pato", "sapo", "palo", "lapiz"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["a", "\/", "z", "u", "l"],
+		"level" : "1",
+		"answers" : ["azul", "ala", "arbol", "maiz", "papel", "casa"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["u", "\/", "b", "a", "s"],
+		"level" : "1",
+		"answers" : ["uvas", "ala", "bala", "casa", "copa", "ropa"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["c", "a", "\/", "y", "a"],
+		"level" : "1",
+		"answers" : ["calla", "casa", "bala", "rama", "cama", "canya"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "l", "u", "\/", "m", "a"],
+		"level" : "1",
+		"answers" : ["pluma", "rama", "cama", "pinya", "goma", "plato"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["a", "r", "\/", "b", "o", "l"],
+		"level" : "1",
+		"answers" : ["arbol", "arco", "brazo", "barco", "reloj", "faro"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["n", "o", "\/", "r", "i", "a"],
+		"level" : "1",
+		"answers" : ["noria", "mono", "copa", "ropa", "sopa", "rojo"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["a", "\/", "b", "e", "\/", "j", "a"],
+		"level" : "1",
+		"answers" : ["abeja", "oreja", "almeja", "banyera", "ballena", "aceite"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["k", "a", "\/", "m", "i", "\/", "n", "o"],
+		"level" : "1",
+		"answers" : ["camino", "camisa", "candado", "cortina", "camara", "sandia"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["k", "o", "\/", "n", "e", "\/", "j", "o"],
+		"level" : "1",
+		"answers" : ["conejo", "oreja", "abeja", "camino", "candado", "almeja"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "a", "\/", "j", "a", "\/", "r", "o"],
+		"level" : "1",
+		"answers" : ["pajaro", "pantano", "platano", "camara", "patata", "candado"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["o", "\/", "r", "e", "\/", "j", "a"],
+		"level" : "1",
+		"answers" : ["oreja", "abeja", "almeja", "conejo", "banyera", "naranja"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["s", "a", "n", "\/", "d", "i", "\/", "a"],
+		"level" : "1",
+		"answers" : ["sandia", "camisa", "candado", "lluvia", "camino", "manzana"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["k", "o", "r", "\/", "b", "a", "\/", "t", "a"],
+		"level" : "1",
+		"answers" : ["corbata", "cortina", "silbato", "cuchara", "camara", "patata"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["a", "n", "\/", "z", "i", "a", "\/", "n", "a"],
+		"level" : "1",
+		"answers" : ["anciana", "manzana", "camino", "cortina", "naranja", "aceite"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["s", "o", "r", "\/", "p", "r", "e", "\/", "s", "a"],
+		"level" : "1",
+		"answers" : ["sorpresa", "sombrilla", "sombrero", "corbata", "cortina"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["k", "a", "n", "\/", "d", "a", "\/", "d", "o"],
+		"level" : "1",
+		"answers" : ["candado", "pantano", "sandia", "pescado", "camino", "pajaro"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["s", "i", "l", "\/", "b", "a", "\/", "t", "o"],
+		"level" : "1",
+		"answers" : ["silbato", "corbata", "platano", "pescado"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["a", "\/", "b", "r", "i", "\/", "g", "o"],
+		"level" : "1",
+		"answers" : ["abrigo", "sombrilla", "abeja", "pajaro", "oreja", "aceite"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["l", "a", "m", "\/", "p", "a", "\/", "r", "a"],
+		"level" : "1",
+		"answers" : ["lampara", "camara", "pajaro", "patata", "manzana", "cuchara"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "l", "a", "\/", "t", "a", "\/", "n", "o"],
+		"level" : "1",
+		"answers" : ["platano", "pantano", "silbato", "pajaro", "pescado", "candado"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["a", "l", "\/", "m", "e", "\/", "j", "a"],
+		"level" : "1",
+		"answers" : ["almeja", "abeja", "oreja", "banyera", "ballena", "camisa"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["k", "o", "r", "\/", "t", "i", "\/", "n", "a"],
+		"level" : "1",
+		"answers" : ["cortina", "corbata", "camino", "camisa", "anciana", "sombrilla"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["k", "u", "\/", "ch", "a", "\/", "r", "a"],
+		"level" : "1",
+		"answers" : ["cuchara", "camara", "corbata", "lampara", "pajaro", "oreja"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["n", "a", "\/", "r", "a", "n", "\/", "j", "a"],
+		"level" : "1",
+		"answers" : ["naranja", "oreja", "maracas", "camara", "patata", "manzana"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["a", "\/", "z", "e", "i", "\/", "t", "e"],
+		"level" : "1",
+		"answers" : ["aceite", "abeja", "oreja", "almeja", "anciana", "abrigo"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "e", "s", "\/", "k", "a", "\/", "d", "o"],
+		"level" : "1",
+		"answers" : ["pescado", "pajaro", "candado", "platano", "pantano", "silbato"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["t", "i", "\/", "j", "e", "\/", "r", "a", "s"],
+		"level" : "1",
+		"answers" : ["tijeras", "oreja", "abeja", "banyera", "almeja"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["k", "a", "\/", "m", "i", "\/", "s", "a"],
+		"level" : "1",
+		"answers" : ["camisa", "camino", "camara", "almeja", "cortina", "maracas"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "a", "n", "\/", "t", "a", "\/", "n", "o"],
+		"level" : "1",
+		"answers" : ["pantano", "platano", "pajaro", "candado", "patata", "manzana"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["m", "a", "\/", "r", "a", "\/", "k", "a", "s"],
+		"level" : "1",
+		"answers" : ["maracas", "camara", "lampara", "naranja", "manzana", "patata"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["k", "a", "\/", "m", "a", "\/", "r", "a"],
+		"level" : "1",
+		"answers" : ["camara", "cuchara", "camisa", "lampara", "maracas", "camino"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["s", "o", "m", "\/", "b", "r", "i", "\/", "y", "a"],
+		"level" : "1",
+		"answers" : ["sombrilla", "sombrero", "sorpresa", "abrigo", "corbata"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["p", "a", "\/", "t", "a", "\/", "t", "a"],
+		"level" : "1",
+		"answers" : ["patata", "pantano", "platano", "pajaro", "camara", "corbata"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["m", "a", "n", "\/", "z", "a", "\/", "n", "a"],
+		"level" : "1",
+		"answers" : ["manzana", "anciana", "pantano", "lampara", "maracas", "camara"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["s", "o", "m", "\/", "b", "r", "e", "\/", "r", "o"],
+		"level" : "1",
+		"answers" : ["sombrero", "sombrilla", "sorpresa", "abrigo"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["b", "a", "\/", "ll", "e", "\/", "n", "a"],
+		"level" : "1",
+		"answers" : ["ballena", "banyera", "abeja", "almeja", "oreja", "manzana"]
+	},
+	{
+		"type" : "sounds",
+		"sounds" : ["ll", "u", "\/", "b", "i", "\/", "a"],
+		"level" : "1",
+		"answers" : ["lluvia", "abeja", "sandia", "abrigo", "cuchara", "camisa"]
+	}
+]
 
