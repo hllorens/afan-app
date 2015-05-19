@@ -2,6 +2,13 @@
 
 date_default_timezone_set('Europe/Madrid');
 
+/// SET MAX SYLLABLES
+$MAX_SYLLABLES=2; // up to 4 or 5...
+/////////
+if( isset($_GET['syllables']) ){
+	$MAX_SYLLABLES=$_GET['syllables'];
+}
+
 /*if( !isset($_GET['action']) ){
 	exit("Error: action not set");
 }
@@ -120,7 +127,7 @@ $trabadas_arr = array('r','l');
 $json_activities=array();
 
 $similar_words=null;
-for($num_syll=1;$num_syll<4;$num_syll++){
+for($num_syll=1;$num_syll<=$MAX_SYLLABLES;$num_syll++){
 	echo "\n\n--------- $num_syll sílabas --------------\n";
 	foreach($word_obj_arr[$num_syll] as $word_obj){
 		echo "\n->".$word_obj['word'].": ";

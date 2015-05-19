@@ -12,7 +12,7 @@ $table = array('à'=>'a', 'á'=>'a', 'ç'=>'c', 'è'=>'e', 'é'=>'e', 'í'=>'i',
 
 $activity_arr=array();
 $level=1;
-$tsvfile="test.tsv";
+$tsvfile="test1.tsv";
 if( isset($_GET['file']) ){
 	$tsvfile=$_GET['file'];
 }

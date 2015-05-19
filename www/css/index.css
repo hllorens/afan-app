@@ -79,6 +79,19 @@ select, button {font-family:inherit;font-size:inherit;}
 .col_moves{text-align: center; color: #d63;}
 .col_moves .critical{color: #c33;}
 
+#results-table{
+	border:1px solid black;
+	margin: 0 auto;
+	font-size: 20px;
+}
+
+#results-table tbody{background-color:#eee;}
+#results-table th{
+	background:#333;
+	color:#eee;
+	font-weight:bold;
+}
+
 div.button{
 	border:2px solid #733;
     background-color: #eee;
@@ -88,19 +101,28 @@ div.button{
 	text-align:center;
 }
 
+
+
 button.button{
 	/*font-size:30px;*/
 	border:2px solid #733;
-    background-color: #eee;
+	background-color: #eee;
 	min-width:48px;min-height:48px;
 	margin:2px;
+	-webkit-transition: background 0.2s ease-in-out;
+	-moz-transition:    background 0.2s ease-in-out;
+	-ms-transition:     background 0.2s ease-in-out;
+	transition:         background 0.2s ease-in-out;
 }
 
 
+button.backgroundRed{
+    background-color: #faa;
+}
 
 
 #sound{/*height:40%;*/
-	width:100%;align:center;margin:0;padding:1px;
+	width:100%;text-align:center;margin:0;padding:1px;
 }
 #answers{/*height:60%;*/
 	width:100%;
@@ -164,11 +186,7 @@ button.button{
 	padding-top:100%;  force square shape 
 }*/
 
-th{
-	background:#333;
-	color:#eee;
-	font-weight:bold;
-}
+
 
 
 /* 
@@ -180,16 +198,19 @@ th{
 @media screen and (max-width: 650px) {
 	#header{height:48px;}
 	#zone_canvas{top:48px;}
+	#results-table{font-size: 16px;}
 }
 
 /* Small Landscape (e.g., Galaxy S4)*/
 @media screen and (max-height: 400px) and (min-width: 420px) {
-	#header{height:38px;}
-	#zone_canvas{top:38px;}
-	#h1{font-size:16px;}
+	/*#header{height:37px;}
+	#zone_canvas{top:37px;}*/
+	#header{height:0px;}
+	#zone_canvas{top:0px;}
+	#h1{font-size:14px;}
 	#zone_canvas{bottom:0;}
 	#answers{width:60%;}
-	body{font-size:18px;}
+	body{font-size:16px;}
 	#menu-logo-div{display:none;height:0;margin:0;padding:0;}
 }
 

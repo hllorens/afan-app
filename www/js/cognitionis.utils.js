@@ -82,7 +82,12 @@ var ResourceLoader={
 	check_load_status: function() {
 		ResourceLoader.media_load_time+=ResourceLoader.media_load_check_status_interval;
 		ResourceLoader.modal_dialog_msg.innerHTML='check_load_status '+ResourceLoader.media_load_time+' - progress: '+ResourceLoader.load_progressbar.value+' - max: '+ResourceLoader.load_progressbar.max
-		if (ResourceLoader.load_progressbar.value == ResourceLoader.load_progressbar.max || ( ResourceLoader.load_progressbar.value==ResourceLoader.num_images && ResourceLoader.not_loaded['images'].length==0 && is_iOS )  ) {
+		if(ResourceLoader.num_images==0 && ResourceLoader.num_sounds==0){
+			document.body.removeChild(ResourceLoader.modal_load_window);
+			ResourceLoader.callback_on_load_end(); // start the app even if audio is not loaded
+			return;			
+		}
+		if (ResourceLoader.load_progressbar.value == ResourceLoader.load_progressbar.max || ( ResourceLoader.load_progressbar.value==ResourceLoader.num_images && ResourceLoader.not_loaded['images'].length==0 && is_iOS ) ) {
 			if(ResourceLoader.load_progressbar.value==ResourceLoader.num_images){
 				if(!ResourceLoader.lazy_audio && !ResourceLoader.download_lazy_audio_active){
 					//clearInterval(ResourceLoader.load_interval); done by return+timeout
@@ -306,7 +311,7 @@ function open_js_modal_alert(title_text, text_text, accept_function, cancel_func
 
 
 
-function open_js_modal_content(html_content){  
+var open_js_modal_content=function(html_content){  
 	var modal_window=document.createElement("div")
 	modal_window.id="js-modal-window"; modal_window.className="js-modal-window"
 	modal_window.innerHTML=html_content;
@@ -317,6 +322,11 @@ function open_js_modal_content(html_content){
 var remove_modal=function (){
 	var modal_window=document.getElementById('js-modal-window');
 	if(modal_window!=null) modal_window.parentNode.removeChild(modal_window);
+}
+
+var open_js_modal_content_timeout=function(html_content, timeout_ms){
+	open_js_modal_content(html_content);
+	setTimeout(function(){remove_modal();},timeout_ms);
 }
 
 
@@ -400,6 +410,7 @@ var AudioSprite=function(audio_object, sprite_ref, activate_debug){
 	this.sound_range_ref=sprite_ref;	// index of sounds in sprite (as ranges)
 	this.currentSpriteRange = {}; 	// current sprite being played
 	this.range_ended=true;
+	this.seeked_and_paused_intents=0;
 	//this.audio_obj.removeEventListener('timeupdate', this.onAudioSpriteTimeUpdate, false); // for safety
 	//this.audio_obj.addEventListener('timeupdate', this.onAudioSpriteTimeUpdate.bind(this), false);
 	this.debug=false;
@@ -408,16 +419,17 @@ var AudioSprite=function(audio_object, sprite_ref, activate_debug){
 AudioSprite.FLOAT_THRESHOLD=0.005;	// for millisec comparison
 AudioSprite.AUDIO_RALENTIZATION_LAG=0.040; // margin for sound range ended check (default 0.040)
 AudioSprite.CHECK_SOUND_POSITION_TIMEOUT=100; // verify if sprite ended timeout (ms)
+AudioSprite.CHECK_IF_SEEKED_PAUSED_MAX_INTENTS=5; // verify if audio paused and not seeking
 AudioSprite.prototype.playSpriteRange = function(range_id,callback_function) {
 	if(this.range_ended==false || !this.audio_obj.paused) alert("ERROR: trying to play a sprite range while other not ended");
 	if(callback_function==='undefined') delete this.audio_obj.callback_on_end;
 	else this.audio_obj.callback_on_end=callback_function;
 	// effectless in data-connections----
-	this.audio_obj.currentTime = 0;
-	this.wait_seeked_and_paused();
+	//this.audio_obj.currentTime = 0;
+	//this.wait_seeked_and_paused();
 	//------------------------------------
 	if (this.sound_range_ref[range_id]) { // assumes the array is correct (contains start and end)
-		if(this.debug) alert("range_id ("+range_id+") found");
+		if(this.debug) console.log("range_id ("+range_id+") found");
 		this.currentSpriteRange = this.sound_range_ref[range_id];
 		this.audio_obj.currentTime = this.currentSpriteRange.start; // currentTime not supported on IE9 (DOM Exception INVALID_STATE_ERR)
 		this.range_ended=false;
@@ -427,11 +439,12 @@ AudioSprite.prototype.playSpriteRange = function(range_id,callback_function) {
 		// -----------------------
 		//this.play_safe(this.currentSpriteRange.start); doesn't work on data-connections (no seeking until play())
 	}else{
-		if(this.debug) alert("ERROR: Sprite ("+range_id+") not found!");
+		alert("ERROR: Sprite ("+range_id+") not found!");
 		this.range_ended=true;
+		if(this.audio_obj.hasOwnProperty("callback_on_end") && typeof(this.audio_obj.callback_on_end) === 'function' ) this.audio_obj.callback_on_end();
 	}
 };
-AudioSprite.prototype.play_safe=function(seek_position){ // wait until paused and not seekeing
+/*AudioSprite.prototype.play_safe=function(seek_position){ // wait until paused and not seekeing
 	// PROBLEM, on mobiles with data-conntection (not wifi), audio won't start to seek until play() event
 	if(this.audio_obj.paused && !this.audio_obj.seekeing && 
 		Math.abs(this.audio_obj.currentTime-seek_position)<AudioSprite.FLOAT_THRESHOLD){
@@ -442,21 +455,28 @@ AudioSprite.prototype.play_safe=function(seek_position){ // wait until paused an
 				if(this.debug) alert("waiting to play safe ct:"+this.audio_obj.currentTime+" - seeking-pos: "+seek_position+" - is-paused: "+this.audio_obj.paused+" - is-seeking: "+this.audio_obj.seekeing+" - abs(currenttime-seekpos): "+Math.abs(this.audio_obj.currentTime-seek_position));
 				this.play_safe(seek_position);
 			}.bind(this),250);
-}
-AudioSprite.prototype.wait_seeked_and_paused=function(){// wait until paused and not seekeing
+}*/
+/*AudioSprite.prototype.wait_seeked_and_paused=function(){// wait until paused and not seekeing
 	// Although 'seeking' is undefined in data-connections it works since it is evaluated to false in js
 	if(this.audio_obj.paused && !this.audio_obj.seekeing) return;
 	else setTimeout(function(){
+				this.seeked_and_paused_intents++;
+				if(this.seeked_and_paused_intents>=AudioSprite.CHECK_IF_SEEKED_PAUSED_MAX_INTENTS){
+					alert("ERROR: Problems pausing audio (wait_seeked_and_paused)");
+				}
 				if(this.debug) alert("waiting to seek safe ct:"+this.audio_obj.currentTime);
 				this.wait_seeked_and_paused();
-			}.bind(this),250)
-}
+			}.bind(this),250);
+}*/
 AudioSprite.prototype.audioSpritePositionCheck = function() {// time update handler to ensure we stop when a sprite is complete
 	if(this.debug)console.log("playing: "+this.audio_obj.currentSrc+" time:"+this.audio_obj.currentTime+" ended:"+this.audio_obj.ended);
 	if (this.ended || (!this.range_ended && this.audio_obj.currentTime >= (this.currentSpriteRange.end+AudioSprite.AUDIO_RALENTIZATION_LAG)) ) {
 		if(this.debug) console.log("Sprite range play ended!!");
 		this.audio_obj.pause();
-		this.wait_seeked_and_paused();
+		// probably, unneeded----------------
+		//this.seeked_and_paused_intents=0;
+		//this.wait_seeked_and_paused();
+		//------------------------------------
 		//this.currentTime=0; // probably unnecessary
 		//this.wait_seeked_and_paused();
 		this.range_ended=true
@@ -466,7 +486,7 @@ AudioSprite.prototype.audioSpritePositionCheck = function() {// time update hand
 	}
 };
 // DEPRECATED... TOO MUCH CHECKINGS... DO NOT DELETE IN CASE WE NEED IT...
-AudioSprite.prototype.onAudioSpriteTimeUpdate = function() {// time update handler to ensure we stop when a sprite is complete
+/*AudioSprite.prototype.onAudioSpriteTimeUpdate = function() {// time update handler to ensure we stop when a sprite is complete
    if(this.debug)console.log("playing: "+this.audio_obj.currentSrc+" time:"+audio_obj.currentTime+" ended:"+audio_obj.ended)
     if (this.ended || (!this.range_ended && this.audio_obj.currentTime >= (this.currentSpriteRange.end+AudioSprite.AUDIO_RALENTIZATION_LAG)) ) { 
     	if(this.debug) console.log("Sprite range play ended!!")
@@ -477,7 +497,7 @@ AudioSprite.prototype.onAudioSpriteTimeUpdate = function() {// time update handl
        	this.range_ended=true
 	if(this.audio_obj.hasOwnProperty("callback_on_end") && typeof(this.audio_obj.callback_on_end) === 'function' ) this.audio_obj.callback_on_end();
     }
-};
+};*/
 
 
 ///////////////////////////////////////
@@ -578,14 +598,12 @@ var DataTableSimple = function (table_config){
 				var table_cell  = table_row.insertCell(table_column);
 				var text=table_config.data[i][table_config.columns[table_column].data];
 				if (table_config.columns[table_column].hasOwnProperty('format') && DataTableSimple.formats.hasOwnProperty(table_config.columns[table_column].format)){
-					//alert (table_config.columns[table_column].format);
 					text=DataTableSimple.formats[table_config.columns[table_column].format](text); 
 				}
 				var cell_text  = document.createTextNode(text);
 				table_cell.appendChild(cell_text);
 				if (table_config.columns[table_column].hasOwnProperty('special') && DataTableSimple.specials[table_config.columns[table_column].special]!=='undefined'){
-					//alert (table_config.columns[table_column].format);
-					table_cell.innerHTML=DataTableSimple.specials[table_config.columns[table_column].special](table_config, i); 
+					table_cell.innerHTML=DataTableSimple.specials[table_config.columns[table_column].special](table_config, i, table_row); 
 				}
 			}
 		}
@@ -596,13 +614,14 @@ var DataTableSimple = function (table_config){
 		var rowsShown = table_config.pagination;
 		var rowsTotal = table_config.data.length;
 		var numPages = rowsTotal/rowsShown;
+		//alert("pagination "+rowsTotal+" "+rowsShown+" "+numPages);
 		for(var i=0;i < numPages;i++) {
 		    var pageNum = i + 1;
 		    tabpagination.innerHTML +='<a href="#" rel="'+i+'">'+pageNum+'</a> ';
 		}
 		var tr_rows=document.querySelectorAll('#'+this.id+' tbody tr');
 		for(var i=0;i<tr_rows.length;i++){tr_rows[i].style.display="none";}
-		for(var i=0;i<tr_rows.length;i++){tr_rows[i].style.display=""; if(i>rowsShown) break;}
+		for(var i=0;i<tr_rows.length;i++){if(i>=rowsShown) break; tr_rows[i].style.display="";}
 		document.querySelector('#'+this.id+'-nav a').classList.add('active');
 		
 		tabpaglinks=document.querySelectorAll('#'+this.id+'-nav a');
@@ -617,7 +636,7 @@ var DataTableSimple = function (table_config){
 				//console.log(currPage+"  "+startItem+"-"+endItem);
 				var tr_rows=document.querySelectorAll('#'+this.parentNode.id.replace("-nav","")+' tbody tr');
 				for(var i=0;i<tr_rows.length;i++){tr_rows[i].style.display="none";}
-				for(var i=startItem;i<tr_rows.length;i++){tr_rows[i].style.display="";if(i>endItem) break;}
+				for(var i=startItem;i<tr_rows.length;i++){if(i>=endItem) break; tr_rows[i].style.display="";}
 			});
 		}
 	}
@@ -634,12 +653,40 @@ DataTableSimple.formats.time_from_seconds=function (data){
 	if(data==='undefined') return "-";
 	return pad_string( (data / 3600) >> 0,2,"0")+":"+pad_string( (data / 60) >> 0,2,"0")+":"+pad_string(data % 60,2,"0")
 };
-DataTableSimple.specials.link_session_details=function (table_config,i){
+DataTableSimple.formats.time_from_seconds_up_to_mins=function (data){
+	if(data==='undefined') return "-";
+	return pad_string( (data / 60) >> 0,2,"0")+":"+pad_string(data % 60,2,"0")
+};
+DataTableSimple.formats.first_4=function (data){
+	if(data==='undefined') return "-";
+	return data.substring(0,4);
+};
+DataTableSimple.specials.red_incorrect=function (table_config,i,table_row){
+	if(table_config==='undefined' || i==='undefined') return "error!";
+	var text=table_config.data[i].result;
+	if(text=='incorrect'){table_row.style.backgroundColor='red';} //return '<span style="background-color:red">'+text+'</span>';}
+	return text;
+};
+/*DataTableSimple.formats.last_4=function (data,n){
+	if(data==='undefined') return "-";
+	return data.substring(data.length - 4);
+};*/
+DataTableSimple.specials.link_session_details=function (table_config,i,table_row){
 	if(table_config==='undefined' || i==='undefined') return "error!";
 	var id=table_config.data[i].id;
 	var text=table_config.data[i].timestamp;
 	return '<a href="javascript:void(0)" onclick="explore_result_detail(\''+table_config.data[i].id+'\')">'+text+'</a>';
 };
+
+
+function select_fill_with_json(data,select_elem){
+	select_elem.innerHTML="";
+	for(var key in data){
+		if (data.hasOwnProperty(key)) {
+			select_elem.innerHTML+='<option value="' + key + '">' + key + '</option>';	
+		}
+	}
+}
 
 
 function selectorExistsInCSS(styleSheetName, selector) {
@@ -830,4 +877,17 @@ var get_query_string = function () {
 	}
 	return query_string;
 };
+
+
+var toggleClassBlink = function(blink_element,blink_class,blink_timeout,num_blinks){
+	blink_element.classList.toggle(blink_class);
+	//alert("a");
+	if(num_blinks!=0)
+	    setTimeout(function(){toggleClassBlink(blink_element,blink_class,blink_timeout,(num_blinks-1));},blink_timeout);
+	else
+		blink_element.classList.remove(blink_class);
+		
+}
+
+
 
