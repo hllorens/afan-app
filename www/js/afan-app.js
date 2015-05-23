@@ -116,11 +116,11 @@ function menu_screen(){
 	canvas_zone.innerHTML=' \
 	<div id="menu-content" class="text-center">\
 	<div id="menu-logo-div"></div> \
-	Sujeto:  <select id="subjects-select"></select> \
+	Participante:  <select id="subjects-select"></select> \
 	<nav id="responsive_menu">\
 	<br /><button id="start-button" class="button" disabled="true">Practicar</button> \
 	<br /><button id="start-test-button" class="button" disabled="true">Test</button> \
-	<br /><button id="add-subject" disabled="true" class="button" onclick="add_subject()">Añadir Participante</button> \
+	<br /><button id="manage-subjects" disabled="true" class="button" onclick="manage_subjects()">Participantes</button> \
 	<br /><button id="results" disabled="true" class="button" onclick="explore_results()">Resultados</button> \
 	<br /><button id="exit" class="button exit" onclick="exit_app()">Salir</button> \
 	</nav>\
@@ -137,7 +137,7 @@ function menu_screen(){
 			select_fill_with_json(data,subjects_select_elem); 
 			document.getElementById("start-button").disabled=false; 
 			document.getElementById("start-test-button").disabled=false;
-			document.getElementById("add-subject").disabled=false;
+			document.getElementById("manage-subjects").disabled=false;
 			document.getElementById("results").disabled=false;
 			// MAL pq no se puede modificar el evento... lo que hay q hacer es un objeto game y prototiparlo
 			document.getElementById("start-button").onclick=function(){session_data.mode="training";json_activities=json_training;game()};
@@ -145,6 +145,43 @@ function menu_screen(){
 		}
 	);
 }
+
+
+var manage_subjects=function(){
+	preventBackExit();
+	header_zone.innerHTML='<h1 onclick="menu_screen()"> < Conciencia Fonológica</h1>';
+	session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
+	canvas_zone.innerHTML=' \
+	<div class="text-center">\
+    <button id="add-subject" class="button" onclick="add_subject()">Añadir</button>\
+	<div id="results-div">cargando participantes...</div> \
+	<br /><button id="go-back" onclick="menu_screen()">Volver</button> \
+	</div>\
+	';
+    user_subjects_data=[];
+	for(var key in user_subjects){
+		if (user_subjects.hasOwnProperty(key)) {
+			user_subjects_data.push(user_subjects[key]);
+		}
+	}    
+    
+	if(user_subjects_data.length==0){
+		document.getElementById("results-div").innerHTML="Resultados user: "+session_data.user+"<br />No hay participantes";
+	}else{
+		document.getElementById("results-div").innerHTML="Resultados user: "+session_data.user+"<br /><table id=\"results-table\"></table>";
+		results_table=document.getElementById("results-table");
+		DataTableSimple.call(results_table, {
+			data: user_subjects_data,
+			pagination: 5,
+			columns: [
+				//{ data: 'id' },
+				{ data: 'name', col_header: 'Nombre'},
+				{ data: 'birthdate', col_header: 'F.Nac'},
+				{ data: 'comments', col_header: 'Info' }
+			]
+		} );
+	}
+};
 
 
 var add_subject=function(){
@@ -223,12 +260,12 @@ var explore_results=function(){
 					pagination: 5,
 					columns: [
 						//{ data: 'id' },
-						{ data: 'timestamp', special: 'link_session_details' },
-						{ data: 'type' ,  format: 'first_4'},
-						{ data: 'mode' ,  format: 'first_4'},
-						{ data: 'age' },
-						{ data: 'duration',  format: 'time_from_seconds_up_to_mins'}, 
-						{ data: 'result', format: 'percentage_int' } 
+						{ data: 'timestamp', col_header: 'Id', special: 'link_session_details' },
+						{ data: 'type', col_header: 'Tipo',  format: 'first_4'},
+						{ data: 'mode', col_header: 'Modo',  format: 'first_4'},
+						{ data: 'age', col_header: 'Edad' },
+						{ data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
+						{ data: 'result', col_header: '%', format: 'percentage_int' } 
 					]
 				} );
 			}
@@ -290,7 +327,7 @@ function game(){
 function start_activity_set(){
 	remove_modal();
 	session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
-	session_data.age=calculateAge(user_subjects[session_data.subject]); 
+	session_data.age=calculateAge(user_subjects[session_data.subject]['age']); 
 	session_data.num_correct=0;
 	session_data.num_answered=0;
 	session_data.details=[];

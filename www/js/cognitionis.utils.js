@@ -270,13 +270,6 @@ function open_js_modal_alert(title_text, text_text, accept_function, cancel_func
 
 	var modal_dialog=document.createElement("div");
 	modal_dialog.className="js-modal-dialog";
-	var close_elem=document.createElement('a')
-	close_elem.innerHTML="x"
-	close_elem.href="javascript:void(0)"
-	close_elem.onclick=function (){
-		var elem_to_remove=document.getElementById("js-modal-window");
-		elem_to_remove.parentNode.removeChild(elem_to_remove);
-	}
 
 	var title_elem=document.createElement('h2')
 	title_elem.innerHTML=title_text
@@ -285,8 +278,17 @@ function open_js_modal_alert(title_text, text_text, accept_function, cancel_func
 	text_elem.id="js-modal-window-text";
 	text_elem.innerHTML=text_text
 
+	if(cancel_function==='undefined'){
+		var close_elem=document.createElement('a')
+		close_elem.innerHTML="x"
+		close_elem.href="javascript:void(0)"
+		close_elem.onclick=function (){
+			var elem_to_remove=document.getElementById("js-modal-window");
+			elem_to_remove.parentNode.removeChild(elem_to_remove);
+		}
+		modal_dialog.appendChild(close_elem)
+	}
 
-	modal_dialog.appendChild(close_elem)
 	modal_dialog.appendChild(title_elem)
 	modal_dialog.appendChild(text_elem)
 
@@ -585,7 +587,11 @@ var DataTableSimple = function (table_config){
 		for(var table_column=0;table_column<table_config.columns.length;table_column++){
 				//var table_cell  = table_row.insertCell(table_column);
 				var th = document.createElement('th');
-				var cell_text  = document.createTextNode(table_config.columns[table_column].data);
+				var col_header=table_config.columns[table_column].data;
+				if (table_config.columns[table_column].hasOwnProperty('col_header')){
+					col_header=table_config.columns[table_column].col_header;
+				}
+				var cell_text  = document.createTextNode(col_header);
 				th.appendChild(cell_text);
 				table_row.appendChild(th);
 		}

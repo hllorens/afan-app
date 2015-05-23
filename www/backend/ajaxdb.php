@@ -37,7 +37,11 @@ if ($action == "get_subjects"){
 	//echo "query: $sQuery ";
 	$rResult = mysql_query( $sQuery, $db_connection ) or die(mysql_error());
 	while ( $aRow = mysql_fetch_array( $rResult ) )	{
-		$output[$aRow['alias']] = $aRow['birthdate'];
+		$output[$aRow['alias']] = array();
+		$output[$aRow['alias']]['id'] = $aRow['id'];
+		$output[$aRow['alias']]['name'] = $aRow['name'];
+		$output[$aRow['alias']]['birthdate'] = $aRow['birthdate'];
+		$output[$aRow['alias']]['comments'] = $aRow['comments'];
 	}
 
 	header('Content-type: application/json');
