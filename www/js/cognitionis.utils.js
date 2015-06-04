@@ -155,7 +155,7 @@ var ResourceLoader={
 	},
 
 	load_media: function (image_arr, sound_arr, callback_function, lazy_audio_option, activate_debug){
-		if(lazy_audio_option==='undefined') ResourceLoader.lazy_audio=false;
+		if(lazy_audio_option===undefined) ResourceLoader.lazy_audio=false;
 		ResourceLoader.debug=false;
 		if(typeof(activate_debug)!=='undefined' && activate_debug==true) ResourceLoader.debug=activate_debug;
 		else ResourceLoader.lazy_audio=lazy_audio_option;
@@ -266,7 +266,7 @@ function open_js_modal_alert_demo(){  //(title_text, text_text){
 // it would be great to objectify this to easily interact with it (e.g., modify text)
 function open_js_modal_alert(title_text, text_text, accept_function, cancel_function){
 	var modal_window=document.createElement("div")
-	modal_window.id="js-modal-window"; modal_window.className="js-modal-window";
+	modal_window.id="js-modal-window-alert"; modal_window.className="js-modal-window";
 
 	var modal_dialog=document.createElement("div");
 	modal_dialog.className="js-modal-dialog";
@@ -278,12 +278,12 @@ function open_js_modal_alert(title_text, text_text, accept_function, cancel_func
 	text_elem.id="js-modal-window-text";
 	text_elem.innerHTML=text_text
 
-	if(cancel_function==='undefined'){
+	if(cancel_function===undefined){
 		var close_elem=document.createElement('a')
 		close_elem.innerHTML="x"
 		close_elem.href="javascript:void(0)"
 		close_elem.onclick=function (){
-			var elem_to_remove=document.getElementById("js-modal-window");
+			var elem_to_remove=document.getElementById("js-modal-window-alert");
 			elem_to_remove.parentNode.removeChild(elem_to_remove);
 		}
 		modal_dialog.appendChild(close_elem)
@@ -292,17 +292,17 @@ function open_js_modal_alert(title_text, text_text, accept_function, cancel_func
 	modal_dialog.appendChild(title_elem)
 	modal_dialog.appendChild(text_elem)
 
-	if(accept_function!=='undefined'){
+	if(accept_function!==undefined){
 		var accept_button=document.createElement('button')
-		accept_button.innerHTML='Aceptar'	
-		accept_button.onclick=accept_function	
+		accept_button.innerHTML='Aceptar'
+		accept_button.onclick=accept_function
 		modal_dialog.appendChild(accept_button)
 	}
 
-	if(cancel_function!=='undefined'){
+	if(cancel_function!==undefined){
 		var cancel_button=document.createElement('button')
-		cancel_button.innerHTML='Cancelar'		
-		cancel_button.onclick=cancel_function	
+		cancel_button.innerHTML='Cancelar'
+		cancel_button.onclick=cancel_function
 		modal_dialog.appendChild(cancel_button)
 	}
 
@@ -321,8 +321,10 @@ var open_js_modal_content=function(html_content){
 	return modal_window;
 }
 
-var remove_modal=function (){
-	var modal_window=document.getElementById('js-modal-window');
+var remove_modal=function (id2remove){
+	var id_remove='js-modal-window';
+	if(id2remove!==undefined) id_remove=id2remove;
+	var modal_window=document.getElementById(id_remove);
 	if(modal_window!=null) modal_window.parentNode.removeChild(modal_window);
 }
 
@@ -362,14 +364,14 @@ function isInteger(value) {     // in the future javacript will have Number.isIn
 var ActivityTimer=function (){	
 	this.seconds=0;
 	this.started=false;
-	this.dom_anchor='undefined';
+	this.dom_anchor=undefined;
 	this.advance_timeout=null;
 	//var that=this // bad hack to store reference scopes
 }
 ActivityTimer.prototype.anchor_to_dom=function(elem){this.dom_anchor=elem;}
 
 ActivityTimer.prototype.start=function(){
-	if(this.dom_anchor=='undefined'){alert("ERROR: Starging an activity_timer without defining it first"); return;}
+	if(this.dom_anchor==undefined){alert("ERROR: Starging an activity_timer without defining it first"); return;}
 	if(this.started){
 		console.log("ERROR: activity_timer already started")	
 	}else{
@@ -424,7 +426,7 @@ AudioSprite.CHECK_SOUND_POSITION_TIMEOUT=100; // verify if sprite ended timeout 
 AudioSprite.CHECK_IF_SEEKED_PAUSED_MAX_INTENTS=5; // verify if audio paused and not seeking
 AudioSprite.prototype.playSpriteRange = function(range_id,callback_function) {
 	if(this.range_ended==false || !this.audio_obj.paused) alert("ERROR: trying to play a sprite range while other not ended");
-	if(callback_function==='undefined') delete this.audio_obj.callback_on_end;
+	if(callback_function===undefined) delete this.audio_obj.callback_on_end;
 	else this.audio_obj.callback_on_end=callback_function;
 	// effectless in data-connections----
 	//this.audio_obj.currentTime = 0;
@@ -574,6 +576,10 @@ document.getElementById('example').DataTable( {
         { data: 'office' }
     ]
 } );
+
+Optionally define: 
+- row_id (default: row position/index)
+- row_id_prefix (default: 'row')
 */
 var DataTableSimple = function (table_config){
 	// Empty table
@@ -598,8 +604,12 @@ var DataTableSimple = function (table_config){
 	}
 	if(table_config.hasOwnProperty('data')){
 		//alert('has data '+table_config.data.length);
+		var row_id_prefix='row'
+		if(table_config.hasOwnProperty('row_id_prefix')) row_id_prefix=table_config.row_id_prefix;
 		for(var i=0;i<table_config.data.length;i++){
 			var table_row   = table_body.insertRow(table_body.rows.length);
+			if(table_config.hasOwnProperty('row_id')) table_row.id=row_id_prefix+"-"+table_config.data[i][table_config.row_id];
+			else table_row.id=row_id_prefix+"-"+i;
 			for(var table_column=0;table_column<table_config.columns.length;table_column++){
 				var table_cell  = table_row.insertCell(table_column);
 				var text=table_config.data[i][table_config.columns[table_column].data];
@@ -608,8 +618,11 @@ var DataTableSimple = function (table_config){
 				}
 				var cell_text  = document.createTextNode(text);
 				table_cell.appendChild(cell_text);
-				if (table_config.columns[table_column].hasOwnProperty('special') && DataTableSimple.specials[table_config.columns[table_column].special]!=='undefined'){
+				if (table_config.columns[table_column].hasOwnProperty('special') && DataTableSimple.specials[table_config.columns[table_column].special]!==undefined){
 					table_cell.innerHTML=DataTableSimple.specials[table_config.columns[table_column].special](table_config, i, table_row); 
+				}
+				if (table_config.columns[table_column].hasOwnProperty('link_function_id') && table_config.columns[table_column].link_function_id!==undefined){
+					table_cell.innerHTML=DataTableSimple.link_function_id(table_config, i, table_row, table_config.columns[table_column].data, table_config.columns[table_column].link_function_id); 
 				}
 			}
 		}
@@ -651,37 +664,43 @@ var DataTableSimple = function (table_config){
 DataTableSimple.formats={};
 DataTableSimple.specials={};
 DataTableSimple.formats.percentage_int=function (data){
-	if(data==='undefined') return "-";
+	if(data===undefined) return "-";
 	data=data*100;
 	return data.toString().split(".")[0]+"%";
 };
 DataTableSimple.formats.time_from_seconds=function (data){
-	if(data==='undefined') return "-";
+	if(data===undefined) return "-";
 	return pad_string( (data / 3600) >> 0,2,"0")+":"+pad_string( (data / 60) >> 0,2,"0")+":"+pad_string(data % 60,2,"0")
 };
 DataTableSimple.formats.time_from_seconds_up_to_mins=function (data){
-	if(data==='undefined') return "-";
+	if(data===undefined) return "-";
 	return pad_string( (data / 60) >> 0,2,"0")+":"+pad_string(data % 60,2,"0")
 };
 DataTableSimple.formats.first_4=function (data){
-	if(data==='undefined') return "-";
+	if(data===undefined) return "-";
 	return data.substring(0,4);
 };
+DataTableSimple.formats.first_12=function (data){  // make this a configurable special...
+	if(data===undefined) return "-";
+	if(data.length>12) return data.substring(0,12)+"..";
+	return data;
+};
 DataTableSimple.specials.red_incorrect=function (table_config,i,table_row){
-	if(table_config==='undefined' || i==='undefined') return "error!";
+	if(table_config===undefined || i===undefined) return "error!";
 	var text=table_config.data[i].result;
 	if(text=='incorrect'){table_row.style.backgroundColor='red';} //return '<span style="background-color:red">'+text+'</span>';}
 	return text;
 };
 /*DataTableSimple.formats.last_4=function (data,n){
-	if(data==='undefined') return "-";
+	if(data===undefined) return "-";
 	return data.substring(data.length - 4);
 };*/
-DataTableSimple.specials.link_session_details=function (table_config,i,table_row){
-	if(table_config==='undefined' || i==='undefined') return "error!";
-	var id=table_config.data[i].id;
-	var text=table_config.data[i].timestamp;
-	return '<a href="javascript:void(0)" onclick="explore_result_detail(\''+table_config.data[i].id+'\')">'+text+'</a>';
+DataTableSimple.link_function_id=function (table_config,i,table_row, table_column_name, function_id){
+	if(table_config===undefined || i===undefined) throw "error: no table config or no index";
+	if(!table_config.hasOwnProperty("row_id")) throw "error: row-id undefined";
+	var id_cleaned=table_config.data[i][table_config.row_id].replace(table_config.row_id_prefix+"-","");
+	var text=table_config.data[i][table_column_name];
+	return '<a href="javascript:void(0)" onclick="'+function_id+'(\''+id_cleaned+'\')">'+text+'</a>'; // substring...
 };
 
 

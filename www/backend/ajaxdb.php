@@ -39,7 +39,9 @@ if ($action == "get_subjects"){
 	while ( $aRow = mysql_fetch_array( $rResult ) )	{
 		$output[$aRow['alias']] = array();
 		$output[$aRow['alias']]['id'] = $aRow['id'];
+		$output[$aRow['alias']]['user'] = $aRow['user'];
 		$output[$aRow['alias']]['name'] = $aRow['name'];
+		$output[$aRow['alias']]['alias'] = $aRow['alias'];
 		$output[$aRow['alias']]['birthdate'] = $aRow['birthdate'];
 		$output[$aRow['alias']]['comments'] = $aRow['comments'];
 	}
@@ -57,9 +59,41 @@ if ($action == "get_subjects"){
 
 	$sQuery = "INSERT INTO subjects (user, alias, name, birthdate,comments) VALUES ('$user', '$alias', '$name', '$birthdate', '$comments');";
 	$rResult = mysql_query( $sQuery, $db_connection );
-	if(!$rResult){header('HTTP/1.1 500 Internal Server Error');die("Error: Exists. ".mysql_error()." -- ".$sQuery);}		
+	if(!$rResult){header('HTTP/1.1 500 Internal Server Error');die("Error: Exists. ".mysql_error()." -- ".$sQuery);}
+	$sQuery = "SELECT LAST_INSERT_ID() as lid;";
+	$rResult = mysql_query( $sQuery, $db_connection );
+	if(!$rResult){header('HTTP/1.1 500 Internal Server Error');die("Error: ".mysql_error()." -- ".$sQuery);}
+	$aRow = mysql_fetch_array( $rResult );
 	header('Content-type: application/json');
 	$output["success"]=$alias;
+	$output["data"]=array();
+	$output["data"]["id"]=$aRow['lid'];
+	$output["data"]["user"]=$user;
+	$output["data"]["alias"]=$alias;
+	$output["data"]["name"]=$name;
+	$output["data"]["birthdate"]=$birthdate;
+	$output["data"]["comments"]=$comments;
+	echo json_encode( $output );
+}else if ($action == "update_subject"){
+	$lid=get_value('lid');
+	$user=get_value('user');
+	$alias=get_value('alias');
+	$name=get_value('name');
+	$birthdate=get_value('birthdate');
+	$comments=get_value('comments');
+
+	$sQuery = "UPDATE subjects  SET name='$name', birthdate='$birthdate',comments='$comments' WHERE id=$lid;";
+	$rResult = mysql_query( $sQuery, $db_connection );
+	if(!$rResult){header('HTTP/1.1 500 Internal Server Error');die("Error: Exists. ".mysql_error()." -- ".$sQuery);}
+	header('Content-type: application/json');
+	$output["success"]=$alias;
+	$output["data"]=array();
+	$output["data"]["id"]=$lid;
+	$output["data"]["user"]=$user;
+	$output["data"]["alias"]=$alias;
+	$output["data"]["name"]=$name;
+	$output["data"]["birthdate"]=$birthdate;
+	$output["data"]["comments"]=$comments;
 	echo json_encode( $output );
 }else if ($action == "send_session_data"){
 	$output["msg"]="success";
@@ -177,7 +211,7 @@ if ($action == "get_subjects"){
 		$output['elements'][$element_count]['level']=$aRow['level'];
 		$output['elements'][$element_count]['duration']=$aRow['duration'];
 		$output['elements'][$element_count]['timestamp']=$aRow['timestamp'];
-		$element_count++;		
+		$element_count++;
 	}
 
 	header('Content-type: application/json');
@@ -188,6 +222,7 @@ if ($action == "get_subjects"){
 	$id=get_value("id");
 	$subject=get_value("subject");
 
+	// create a detailed acction log db so that we can recover actions, authors, dates and previous states
 	$sQuery = "DELETE FROM sessions WHERE id='$id' AND subject='$subject';";
 
 	$rResult = mysql_query( $sQuery, $db_connection ) or die(mysql_error());

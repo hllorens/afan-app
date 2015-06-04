@@ -101,7 +101,7 @@ var session_data={
 };
 
 var subjects_select_elem="none";
-var user_subjects={};
+var user_subjects=null;
 
 function menu_screen(){
 	allowBackExit();
@@ -129,21 +129,28 @@ function menu_screen(){
 
 	//document.getElementById("splash-logo-div").appendChild(media_objects.images['key.png'])
 	subjects_select_elem=document.getElementById('subjects-select');
+	document.getElementById("start-button").onclick=function(){session_data.mode="training";json_activities=json_training;game()};
+	document.getElementById("start-test-button").onclick=function(){session_data.mode="test";json_activities=json_test;game()};
 
-	ajax_request_json(
-		backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user, 
-		function(data) {
-			user_subjects=data;
-			select_fill_with_json(data,subjects_select_elem); 
-			document.getElementById("start-button").disabled=false; 
-			document.getElementById("start-test-button").disabled=false;
-			document.getElementById("manage-subjects").disabled=false;
-			document.getElementById("results").disabled=false;
-			// MAL pq no se puede modificar el evento... lo que hay q hacer es un objeto game y prototiparlo
-			document.getElementById("start-button").onclick=function(){session_data.mode="training";json_activities=json_training;game()};
-			document.getElementById("start-test-button").onclick=function(){session_data.mode="test";json_activities=json_test;game()};
-		}
-	);
+	if(user_subjects==null){
+		ajax_request_json(
+			backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user, 
+			function(data) {
+				user_subjects=data;
+				select_fill_with_json(user_subjects,subjects_select_elem); 
+				document.getElementById("start-button").disabled=false; 
+				document.getElementById("start-test-button").disabled=false;
+				document.getElementById("manage-subjects").disabled=false;
+				document.getElementById("results").disabled=false;
+			}
+		);
+	}else{
+		select_fill_with_json(user_subjects,subjects_select_elem);
+		document.getElementById("start-button").disabled=false; 
+		document.getElementById("start-test-button").disabled=false;
+		document.getElementById("manage-subjects").disabled=false;
+		document.getElementById("results").disabled=false;
+	}
 }
 
 
@@ -173,11 +180,13 @@ var manage_subjects=function(){
 		DataTableSimple.call(results_table, {
 			data: user_subjects_data,
 			pagination: 5,
+			row_id: 'id',
+			row_id_prefix: 'row-subj',
 			columns: [
 				//{ data: 'id' },
-				{ data: 'name', col_header: 'Nombre'},
+				{ data: 'alias', col_header: 'Alias',  format: 'first_12', link_function_id: 'edit_subject'}, // TODO: edit_function: "" --> this will add the edit icon etc...
 				{ data: 'birthdate', col_header: 'F.Nac'},
-				{ data: 'comments', col_header: 'Info' }
+				{ data: 'comments', col_header: 'Info',  format: 'first_12' }
 			]
 		} );
 	}
@@ -193,37 +202,36 @@ var add_subject=function(){
 			// TODO se puede abstraer merjor...
 		    myform.removeEventListener("submit", formValidationSafariSupport);
 		    myform.addEventListener("submit", formValidationSafariSupport);
-
 		    myformsubmit.removeEventListener("click", showFormAllErrorMessages);
 		    myformsubmit.addEventListener("click", showFormAllErrorMessages);
-
-
-
 			myformsubmit.click(); // won't submit (invalid), but show errors
 		}else{
+			open_js_modal_content('<h1>Añadiendo... '+document.getElementById('new-alias').value+'</h1>');
 			ajax_request_json(
 			backend_url+'ajaxdb.php?action=add_subject&user='+document.getElementById('new-user').value+'&alias='+document.getElementById('new-alias').value+'&name='+document.getElementById('new-name').value+'&birthdate='+document.getElementById('new-birthdate').value+'&comments='+document.getElementById('new-comments').value, 
 			function(data) {
-				var modal_text=document.getElementById("js-modal-window-text");
 				if(data['success']!='undefined'){
-					//modal_text.innerHTML="Añadido con éxito!!";
-					subjects_select_elem.innerHTML+='<option value="' + data['success'] + '">' + data['success'] + '</option>';
-					var elem_to_remove=document.getElementById("js-modal-window");
-					//setTimeout(function(){
-					alert("Sujeto añadido con éxito");
-						elem_to_remove.parentNode.removeChild(elem_to_remove);
-						//}, 1000)
+					user_subjects[data['success']]=data['data'];
+					remove_modal();
+					remove_modal("js-modal-window-alert");
+					manage_subjects(); // to reload with the new user...
+					/*ajax_request_json(
+						backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user, 
+						function(data) {
+							user_subjects=data;
+							remove_modal();
+							remove_modal("js-modal-window-alert");
+							manage_subjects(); // to reload with the new user...
+						}
+					);*/
 				}else{
-					alert(JSON.stringify(data));
+					alert("ERROR: "+JSON.stringify(data));
 				}
 			}
 			);
 		}
 	};
-	var cancel_function=function(){
-		var elem_to_remove=document.getElementById("js-modal-window");
-		elem_to_remove.parentNode.removeChild(elem_to_remove);
-	};	
+	var cancel_function=function(){ remove_modal("js-modal-window-alert"); };
 	var form_html='<form id="my-form" action="javascript:void(0);"> \
 			<ul class="errorMessages"></ul>\
 			<label for="new-user">Usuario</label><input id="new-user" type="text" value="afan" /><br /> \
@@ -234,6 +242,63 @@ var add_subject=function(){
 			<input id="my-form-submit" type="submit" style="visibility:hidden;display:none" />\
 			</form>'; //title="Error: yyyy-mm-dd"		
 	open_js_modal_alert("Añadir Participante",form_html,accept_function,cancel_function);
+};
+
+var edit_subject=function(sid){
+	var accept_function=function(){
+		var myform=document.getElementById('my-form');
+		var myformsubmit=document.getElementById('my-form-submit');
+		if (!myform.checkValidity()){
+			if(debug) console.log("form error");
+			// TODO se puede abstraer merjor...
+		    myform.removeEventListener("submit", formValidationSafariSupport);
+		    myform.addEventListener("submit", formValidationSafariSupport);
+		    myformsubmit.removeEventListener("click", showFormAllErrorMessages);
+		    myformsubmit.addEventListener("click", showFormAllErrorMessages);
+			myformsubmit.click(); // won't submit (invalid), but show errors
+		}else{
+			open_js_modal_content('<h1>Actualizando... '+document.getElementById('new-alias').value+'</h1>');
+			ajax_request_json(
+			backend_url+'ajaxdb.php?action=update_subject&lid='+sid+'&user='+document.getElementById('new-user').value+'&alias='+document.getElementById('new-alias').value+'&name='+document.getElementById('new-name').value+'&birthdate='+document.getElementById('new-birthdate').value+'&comments='+document.getElementById('new-comments').value, 
+			function(data) {
+				if(data['success']!='undefined'){
+					user_subjects[data['success']]=data['data'];
+					remove_modal();
+					remove_modal("js-modal-window-alert");
+					manage_subjects(); // to reload with the new user...
+					/*ajax_request_json(
+						backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user, 
+						function(data) {
+							user_subjects=data;
+							remove_modal();
+							remove_modal("js-modal-window-alert");
+							manage_subjects(); // to reload with the new user...
+						}
+					);*/
+				}else{
+					alert("ERROR: "+JSON.stringify(data));
+				}
+			}
+			);
+		}
+	};
+	var cancel_function=function(){ remove_modal("js-modal-window-alert"); };
+	var subj2edit={"id": sid, "alias":"", "name":"", "birthdate":"", "comments":"", "user":"afan"}
+	for(var key in user_subjects){
+		if (user_subjects.hasOwnProperty(key) && user_subjects[key]['id']==sid) {
+			subj2edit=user_subjects[key];
+		}
+	}
+	var form_html='<form id="my-form" action="javascript:void(0);"> \
+			<ul class="errorMessages"></ul>\
+			<label for="new-user">Usuario</label><input id="new-user" type="text" readonly="readonly" value="'+subj2edit.user+'" /><br /> \
+			<label for="new-alias">Alias</label><input id="new-alias" type="text" required="required" readonly="readonly" value="'+subj2edit.alias+'" /><br /> \
+			<label for="new-name">Nombre</label><input id="new-name" type="text" required="required" value="'+subj2edit.name+'" /><br /> \
+			<label for="new-birthdate">Fecha Nac.</label><input id="new-birthdate" type="date" placeholder="yyyy-mm-dd" required="required" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"  value="'+subj2edit.birthdate+'" /><br /> \
+			<label>Comentarios</label><textarea id="new-comments">'+subj2edit.comments+'</textarea><br /> \
+			<input id="my-form-submit" type="submit" style="visibility:hidden;display:none" />\
+			</form>'; //title="Error: yyyy-mm-dd"		
+	open_js_modal_alert("Editar Participante",form_html,accept_function,cancel_function);
 };
 
 
@@ -257,10 +322,11 @@ var explore_results=function(){
 				results_table=document.getElementById("results-table");
 				DataTableSimple.call(results_table, {
 					data: data.elements,
+					row_id: 'id',
 					pagination: 5,
 					columns: [
 						//{ data: 'id' },
-						{ data: 'timestamp', col_header: 'Id', special: 'link_session_details' },
+						{ data: 'timestamp', col_header: 'Id', link_function_id: 'explore_result_detail' },
 						{ data: 'type', col_header: 'Tipo',  format: 'first_4'},
 						{ data: 'mode', col_header: 'Modo',  format: 'first_4'},
 						{ data: 'age', col_header: 'Edad' },
@@ -289,6 +355,7 @@ var explore_result_detail=function(session_id){
 			DataTableSimple.call(results_table, {
 				data: data.elements,
 				pagination: 6,
+				row_id: 'id',
 				columns: [
 					//{ data: 'id' },
 					{ data: 'activity' },
@@ -319,7 +386,7 @@ function game(){
 		audio_sprite_object.removeEventListener('canplaythrough', ResourceLoader.log_and_remove_from_not_loaded);
 		audio_sprite=new AudioSprite(audio_sprite_object,audio_object_sprite_ref,debug);
 		
-		title_modal_window=open_js_modal_content('<h1>Nivel 1: '+session_data.mode+'</h1>');
+		open_js_modal_content('<h1>Nivel 1: '+session_data.mode+'</h1>');
 		audio_sprite.playSpriteRange('zsilence_start',start_activity_set);
 	}
 }
