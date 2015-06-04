@@ -178,6 +178,7 @@ for($num_syll=1;$num_syll<=$MAX_SYLLABLES;$num_syll++){
 				foreach($similar_words[$i] as $similar_word){
 					++$similar_count;
 					echo "$similar_word ($i),";
+                    if(array_key_exists($similar_word, $activity['answers'])) echo ">>>>>> ERROR: Duplicate??";
 					$activity['answers'][]=strtr($similar_word, $table);
 					if($similar_count==5) break;
 				}

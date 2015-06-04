@@ -283,7 +283,7 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["b", "a", "r", "\/", "c", "o"],
+		"sounds" : ["b", "a", "r", "\/", "k", "o"],
 		"level" : "1",
 		"answers" : ["barco", "brazo", "marco", "gato", "mano", "pato"]
 	},
@@ -355,7 +355,7 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["c", "a", "\/", "y", "a"],
+		"sounds" : ["k", "a", "\/", "y", "a"],
 		"level" : "1",
 		"answers" : ["calla", "casa", "bala", "rama", "cama", "canya"]
 	},
