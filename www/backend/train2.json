@@ -175,12 +175,6 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["s", "o", "\/", "f", "a"],
-		"level" : "1",
-		"answers" : ["sofa", "sopa", "copa", "ropa", "goma", "seta"]
-	},
-	{
-		"type" : "sounds",
 		"sounds" : ["b", "i", "\/", "n", "o"],
 		"level" : "1",
 		"answers" : ["vino", "pino", "mano", "mono", "plano", "barco"]

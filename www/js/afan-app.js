@@ -11,7 +11,13 @@ var sounds = [
 	//or absolute http://www.centroafan.com/afan-app-media/audio/...m4a"
 	// relative is the best to reuse it in the cordova app
 	"../../afan-app-media/audio/soundsSpriteVBR30-19kbps-100k.m4a"
+	//"../../afan-app-media/audio/soundsSpriteABR56.30kbps.141k.m4a" --> va mal, tornar a generar
 ];
+
+var media_objects;
+
+var header_zone=document.getElementById('header');
+var canvas_zone=document.getElementById('zone_canvas');
 
 var audio_sprite;
 
@@ -101,13 +107,17 @@ var session_data={
 };
 
 var subjects_select_elem="none";
+
+// Clear this if user changes, session...
 var user_subjects=null;
+var user_subject_results={};
+var user_subject_result_detail={};
 
 function menu_screen(){
 	allowBackExit();
 	var splash=document.getElementById("splash_screen");
-	if(splash!=null) splash.parentNode.removeChild(splash);
-
+	if(splash!=null && (ResourceLoader.lazy_audio==true || ResourceLoader.not_loaded['sounds'].length==0)){ splash.parentNode.removeChild(splash); }
+	if(media_objects===undefined) media_objects=ResourceLoader.ret_media; // in theory all are loaded at this point
 	header_zone.innerHTML='<h1>Conciencia Fonológica</h1>';
 	if(debug){
 		console.log('userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info);
@@ -127,6 +137,8 @@ function menu_screen(){
 	</div>\
 	';
 
+	
+	
 	//document.getElementById("splash-logo-div").appendChild(media_objects.images['key.png'])
 	subjects_select_elem=document.getElementById('subjects-select');
 	document.getElementById("start-button").onclick=function(){session_data.mode="training";json_activities=json_training;game()};
@@ -312,30 +324,54 @@ var explore_results=function(){
 	<br /><button id="go-back" onclick="menu_screen()">Volver</button> \
 	</div>\
 	';
-	ajax_request_json(
-		backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject, 
-		function(data) { 
-			if(data.elements.length==0){
-				document.getElementById("results-div").innerHTML="Resultados user: "+data.general.user+" - subject: <b>"+data.general.subject+"</b><br />No hay resultados";
-			}else{
-				document.getElementById("results-div").innerHTML="Resultados user: "+data.general.user+" - subject: <b>"+data.general.subject+"</b><br /><table id=\"results-table\"></table>";
-				results_table=document.getElementById("results-table");
-				DataTableSimple.call(results_table, {
-					data: data.elements,
-					row_id: 'id',
-					pagination: 5,
-					columns: [
-						//{ data: 'id' },
-						{ data: 'timestamp', col_header: 'Id', link_function_id: 'explore_result_detail' },
-						{ data: 'type', col_header: 'Tipo',  format: 'first_4'},
-						{ data: 'mode', col_header: 'Modo',  format: 'first_4'},
-						{ data: 'age', col_header: 'Edad' },
-						{ data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
-						{ data: 'result', col_header: '%', format: 'percentage_int' } 
-					]
-				} );
-			}
-		});	
+	if(!user_subject_results.hasOwnProperty(session_data.subject)){
+		ajax_request_json(
+			backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject, 
+			function(data) {
+				user_subject_results[session_data.subject]=data; //cache (never changes)
+				if(user_subject_results[session_data.subject].elements.length==0){
+					document.getElementById("results-div").innerHTML="Resultados user: "+user_subject_results[session_data.subject].general.user+" - subject: <b>"+user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
+				}else{
+					document.getElementById("results-div").innerHTML="Resultados user: "+user_subject_results[session_data.subject].general.user+" - subject: <b>"+user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
+					results_table=document.getElementById("results-table");
+					DataTableSimple.call(results_table, {
+						data: user_subject_results[session_data.subject].elements,
+						row_id: 'id',
+						pagination: 5,
+						columns: [
+							//{ data: 'id' },
+							{ data: 'timestamp', col_header: 'Id', link_function_id: 'explore_result_detail' },
+							{ data: 'type', col_header: 'Tipo',  format: 'first_4'},
+							{ data: 'mode', col_header: 'Modo',  format: 'first_4'},
+							{ data: 'age', col_header: 'Edad' },
+							{ data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
+							{ data: 'result', col_header: '%', format: 'percentage_int' } 
+						]
+					} );
+				}
+			});	
+	}else{
+		if(user_subject_results[session_data.subject].elements.length==0){
+			document.getElementById("results-div").innerHTML="Resultados user: "+user_subject_results[session_data.subject].general.user+" - subject: <b>"+user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
+		}else{
+			document.getElementById("results-div").innerHTML="Resultados user: "+user_subject_results[session_data.subject].general.user+" - subject: <b>"+user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
+			results_table=document.getElementById("results-table");
+			DataTableSimple.call(results_table, {
+				data: user_subject_results[session_data.subject].elements,
+				row_id: 'id',
+				pagination: 5,
+				columns: [
+					//{ data: 'id' },
+					{ data: 'timestamp', col_header: 'Id', link_function_id: 'explore_result_detail' },
+					{ data: 'type', col_header: 'Tipo',  format: 'first_4'},
+					{ data: 'mode', col_header: 'Modo',  format: 'first_4'},
+					{ data: 'age', col_header: 'Edad' },
+					{ data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
+					{ data: 'result', col_header: '%', format: 'percentage_int' } 
+				]
+			} );
+		}
+	}
 };
 
 var explore_result_detail=function(session_id){
@@ -347,28 +383,46 @@ var explore_result_detail=function(session_id){
 	<br /><button id="go-back" onclick="explore_results()">Volver</button> \
 	</div>\
 	';
-	ajax_request_json(
-		backend_url+'ajaxdb.php?action=get_result_detail&session='+session_id, 
-		function(data) { 
-			document.getElementById("results-div").innerHTML="session: "+data.general.session+" - subject: "+data.elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
-			results_table=document.getElementById("results-table");
-			DataTableSimple.call(results_table, {
-				data: data.elements,
-				pagination: 6,
-				row_id: 'id',
-				columns: [
-					//{ data: 'id' },
-					{ data: 'activity' },
-					{ data: 'choice' },
-					{ data: 'result',  special: 'red_incorrect' },
-					{ data: 'duration',  format: 'time_from_seconds_up_to_mins'}
-				]
-			} );
-		});	
+	if(!user_subject_result_detail.hasOwnProperty(session_id)){
+		ajax_request_json(
+			backend_url+'ajaxdb.php?action=get_result_detail&session='+session_id, 
+			function(data) {
+				user_subject_result_detail[session_id]=data; //cache (never changes)
+				document.getElementById("results-div").innerHTML="session: "+user_subject_result_detail[session_id].general.session+" - subject: "+user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
+				results_table=document.getElementById("results-table");
+				DataTableSimple.call(results_table, {
+					data: user_subject_result_detail[session_id].elements,
+					pagination: 6,
+					row_id: 'id',
+					columns: [
+						//{ data: 'id' },
+						{ data: 'activity' },
+						{ data: 'choice' },
+						{ data: 'result',  special: 'red_incorrect' },
+						{ data: 'duration',  format: 'time_from_seconds_up_to_mins'}
+					]
+				} );
+			});
+	}else{
+		document.getElementById("results-div").innerHTML="session: "+user_subject_result_detail[session_id].general.session+" - subject: "+user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
+		results_table=document.getElementById("results-table");
+		DataTableSimple.call(results_table, {
+			data: user_subject_result_detail[session_id].elements,
+			pagination: 6,
+			row_id: 'id',
+			columns: [
+				//{ data: 'id' },
+				{ data: 'activity' },
+				{ data: 'choice' },
+				{ data: 'result',  special: 'red_incorrect' },
+				{ data: 'duration',  format: 'time_from_seconds_up_to_mins'}
+			]
+		} );
+	}
 };
 
 
-function game(){
+var game=function(){
 	preventBackExit();
 	header_zone.innerHTML='<h1 onclick="menu_screen()"> < Conciencia Fonológica </h1>'; //<button id="go-back" onclick="menu_screen()">Salir</button>
 	if(ResourceLoader.not_loaded['sounds'].length!=0){
@@ -382,8 +436,7 @@ function game(){
 		//
 
 		// load audio in the object 
-		var audio_sprite_object=media_objects.sounds['soundsSpriteVBR30-19kbps-100k.m4a'];
-		audio_sprite_object.removeEventListener('canplaythrough', ResourceLoader.log_and_remove_from_not_loaded);
+		var audio_sprite_object=media_objects.sounds['soundsSpriteVBR30-19kbps-100k.m4a']; //soundsSpriteABR56.30kbps.141k.m4a, soundsSpriteVBR30-19kbps-100k.m4a
 		audio_sprite=new AudioSprite(audio_sprite_object,audio_object_sprite_ref,debug);
 		
 		open_js_modal_content('<h1>Nivel 1: '+session_data.mode+'</h1>');
@@ -457,32 +510,35 @@ function activity(i){
 	if(debug) console.log(i+"--"+remaining_rand_activities);
 	current_activity_data=remaining_rand_activities[i]; //json_activities[i]
 	correct_answer=current_activity_data['answers'][0];
-	
-
-	//TODO TODO TODO USAR IMAGENES EN VEZ DE DIVS CON FONDOS? I USAR -100% ETC.. SOLO DE UNA DIMENSION...
-	// breakpoint a partir de widh menor q 500 usar img sprite small (e.g., 80x80px)??
 
 	var answers_div=document.getElementById('answers');
 	answers_div.innerHTML="";
 	used_answers=[];
+	used_answers_text=[];
 	for(var i=0; i<USE_ANSWERS ; ++i) {
 		use=Math.floor(Math.random() * USE_ANSWERS)
 		while(used_answers.indexOf(use) != -1) use=Math.floor(Math.random() * USE_ANSWERS);
 		//answers_div.innerHTML+='<div id="answer'+i+'" class="hover_red_border" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"></div>'
+
 		var answer_i=current_activity_data['answers'][use];
 		answers_div.innerHTML+='<div id="answer'+i+'" onclick="check_correct(this.firstChild,correct_answer)" class="hover_red_border"  ></div>'; //onclick="check_correct(this,correct_answer)"  style="float:left;" stretchy no-limit-250
 		//if(media_objects.images[current_activity_data['answers'][use]+'.png']==undefined){
 		if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+current_activity_data['answers'][use])){
 			alert("ERROR: .wordimage-"+current_activity_data['answers'][use]+" not found in wordimg-sprite.css.");
-			document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png'])
+			document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
+        }else if(used_answers_text.hasOwnProperty(current_activity_data['answers'][use])){
+			alert("ERROR: "+current_activity_data['answers'][use]+" is already used contact the ADMIN.");
+			document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
 		}else{	
 			////document.getElementById("answer"+i).appendChild(media_objects.images[current_activity_data['answers'][use]+'.png']);		
 			////document.getElementById("answer"+i).className += " wordimage wordimage-"+current_activity_data['answers'][use];		
 			document.getElementById("answer"+i).innerHTML += '<div class="wordimage wordimage-'+current_activity_data['answers'][use]+'"></div>';
 			//document.getElementById("answer"+i).innerHTML += '<img class="spacer"  src="spacer158.png"><img class="spritev wordimg-'+current_activity_data['answers'][use]+'" src="../../../afan-app-media/img/wordimg-sprite.png" />';		
 		}
-		used_answers[used_answers.length]=use
-	 }
+		
+		used_answers[used_answers.length]=use;
+		used_answers_text[used_answers_text.length]=current_activity_data['answers'][use];
+	}
 	
 	zone_sound=document.getElementById('sound');
 	zone_sound.innerHTML='<button id="playb" class="button" onclick="play_activity_sound()">PLAY</button> ';

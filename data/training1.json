@@ -151,12 +151,6 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["s", "o", "\/", "f", "a"],
-		"level" : "1",
-		"answers" : ["sofa", "sopa", "copa", "ropa", "goma", "seta"]
-	},
-	{
-		"type" : "sounds",
 		"sounds" : ["b", "i", "\/", "n", "o"],
 		"level" : "1",
 		"answers" : ["vino", "pino", "mano", "mono", "plano", "barco"]
@@ -235,12 +229,6 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["rr", "e", "\/", "j", "a"],
-		"level" : "1",
-		"answers" : ["reja", "mesa", "seta", "ropa", "rama", "ala"]
-	},
-	{
-		"type" : "sounds",
 		"sounds" : ["p", "u", "e", "n", "\/", "t", "e"],
 		"level" : "1",
 		"answers" : ["puente", "pastel", "dulce", "pato", "plato", "percha"]
@@ -253,7 +241,7 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["b", "a", "r", "\/", "c", "o"],
+		"sounds" : ["b", "a", "r", "\/", "k", "o"],
 		"level" : "1",
 		"answers" : ["barco", "brazo", "marco", "gato", "mano", "pato"]
 	},
@@ -325,7 +313,7 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["c", "a", "\/", "y", "a"],
+		"sounds" : ["k", "a", "\/", "y", "a"],
 		"level" : "1",
 		"answers" : ["calla", "casa", "bala", "rama", "cama", "canya"]
 	},
