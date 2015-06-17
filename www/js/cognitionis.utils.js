@@ -53,7 +53,7 @@ var ResourceLoader={
 		ResourceLoader.ret_media.sounds[get_resource_name(resource_url)]=new Audio();
 		if (!ResourceLoader.ret_media.sounds[get_resource_name(resource_url)].canPlayType 
 			|| ResourceLoader.ret_media.sounds[get_resource_name(resource_url)].canPlayType("audio/mp4")==""){ 
-			return {playclip:function(){throw new Error("Your browser doesn't support HTML5 audio or mp4/m4a")}}
+			return {playclip:function(){throw new Error("Your browser doesn't support HTML5 audio or mp4/m4a");}}
 		}
 		ResourceLoader.ret_media.sounds[get_resource_name(resource_url)].src=resource_url;
 		ResourceLoader.ret_media.sounds[get_resource_name(resource_url)].addEventListener('canplaythrough', 
