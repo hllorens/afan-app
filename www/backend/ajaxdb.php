@@ -37,7 +37,18 @@ mysql_query("set time_zone:='Europe/Madrid'");
 
 $output=array();
 	
-if ($action == "get_subjects"){
+if ($action == "get_users"){
+	$sQuery = "SELECT * FROM users";
+	//echo "query: $sQuery ";
+	$rResult = mysql_query( $sQuery, $db_connection ) or die(mysql_error());
+	while ( $aRow = mysql_fetch_array( $rResult ) )	{
+		$output[$aRow['email']] = array();
+		$output[$aRow['email']]['email'] = $aRow['email'];
+		$output[$aRow['email']]['access_level'] = $aRow['access_level'];
+	}
+	header('Content-type: application/json');
+	echo json_encode( $output );
+}else if ($action == "get_subjects"){
 	$user=get_value("user");
 
 	$sQuery = "SELECT * FROM subjects WHERE user='$user';";
@@ -342,7 +353,7 @@ if ($action == "get_subjects"){
 
 			// Store the token in the session for later use.
 			//$_SESSION['token']=json_encode($token);
-			echo 'Succesfully connected';
+			//echo 'Succesfully connected';
 			//print_r($_SESSION['long_lived_access_token'], true);
 			
 			# Get user info
@@ -368,8 +379,27 @@ if ($action == "get_subjects"){
 			$_SESSION['username'] = $userInfo->name;
 			$_SESSION['picture'] = $userInfo->picture;
 			$_SESSION['email'] = $userInfo->email;
+			
+			$sQuery = "SELECT * FROM users WHERE email='".$userInfo->email."'";
+			//echo "query: $sQuery ";
+			$rResult = mysql_query( $sQuery, $db_connection ) or die(mysql_error());
+			if ( $aRow = mysql_fetch_array( $rResult ) ){
+				//existing user
+				$_SESSION['access_level'] = $aRow['access_level'];
+				// update the user last_login and last_provider
+			}else{ //new user
+				$_SESSION['access_level'] = 'normal';
+				// insert the user in the db
+			}
+			header('Content-type: application/json');
+			
 	}
-	echo "{username: '".$_SESSION['username']."', email: '".$_SESSION['email'].'}';
+	$output['username']=$_SESSION['username'];
+	$output['email']=$_SESSION['email'];
+	$output['access_level']=$_SESSION['access_level'];
+	$output['toksum']=substr($_SESSION['long_lived_access_token']->access_token,0,5);
+	header('Content-type: application/json');
+	echo json_encode( $output );
 }else if ($action == "gdisconnect"){
 	//if (!isset($_SESSION['long_lived_access_token'])) echo "No one is logged";
 	if (empty($_SESSION['long_lived_access_token'])) echo "No one is logged";
@@ -393,11 +423,11 @@ if ($action == "get_subjects"){
 			unset($_SESSION['picture']);
 			echo "Succesfully disconnected";
 		}else{
-			/*unset($_SESSION['long_lived_access_token']);
+			unset($_SESSION['long_lived_access_token']);
 			unset($_SESSION['userid']);
 			unset($_SESSION['username']);
 			unset($_SESSION['email']);
-			unset($_SESSION['picture']);*/
+			unset($_SESSION['picture']);
 			echo "Failed to revoke token for given user ($httpcode - $response - token=".substr($_SESSION['long_lived_access_token']->access_token,0,5)."...";
 		}
 	}

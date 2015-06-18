@@ -15,7 +15,7 @@ var sounds = [
 ];
 
 var media_objects;
-
+var session_state="unset";
 var header_zone=document.getElementById('header');
 var canvas_zone=document.getElementById('zone_canvas');
 
@@ -31,6 +31,10 @@ ajax_request_json("../data/train2.json", function(json) { //training1, training1
 });
 var json_activities=json_training;
 
+ajax_request('backend/ajaxdb.php?action=gen_session_state',function(text) {
+	session_state=text;
+	if(debug) console.log(session_state);
+});
 // if media not found locally, url
 //image_src_start_exists=clicked_answer.indexOf("src=\""+media_url)
 //clicked_answer=clicked_answer.substring(image_src_start_exists+media_url.length+15,img_src_end)
@@ -91,7 +95,7 @@ var current_activity_played_times=0;
 
 
 var session_data={
-	user: "afan",
+	user: null,
 	subject: "juan",
 	subject_age: "5",
 	level: "1",
@@ -107,11 +111,131 @@ var session_data={
 };
 
 var subjects_select_elem="none";
+var users_select_elem="none";
 
 // Clear this if user changes, session...
 var user_subjects=null;
 var user_subject_results={};
 var user_subject_result_detail={};
+
+function login_screen(){
+	header_zone.innerHTML='<h1>CF login</h1>';
+	canvas_zone.innerHTML=' \
+	<div id="signinButton" class="g-signin2">\
+   <span class="icon"></span>\
+    <span class="buttonText">Google</span>\
+	</div>\
+		';
+	/*var params={
+		client_id: '125860785862-s07kh0j5tpb2drjkeqsifldn39krhh60.apps.googleusercontent.com'
+	}
+	gapi.auth2.init(params);
+	var options={
+		'scope': 'email profile',
+		'width': 200,
+		'height': 50,
+		'longtitle': false,
+		'theme': 'light',
+		'onsuccess': signInCallback,
+		'onfailure': signInCallback
+	}
+	  <span class="g-signin"\
+		data-scope="openid email" \
+		data-clientid="125860785862-s07kh0j5tpb2drjkeqsifldn39krhh60.apps.googleusercontent.com"\
+		data-redirecturi="postmessage"\
+		data-accesstype="offline"\
+		data-cookiepolicy="single_host_origin"\
+		data-callback="signInCallback"\
+		> \
+	  </span><!-- scope: openid email https://www.googleapis.com/auth/plus.login --> <!-- delete data-approvalprompt="force" when debugged, use another URI (e.g., server to avoid geting back to client?) -->\
+
+	gapi.signin2.render('signinButton', options)*/
+	gapi.signin.render('signinButton', {
+	  'callback': 'signInCallback',
+	  'clientid': '125860785862-s07kh0j5tpb2drjkeqsifldn39krhh60.apps.googleusercontent.com',
+	  'cookiepolicy': 'single_host_origin',
+	  'redirecturi': 'postmessage',
+	  'accesstype': 'offline',
+	  'scope': 'openid email'
+	}); //'redirecturi': 'postmessage', --> avoids reloading the page?
+	// accesstype="offline" --> ?? isn't implicit?
+}
+
+
+function signInCallback(authResult) {
+	//console.log(authResult);
+	if (authResult['code']) {
+		$('#signinButton').attr('style', 'display: none'); // hide button
+		// Send one-time-code to server, if responds -> success
+		if(debug) console.log(authResult);
+		$.ajax({
+			type: 'POST',
+			url: 'backend/ajaxdb.php?action=gconnect&state='+session_state+'&code='+authResult['code'],
+			processData: false,
+			data: authResult['code'],
+			contentType: 'application/octet-stream; charset=utf-8',
+			success: function(result) {
+				if (result) {
+					//$('#result').html('RESULT</br>'+ result + ' (<a href="#" onclick="gdisconnect();">disconnect</a>)</br>');
+					if(debug){console.log(result);console.log("logged! "+result.email+" level:"+result.access_level);alert("logged! "+result.email+" level:"+result.access_level);}
+					session_data.user=result.email;
+					session_data.user_access_level=result.access_level;
+					if(result.access_level=='admin'){ admin_screen();}
+					else{  menu_screen();}
+				} else if (authResult['error']) {
+					$('#signinButton').attr('style', 'display: block'); // hide button
+					alert('There was an error: ' + authResult['error']);
+				} else {
+					alert("error!");
+					$('#signinButton').attr('style', 'display: block'); // hide button
+					alert('Failed to make a server-side call. Check your configuration and console.</br>Result:'+ result);
+				}
+			}
+		}); 
+	}
+}
+
+function gdisconnect(){
+	$.ajax({
+		type: 'POST',
+		url: 'backend/ajaxdb.php?action=gdisconnect',
+		success: function(result) {
+			if (result) {
+				$('#signinButton').attr('style', 'display: block'); // hide button
+				console.log(result);
+				login_screen();
+			} else {
+				$('#result').html('Failed to disconnect.</br>Result:'+ result);
+			}
+		}
+	}); 
+	return false;
+}
+
+function admin_screen(){
+	header_zone.innerHTML='<h1>CF '+session_data.user.substr(0,8)+' <a href="#" onclick="gdisconnect();">desc</a></h1>';
+	ajax_request_json(
+		backend_url+'ajaxdb.php?action=get_users', 
+		function(data) {
+			users=data;
+			canvas_zone.innerHTML=' \
+				This is what an admin user will see \
+				<div id="menu-content" class="text-center">\
+				User:  <select id="users-select"></select> \
+				<br /><button onclick="set_user()" class="button">Acceder</button> \
+				</div>\
+				';
+			users_select_elem=document.getElementById('users-select');
+			select_fill_with_json(users,users_select_elem);
+		}
+	);
+}
+
+
+function set_user(){
+	session_data.user=users_select_elem.options[users_select_elem.selectedIndex].value;
+	menu_screen();
+}
 
 function menu_screen(){
 	allowBackExit();
@@ -123,45 +247,55 @@ function menu_screen(){
 		console.log('userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info);
 		console.log('not_loaded sounds: '+ResourceLoader.not_loaded['sounds'].length);
 	}
-	canvas_zone.innerHTML=' \
-	<div id="menu-content" class="text-center">\
-	<div id="menu-logo-div"></div> \
-	Participante:  <select id="subjects-select"></select> \
-	<nav id="responsive_menu">\
-	<br /><button id="start-button" class="button" disabled="true">Practicar</button> \
-	<br /><button id="start-test-button" class="button" disabled="true">Test</button> \
-	<br /><button id="manage-subjects" disabled="true" class="button" onclick="manage_subjects()">Participantes</button> \
-	<br /><button id="results" disabled="true" class="button" onclick="explore_results()">Resultados</button> \
-	<br /><button id="exit" class="button exit" onclick="exit_app()">Salir</button> \
-	</nav>\
-	</div>\
-	';
-
 	
+	if(is_app){
+		session_data.user='montsedeayala@gmail.com'; // will find a way to set the usr, by google account
+	}
 	
-	//document.getElementById("splash-logo-div").appendChild(media_objects.images['key.png'])
-	subjects_select_elem=document.getElementById('subjects-select');
-	document.getElementById("start-button").onclick=function(){session_data.mode="training";json_activities=json_training;game()};
-	document.getElementById("start-test-button").onclick=function(){session_data.mode="test";json_activities=json_test;game()};
-
-	if(user_subjects==null){
-		ajax_request_json(
-			backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user, 
-			function(data) {
-				user_subjects=data;
-				select_fill_with_json(user_subjects,subjects_select_elem); 
-				document.getElementById("start-button").disabled=false; 
-				document.getElementById("start-test-button").disabled=false;
-				document.getElementById("manage-subjects").disabled=false;
-				document.getElementById("results").disabled=false;
-			}
-		);
+	if(session_data.user==null){
+		login_screen();
 	}else{
-		select_fill_with_json(user_subjects,subjects_select_elem);
-		document.getElementById("start-button").disabled=false; 
-		document.getElementById("start-test-button").disabled=false;
-		document.getElementById("manage-subjects").disabled=false;
-		document.getElementById("results").disabled=false;
+		header_zone.innerHTML='<h1>CF '+session_data.user.substr(0,8)+' <a href="#" onclick="gdisconnect();">desc</a></h1>';
+		canvas_zone.innerHTML=' \
+		<div id="menu-content" class="text-center">\
+		<div id="menu-logo-div"></div> \
+		Participante:  <select id="subjects-select"></select> \
+		<nav id="responsive_menu">\
+		<br /><button id="start-button" class="button" disabled="true">Practicar</button> \
+		<br /><button id="start-test-button" class="button" disabled="true">Test</button> \
+		<br /><button id="manage-subjects" disabled="true" class="button" onclick="manage_subjects()">Participantes</button> \
+		<br /><button id="results" disabled="true" class="button" onclick="explore_results()">Resultados</button> \
+		<br /><button id="exit" class="button exit" onclick="exit_app()">Salir</button> \
+		</nav>\
+		</div>\
+		';
+
+		
+		
+		//document.getElementById("splash-logo-div").appendChild(media_objects.images['key.png'])
+		subjects_select_elem=document.getElementById('subjects-select');
+		document.getElementById("start-button").onclick=function(){session_data.mode="training";json_activities=json_training;game()};
+		document.getElementById("start-test-button").onclick=function(){session_data.mode="test";json_activities=json_test;game()};
+
+		if(user_subjects==null){
+			ajax_request_json(
+				backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user, 
+				function(data) {
+					user_subjects=data;
+					select_fill_with_json(user_subjects,subjects_select_elem); 
+					document.getElementById("start-button").disabled=false; 
+					document.getElementById("start-test-button").disabled=false;
+					document.getElementById("manage-subjects").disabled=false;
+					document.getElementById("results").disabled=false;
+				}
+			);
+		}else{
+			select_fill_with_json(user_subjects,subjects_select_elem);
+			document.getElementById("start-button").disabled=false; 
+			document.getElementById("start-test-button").disabled=false;
+			document.getElementById("manage-subjects").disabled=false;
+			document.getElementById("results").disabled=false;
+		}
 	}
 }
 

@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 
 <head>
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
-	</script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 	<script src="https://apis.google.com/js/client:platform.js?onload=start" async defer>
 	</script>
 </head>
@@ -19,7 +18,7 @@
     data-cookiepolicy="single_host_origin"
     data-callback="signInCallback"
 	> 
-  </span><!-- scope: openid email https://www.googleapis.com/auth/plus.login --> <!-- delete data-approvalprompt="force" when debugged -->
+  </span><!-- scope: openid email https://www.googleapis.com/auth/plus.login --> <!-- delete data-approvalprompt="force" when debugged, use another URI (e.g., server to avoid geting back to client?) -->
 </div>
 <a href="#" onclick="gdisconnect();">force disconnect</a>
 <!--<a href="#" onclick="show_secret()">show secret</a>-->
@@ -28,6 +27,60 @@
 
 <script>
 var session_state="unset";
+/*
+// TODO try if this works in a phonegap after it is ingetrated in the app
+//http://stackoverflow.com/questions/23930744/how-to-use-google-login-api-with-cordova-phonegap
+ var googleapi = {
+        authorize: function(options) {
+            var deferred = $.Deferred();
+
+            //Build the OAuth consent page URL
+            var authUrl = 'https://accounts.google.com/o/oauth2/auth?' + $.param({
+                client_id: 'the id...',
+                redirect_uri: 'http://localhost',
+                response_type: 'code',
+                scope: 'openid email'
+            });
+
+            //Open the OAuth consent page in the InAppBrowser
+            var authWindow = window.open(authUrl, '_blank', 'location=no,toolbar=no');
+
+            //The recommendation is to use the redirect_uri "urn:ietf:wg:oauth:2.0:oob"
+            //which sets the authorization code in the browser's title. However, we can't
+            //access the title of the InAppBrowser.
+            //
+            //Instead, we pass a bogus redirect_uri of "http://localhost", which means the
+            //authorization code will get set in the url. We can access the url in the
+            //loadstart and loadstop events. So if we bind the loadstart event, we can
+            //find the authorization code and close the InAppBrowser after the user
+            //has granted us access to their data.
+            $(authWindow).on('loadstart', function(e) {
+                var url = e.originalEvent.url;
+                var code = /\?code=(.+)$/.exec(url);
+                var error = /\?error=(.+)$/.exec(url);
+
+                if (code || error) {
+                    //Always close the browser when match is found
+                    authWindow.close();
+                }
+
+                if (code) {
+                    // run the callback as in the normal version
+                } else if (error) {
+                    //The user denied access to the app
+                    deferred.reject({
+                        error: error[1]
+                    });
+                }
+            });
+
+            return deferred.promise();
+        }
+
+    };
+
+*/
+
 
 /*function show_secret(){
 	$.ajax({
@@ -50,6 +103,7 @@ function signInCallback(authResult) {
 	if (authResult['code']) {
 		$('#signinButton').attr('style', 'display: none'); // hide button
 		// Send one-time-code to server, if responds -> success
+		console.log(authResult);
 		$.ajax({
 			type: 'POST',
 			url: 'backend/ajaxdb.php?action=gconnect&state='+session_state+'&code='+authResult['code'],
@@ -58,7 +112,7 @@ function signInCallback(authResult) {
 			contentType: 'application/octet-stream; charset=utf-8',
 			success: function(result) {
 				if (result) {
-					console.log(result);
+					//console.log(result); debug
 					$('#result').html('RESULT</br>'+ result + ' (<a href="#" onclick="gdisconnect();">disconnect</a>)</br>Redirecting...');
 					/*setTimeout(function() {
 					window.location.href = "/restaurant";
