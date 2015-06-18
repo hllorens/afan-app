@@ -802,7 +802,7 @@ function nextActivity(){
 }
 
 function send_session_data(){
-	if(session_data.user_access_level=='invitado'){
+	if(session_data.user_access_level=='invitee'){
 		canvas_zone.innerHTML+='<br />Los resultados no se pueden guardar para\
 			usuarios "invitados"<br /><br />\
 		<br /><button id="go-back" onclick="menu_screen()">Volver</button>';

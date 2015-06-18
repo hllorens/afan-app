@@ -222,7 +222,7 @@ if ($action == "get_users"){
 	$session=get_value("session");
 	$user=get_value("user");
 
-	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
+	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject ($user!=".$_SESSION['email'].")";return;}
 
 	$sQuery = "SELECT * FROM session_activities WHERE session='$session' AND user='$user';";
 	//echo "query: $sQuery ";
