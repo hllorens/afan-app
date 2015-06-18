@@ -51,7 +51,7 @@ if ($action == "get_users"){
 	echo json_encode( $output );
 }else if ($action == "get_subjects"){
 	$user=get_value("user");
-	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['user']){echo "ERROR: no admin or owner of subject";return;}
+	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
 
 	$sQuery = "SELECT * FROM subjects WHERE user='$user';";
 	//echo "query: $sQuery ";
@@ -77,7 +77,7 @@ if ($action == "get_users"){
 	$birthdate=get_value('birthdate');
 	$comments=get_value('comments');
 
-	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['user']){echo "ERROR: no admin or owner of subject";return;}
+	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
 
 	$sQuery = "INSERT INTO subjects (user, alias, name, birthdate,comments) VALUES ('$user', '$alias', '$name', '$birthdate', '$comments');";
 	$rResult = mysql_query( $sQuery, $db_connection );
@@ -104,7 +104,7 @@ if ($action == "get_users"){
 	$birthdate=get_value('birthdate');
 	$comments=get_value('comments');
 
-	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['user']){echo "ERROR: no admin or owner of subject";return;}
+	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
 
 	
 	$sQuery = "UPDATE subjects  SET name='$name', birthdate='$birthdate',comments='$comments' WHERE id=$lid;";
@@ -134,7 +134,7 @@ if ($action == "get_users"){
 	$duration=get_value("duration");
 	$timestamp=get_value("timestamp");
 
-	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['user']){echo "ERROR: no admin or owner of subject";return;}
+	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
 
 	$sQuery = "INSERT INTO sessions(reference,user,subject,age,num_answered,num_correct,result,level,duration,timestamp)  VALUES ('$reference','$user','$subject','$age','$num_answered','$num_correct','$result','$level','$duration','$timestamp');"; 
 	$rResult = mysql_query( $sQuery, $db_connection );
@@ -162,7 +162,7 @@ if ($action == "get_users"){
 	$duration=$str_json["duration"];
 	$timestamp=$str_json["timestamp"];
 
-	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['user']){echo "ERROR: no admin or owner of subject";return;}
+	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
 
 	$error=0;
 	
@@ -188,7 +188,7 @@ if ($action == "get_users"){
 	$user=get_value("user");
 	$subject=get_value("subject");
 
-	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['user']){echo "ERROR: no admin or owner of subject";return;}
+	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
 
 	$sQuery = "SELECT * FROM sessions WHERE user='$user' AND subject='$subject';";
 	//echo "query: $sQuery ";
@@ -222,7 +222,7 @@ if ($action == "get_users"){
 	$session=get_value("session");
 	$user=get_value("user");
 
-	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['user']){echo "ERROR: no admin or owner of subject";return;}
+	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
 
 	$sQuery = "SELECT * FROM session_activities WHERE session='$session' AND user='$user';";
 	//echo "query: $sQuery ";
@@ -256,7 +256,7 @@ if ($action == "get_users"){
 	$id=get_value("id");
 	$user=get_value("user");
 	$subject=get_value("subject");
-	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['user']){echo "ERROR: no admin or owner of subject";return;}
+	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
 
 	// create a detailed acction log db so that we can recover actions, authors, dates and previous states
 	$sQuery = "DELETE FROM sessions WHERE id='$id' AND subject='$subject' AND user='$user';";
@@ -405,7 +405,7 @@ if ($action == "get_users"){
 				//existing user
 				$_SESSION['access_level'] = $aRow['access_level'];
 				// update the user last_login and last_provider
-				$sQuery = "UPDATE users  SET last_login='$timestamp_seconds',last_provider='google' WHERE user='".$_SESSION['email']."';";
+				$sQuery = "UPDATE users  SET last_login='$timestamp_seconds',last_provider='google' WHERE email='".$_SESSION['email']."';";
 				$rResult = mysql_query( $sQuery, $db_connection );
 				if(!$rResult){header('HTTP/1.1 500 Internal Server Error');die("Error: Exists. ".mysql_error()." -- ".$sQuery);}
 			}else{ //new user
