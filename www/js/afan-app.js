@@ -96,7 +96,7 @@ var current_activity_played_times=0;
 
 var session_data={
 	user: null,
-	subject: "juan",
+	subject: "invitado",
 	subject_age: "5",
 	level: "1",
 	duration: 0,
@@ -120,12 +120,18 @@ var user_subject_result_detail={};
 
 function login_screen(){
 	header_zone.innerHTML='<h1>CF login</h1>';
-	canvas_zone.innerHTML=' \
-	<div id="signinButton" class="g-signin2">\
+	canvas_zone.innerHTML=' <br />\
+	<div id="menu-content" class="text-center">\
+	<div id="signinButton" class="button">Acceso Google\
    <span class="icon"></span>\
-    <span class="buttonText">Google</span>\
+    <span class="buttonText"></span>\
 	</div>\
+	<br /><button id="exit" class="button exit" onclick="invitee_access()">Acceso Invitado (Offline)</button> \
+	<br /><button id="exit" class="button exit" onclick="exit_app()">Salir</button> \
+	</div> \
 		';
+		// check if there is an option to change the window... see stackoverflow oauth.html to see how-to cordova
+		// class g-signin2  only needed if render is not used
 	/*var params={
 		client_id: '125860785862-s07kh0j5tpb2drjkeqsifldn39krhh60.apps.googleusercontent.com'
 	}
@@ -161,11 +167,18 @@ function login_screen(){
 	// accesstype="offline" --> ?? isn't implicit?
 }
 
+function invitee_access(){
+	session_data.user='invitado';
+	session_data.user_access_level='invitee';
+	menu_screen();
+}
+
 
 function signInCallback(authResult) {
 	//console.log(authResult);
 	if (authResult['code']) {
-		$('#signinButton').attr('style', 'display: none'); // hide button
+		//$('#signinButton').attr('style', 'display: none'); // hide button
+		document.getElementById('signinButton').innerHTML="Loading...";
 		// Send one-time-code to server, if responds -> success
 		if(debug) console.log(authResult);
 		$.ajax({
@@ -233,7 +246,10 @@ function admin_screen(){
 
 
 function set_user(){
-	session_data.user=users_select_elem.options[users_select_elem.selectedIndex].value;
+	if(session_data.user!=users_select_elem.options[users_select_elem.selectedIndex].value){
+		session_data.user=users_select_elem.options[users_select_elem.selectedIndex].value;
+		user_subjects=null;
+	}
 	menu_screen();
 }
 
@@ -256,15 +272,20 @@ function menu_screen(){
 		login_screen();
 	}else{
 		header_zone.innerHTML='<h1>CF '+session_data.user.substr(0,8)+' <a href="#" onclick="gdisconnect();">desc</a></h1>';
+		var admin_opts='<br /><button id="sel-usr" onclick="admin_screen()" class="button">Administrar</button>';
+		var normal_opts='<br /><button id="start-test-button" class="button" disabled="true">Test</button> \
+		<br /><button id="manage-subjects" disabled="true" class="button" onclick="manage_subjects()">Participantes</button> \
+		<br /><button id="results" disabled="true" class="button" onclick="explore_results()">Resultados</button>';
+		if(session_data.user_access_level!='admin') admin_opts="";
+		if(session_data.user_access_level=='invitee'){ normal_opts=""; user_subjects={invitado:'invitado'}}
 		canvas_zone.innerHTML=' \
 		<div id="menu-content" class="text-center">\
 		<div id="menu-logo-div"></div> \
 		Participante:  <select id="subjects-select"></select> \
 		<nav id="responsive_menu">\
+		'+admin_opts+'\
 		<br /><button id="start-button" class="button" disabled="true">Practicar</button> \
-		<br /><button id="start-test-button" class="button" disabled="true">Test</button> \
-		<br /><button id="manage-subjects" disabled="true" class="button" onclick="manage_subjects()">Participantes</button> \
-		<br /><button id="results" disabled="true" class="button" onclick="explore_results()">Resultados</button> \
+		'+normal_opts+'\
 		<br /><button id="exit" class="button exit" onclick="exit_app()">Salir</button> \
 		</nav>\
 		</div>\
@@ -275,7 +296,9 @@ function menu_screen(){
 		//document.getElementById("splash-logo-div").appendChild(media_objects.images['key.png'])
 		subjects_select_elem=document.getElementById('subjects-select');
 		document.getElementById("start-button").onclick=function(){session_data.mode="training";json_activities=json_training;game()};
-		document.getElementById("start-test-button").onclick=function(){session_data.mode="test";json_activities=json_test;game()};
+		if(session_data.user_access_level!='invitee'){
+			document.getElementById("start-test-button").onclick=function(){session_data.mode="test";json_activities=json_test;game()};
+		}
 
 		if(user_subjects==null){
 			ajax_request_json(
@@ -283,18 +306,22 @@ function menu_screen(){
 				function(data) {
 					user_subjects=data;
 					select_fill_with_json(user_subjects,subjects_select_elem); 
-					document.getElementById("start-button").disabled=false; 
-					document.getElementById("start-test-button").disabled=false;
-					document.getElementById("manage-subjects").disabled=false;
-					document.getElementById("results").disabled=false;
+					document.getElementById("start-button").disabled=false;
+					if(session_data.user_access_level!='invitee'){
+						document.getElementById("start-test-button").disabled=false;
+						document.getElementById("manage-subjects").disabled=false;
+						document.getElementById("results").disabled=false;
+					}
 				}
 			);
 		}else{
 			select_fill_with_json(user_subjects,subjects_select_elem);
-			document.getElementById("start-button").disabled=false; 
-			document.getElementById("start-test-button").disabled=false;
-			document.getElementById("manage-subjects").disabled=false;
-			document.getElementById("results").disabled=false;
+			document.getElementById("start-button").disabled=false;
+			if(session_data.user_access_level!='invitee'){
+				document.getElementById("start-test-button").disabled=false;
+				document.getElementById("manage-subjects").disabled=false;
+				document.getElementById("results").disabled=false;
+			}
 		}
 	}
 }
@@ -519,7 +546,7 @@ var explore_result_detail=function(session_id){
 	';
 	if(!user_subject_result_detail.hasOwnProperty(session_id)){
 		ajax_request_json(
-			backend_url+'ajaxdb.php?action=get_result_detail&session='+session_id, 
+			backend_url+'ajaxdb.php?action=get_result_detail&session='+session_id+'&user='+session_data.user, 
 			function(data) {
 				user_subject_result_detail[session_id]=data; //cache (never changes)
 				document.getElementById("results-div").innerHTML="session: "+user_subject_result_detail[session_id].general.session+" - subject: "+user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
@@ -775,18 +802,25 @@ function nextActivity(){
 }
 
 function send_session_data(){
-  if(debug) console.log(JSON.stringify(session_data));
-  var xhr = new XMLHttpRequest();
-  xhr.open("POST", "http://www.centroafan.com/afan-app/www/"+backend_url+'ajaxdb.php',true);
-  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  xhr.responsetype="json";
-  xhr.send("action=send_session_data_post&json_string="+(JSON.stringify(session_data))); 
+	if(session_data.user_access_level=='invitado'){
+		canvas_zone.innerHTML+='<br />Los resultados no se pueden guardar para\
+			usuarios "invitados"<br /><br />\
+		<br /><button id="go-back" onclick="menu_screen()">Volver</button>';
+		return;
+	}
+	
+	if(debug) console.log(JSON.stringify(session_data));
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST", "http://www.centroafan.com/afan-app/www/"+backend_url+'ajaxdb.php',true);
+	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	xhr.responsetype="json";
+	xhr.send("action=send_session_data_post&json_string="+(JSON.stringify(session_data))); 
 
-  xhr.onload = function () {
-    var data=JSON.parse(this.responseText);
-    canvas_zone.innerHTML+='<br />Server message: '+data.msg+'<br /><br />\
-    <br /><button id="go-back" onclick="menu_screen()">Volver</button>';
-  };
+	xhr.onload = function () {
+		var data=JSON.parse(this.responseText);
+		canvas_zone.innerHTML+='<br />Server message: '+data.msg+'<br /><br />\
+		<br /><button id="go-back" onclick="menu_screen()">Volver</button>';
+	};
 
 }
 
