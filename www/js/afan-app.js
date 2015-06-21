@@ -1,3 +1,5 @@
+"use strict";
+
 // MEDIA
 var images = [
 "../../afan-app-media/img/spacer158.png",
@@ -33,7 +35,7 @@ var json_activities=json_training;
 
 ajax_request('backend/ajaxdb.php?action=gen_session_state',function(text) {
 	session_state=text;
-	if(debug) console.log(session_state);
+	//console.log(session_state);
 });
 // if media not found locally, url
 //image_src_start_exists=clicked_answer.indexOf("src=\""+media_url)
@@ -93,7 +95,7 @@ var current_activity_data={};
 var current_activity_index=0;
 var current_activity_played_times=0;
 
-
+var user_data={}
 var session_data={
 	user: null,
 	subject: "invitado",
@@ -170,6 +172,9 @@ function login_screen(){
 function invitee_access(){
 	session_data.user='invitado';
 	session_data.user_access_level='invitee';
+	user_data.email='invitado';
+	user_data.display_name='invitado';
+	user_data.access_level='invitee';
 	menu_screen();
 }
 
@@ -177,11 +182,27 @@ function invitee_access(){
 function signInCallback(authResult) {
 	//console.log(authResult);
 	if (authResult['code']) {
-		//$('#signinButton').attr('style', 'display: none'); // hide button
 		document.getElementById('signinButton').innerHTML="Loading...";
 		// Send one-time-code to server, if responds -> success
 		if(debug) console.log(authResult);
-		$.ajax({
+		ajax_request_json(
+			backend_url+'ajaxdb.php?action=gconnect&state='+session_state+'&code='+authResult['code'],
+			function(result) {
+				if (result) {
+					if(debug){console.log(result);console.log("logged! "+result.email+" level:"+result.access_level);alert("logged! "+result.email+" level:"+result.access_level);}
+                    user_data=result;
+					session_data.user=result.email;
+					session_data.user_access_level=result.access_level;
+					if(result.access_level=='admin'){ admin_screen();}
+					else{  menu_screen();}
+				} else if (authResult['error']) {
+					alert('There was an error: ' + authResult['error']);
+				} else {
+					alert('Failed to make a server-side call. Check your configuration and console.</br>Result:'+ result);
+				}
+			}
+		);
+		/*$.ajax({
 			type: 'POST',
 			url: 'backend/ajaxdb.php?action=gconnect&state='+session_state+'&code='+authResult['code'],
 			processData: false,
@@ -189,48 +210,47 @@ function signInCallback(authResult) {
 			contentType: 'application/octet-stream; charset=utf-8',
 			success: function(result) {
 				if (result) {
-					//$('#result').html('RESULT</br>'+ result + ' (<a href="#" onclick="gdisconnect();">disconnect</a>)</br>');
 					if(debug){console.log(result);console.log("logged! "+result.email+" level:"+result.access_level);alert("logged! "+result.email+" level:"+result.access_level);}
+                    user_data=result;
 					session_data.user=result.email;
 					session_data.user_access_level=result.access_level;
 					if(result.access_level=='admin'){ admin_screen();}
 					else{  menu_screen();}
 				} else if (authResult['error']) {
-					$('#signinButton').attr('style', 'display: block'); // hide button
 					alert('There was an error: ' + authResult['error']);
 				} else {
-					alert("error!");
-					$('#signinButton').attr('style', 'display: block'); // hide button
 					alert('Failed to make a server-side call. Check your configuration and console.</br>Result:'+ result);
 				}
 			}
-		}); 
+		});*/
+		
 	}
 }
 
 function gdisconnect(){
-	$.ajax({
-		type: 'POST',
-		url: 'backend/ajaxdb.php?action=gdisconnect',
-		success: function(result) {
-			if (result) {
-				$('#signinButton').attr('style', 'display: block'); // hide button
-				console.log(result);
+	if(user.email=='invitado') login_screen();
+	ajax_request_json(
+		backend_url+'ajaxdb.php?action=gdisconnect', 
+		function(result) {
+			if (result.hasOwnProperty('success')) {
+				if(debug) console.log(result.success);
 				login_screen();
 			} else {
-				$('#result').html('Failed to disconnect.</br>Result:'+ result);
+				if(!result.hasOwnProperty('error')) result.error="NO JSON RETURNED";
+				alert('Failed to disconnect.</br>Result:'+ result.error);
 			}
 		}
-	}); 
+	);
+
 	return false;
 }
 
 function admin_screen(){
-	header_zone.innerHTML='<h1>CF '+session_data.user.substr(0,8)+' <a href="#" onclick="gdisconnect();">desc</a></h1>';
+	header_zone.innerHTML='<h1>CF '+user_data.email.substr(0,8)+' <a href="#" onclick="gdisconnect();">desc</a></h1>';
 	ajax_request_json(
 		backend_url+'ajaxdb.php?action=get_users', 
 		function(data) {
-			users=data;
+			var users=data;
 			canvas_zone.innerHTML=' \
 				This is what an admin user will see \
 				<div id="menu-content" class="text-center">\
@@ -268,16 +288,29 @@ function menu_screen(){
 		session_data.user='montsedeayala@gmail.com'; // will find a way to set the usr, by google account
 	}
 	
-	if(session_data.user==null){
+	if(user_data.email==null){
 		login_screen();
 	}else{
-		header_zone.innerHTML='<h1>CF '+session_data.user.substr(0,8)+' <a href="#" onclick="gdisconnect();">desc</a></h1>';
+		// TODO if admin administrar... lo de sujetos puede ir aquí tb...
+		hamburger_menu_content.innerHTML=''+user_data.email.substr(0,8)+'<ul>\
+		<li><a href="#" onclick="gdisconnect()">perfil</a></li>\
+		<li><a href="#" onclick="gdisconnect()">desconectar</a></li>\
+		<li><a href="#" onclick="exit_app()">salir</a></li>\
+		</ul>';
+		header_zone.innerHTML='<a id="hamburger_icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">\
+		<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"/></svg></a><h1>Conciencia Fonológica</h1>';
+		hamburger_icon=document.getElementById('hamburger_icon');
+		hamburger_icon.addEventListener('click', function(e) {
+			hamburger_menu.classList.toggle('open');
+			e.stopPropagation();
+		});
+
 		var admin_opts='<br /><button id="sel-usr" onclick="admin_screen()" class="button">Administrar</button>';
 		var normal_opts='<br /><button id="start-test-button" class="button" disabled="true">Test</button> \
 		<br /><button id="manage-subjects" disabled="true" class="button" onclick="manage_subjects()">Participantes</button> \
 		<br /><button id="results" disabled="true" class="button" onclick="explore_results()">Resultados</button>';
-		if(session_data.user_access_level!='admin') admin_opts="";
-		if(session_data.user_access_level=='invitee'){ normal_opts=""; user_subjects={invitado:'invitado'}}
+		if(user_data.access_level!='admin') admin_opts="";
+		if(user_data.access_level=='invitee'){ normal_opts=""; user_subjects={invitado:'invitado'}}
 		canvas_zone.innerHTML=' \
 		<div id="menu-content" class="text-center">\
 		<div id="menu-logo-div"></div> \
@@ -296,7 +329,7 @@ function menu_screen(){
 		//document.getElementById("splash-logo-div").appendChild(media_objects.images['key.png'])
 		subjects_select_elem=document.getElementById('subjects-select');
 		document.getElementById("start-button").onclick=function(){session_data.mode="training";json_activities=json_training;game()};
-		if(session_data.user_access_level!='invitee'){
+		if(user_data.access_level!='invitee'){
 			document.getElementById("start-test-button").onclick=function(){session_data.mode="test";json_activities=json_test;game()};
 		}
 
@@ -307,7 +340,7 @@ function menu_screen(){
 					user_subjects=data;
 					select_fill_with_json(user_subjects,subjects_select_elem); 
 					document.getElementById("start-button").disabled=false;
-					if(session_data.user_access_level!='invitee'){
+					if(user_data.access_level!='invitee'){
 						document.getElementById("start-test-button").disabled=false;
 						document.getElementById("manage-subjects").disabled=false;
 						document.getElementById("results").disabled=false;
@@ -317,7 +350,7 @@ function menu_screen(){
 		}else{
 			select_fill_with_json(user_subjects,subjects_select_elem);
 			document.getElementById("start-button").disabled=false;
-			if(session_data.user_access_level!='invitee'){
+			if(user_data.access_level!='invitee'){
 				document.getElementById("start-test-button").disabled=false;
 				document.getElementById("manage-subjects").disabled=false;
 				document.getElementById("results").disabled=false;
@@ -338,7 +371,7 @@ var manage_subjects=function(){
 	<br /><button id="go-back" onclick="menu_screen()">Volver</button> \
 	</div>\
 	';
-    user_subjects_data=[];
+	var user_subjects_data=[];
 	for(var key in user_subjects){
 		if (user_subjects.hasOwnProperty(key)) {
 			user_subjects_data.push(user_subjects[key]);
@@ -349,7 +382,7 @@ var manage_subjects=function(){
 		document.getElementById("results-div").innerHTML="Resultados user: "+session_data.user+"<br />No hay participantes";
 	}else{
 		document.getElementById("results-div").innerHTML="Resultados user: "+session_data.user+"<br /><table id=\"results-table\"></table>";
-		results_table=document.getElementById("results-table");
+		var results_table=document.getElementById("results-table");
 		DataTableSimple.call(results_table, {
 			data: user_subjects_data,
 			pagination: 5,
@@ -494,7 +527,7 @@ var explore_results=function(){
 					document.getElementById("results-div").innerHTML="Resultados user: "+user_subject_results[session_data.subject].general.user+" - subject: <b>"+user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
 				}else{
 					document.getElementById("results-div").innerHTML="Resultados user: "+user_subject_results[session_data.subject].general.user+" - subject: <b>"+user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
-					results_table=document.getElementById("results-table");
+					var results_table=document.getElementById("results-table");
 					DataTableSimple.call(results_table, {
 						data: user_subject_results[session_data.subject].elements,
 						row_id: 'id',
@@ -516,7 +549,7 @@ var explore_results=function(){
 			document.getElementById("results-div").innerHTML="Resultados user: "+user_subject_results[session_data.subject].general.user+" - subject: <b>"+user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
 		}else{
 			document.getElementById("results-div").innerHTML="Resultados user: "+user_subject_results[session_data.subject].general.user+" - subject: <b>"+user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
-			results_table=document.getElementById("results-table");
+			var results_table=document.getElementById("results-table");
 			DataTableSimple.call(results_table, {
 				data: user_subject_results[session_data.subject].elements,
 				row_id: 'id',
@@ -550,7 +583,7 @@ var explore_result_detail=function(session_id){
 			function(data) {
 				user_subject_result_detail[session_id]=data; //cache (never changes)
 				document.getElementById("results-div").innerHTML="session: "+user_subject_result_detail[session_id].general.session+" - subject: "+user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
-				results_table=document.getElementById("results-table");
+				var results_table=document.getElementById("results-table");
 				DataTableSimple.call(results_table, {
 					data: user_subject_result_detail[session_id].elements,
 					pagination: 6,
@@ -566,7 +599,7 @@ var explore_result_detail=function(session_id){
 			});
 	}else{
 		document.getElementById("results-div").innerHTML="session: "+user_subject_result_detail[session_id].general.session+" - subject: "+user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
-		results_table=document.getElementById("results-table");
+		var results_table=document.getElementById("results-table");
 		DataTableSimple.call(results_table, {
 			data: user_subject_result_detail[session_id].elements,
 			pagination: 6,
@@ -674,10 +707,10 @@ function activity(i){
 
 	var answers_div=document.getElementById('answers');
 	answers_div.innerHTML="";
-	used_answers=[];
-	used_answers_text=[];
+	var used_answers=[];
+	var used_answers_text=[];
 	for(var i=0; i<USE_ANSWERS ; ++i) {
-		use=Math.floor(Math.random() * USE_ANSWERS)
+		var use=Math.floor(Math.random() * USE_ANSWERS)
 		while(used_answers.indexOf(use) != -1) use=Math.floor(Math.random() * USE_ANSWERS);
 		//answers_div.innerHTML+='<div id="answer'+i+'" class="hover_red_border" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"></div>'
 
@@ -691,10 +724,11 @@ function activity(i){
 			alert("ERROR: "+current_activity_data['answers'][use]+" is already used contact the ADMIN.");
 			document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
 		}else{	
-			////document.getElementById("answer"+i).appendChild(media_objects.images[current_activity_data['answers'][use]+'.png']);		
-			////document.getElementById("answer"+i).className += " wordimage wordimage-"+current_activity_data['answers'][use];		
+			////document.getElementById("answer"+i).appendChild(media_objects.images[current_activity_data['answers'][use]+'.png']);
+			////document.getElementById("answer"+i).className += " wordimage wordimage-"+current_activity_data['answers'][use];
+			// TWO DIVS ARE NEEDED TO MAKE THIS RESPONSIBLE AND ALSO INCLUDE MAX-WIDTH...
 			document.getElementById("answer"+i).innerHTML += '<div class="wordimage wordimage-'+current_activity_data['answers'][use]+'"></div>';
-			//document.getElementById("answer"+i).innerHTML += '<img class="spacer"  src="spacer158.png"><img class="spritev wordimg-'+current_activity_data['answers'][use]+'" src="../../../afan-app-media/img/wordimg-sprite.png" />';		
+			////document.getElementById("answer"+i).innerHTML += '<img class="spacer"  src="spacer158.png"><img class="spritev wordimg-'+current_activity_data['answers'][use]+'" src="../../../afan-app-media/img/wordimg-sprite.png" />';		
 		}
 		
 		used_answers[used_answers.length]=use;
@@ -802,7 +836,7 @@ function nextActivity(){
 }
 
 function send_session_data(){
-	if(session_data.user_access_level=='invitee'){
+	if(user_data.access_level=='invitee'){
 		canvas_zone.innerHTML+='<br />Los resultados no se pueden guardar para\
 			usuarios "invitados"<br /><br />\
 		<br /><button id="go-back" onclick="menu_screen()">Volver</button>';

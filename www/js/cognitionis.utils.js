@@ -917,7 +917,7 @@ var allowBackExit=function(){
 
 // BASIC AJAX
 // Abstraction (type and method are optional)
-function ajax_request(url, callback, type, method) {
+function ajax_request(url, callback, type, method, data) {
 	if(typeof(method)==="undefined") method = "GET";
 	if(typeof(type)==="undefined") type = "text";
 	var xhr=new XMLHttpRequest();
@@ -936,10 +936,15 @@ function ajax_request(url, callback, type, method) {
 		}
 	}
 	xhr.open(method, url, true);
-	xhr.send()
+	if(method=="POST" && typeof(data)!='undefined') xhr.send(data)
+	else xhr.send()
 }
 
 function ajax_request_json(url, callback) {ajax_request(url,callback,"json");}
+
+// TODO for sending utf-8 post use "application/json; charset=UTF-8"
+// or if not json "application/octet-stream; charset=UTF-8"
+
 
 // QUERY STRING location.search
 var get_query_string = function () {
@@ -964,5 +969,14 @@ var toggleClassBlink = function(blink_element,blink_class,blink_timeout,num_blin
 		
 }
 
+// HAMBURGER MENU
+
+var hamburger_menu=document.getElementById('hamburger_menu');
+var hamburger_menu_content=document.getElementById('hamburger_menu_content');
+var hamburger_close=document.getElementById('hamburger_close');
+hamburger_close.addEventListener('click', function(e) {
+			hamburger_menu.classList.remove('open');
+			e.stopPropagation();
+		});
 
 

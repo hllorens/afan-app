@@ -146,11 +146,16 @@ button.backgroundRed{
 .hover_red_border{
 	width:31%; max-width:250px;
  	text-align:center;
-	margin:0 1px; padding:1px;
 	/*float:left;*/
 	display:inline-block;
 	border:2px solid #a55; /*original border color #fee*/
 	background-color: #eee; /*d99, fbb*/
+	/* on two divs (use .hover_red_border div too) */
+	padding:1px;
+	margin:0 1px;
+	/* on one div (IMPOSSIBLE, there is no max-padding-top)
+	padding-top:31%;  
+	max-padding-top:250px;*/
 }
 
 .hover_red_border div{

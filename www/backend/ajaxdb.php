@@ -427,7 +427,8 @@ if ($action == "get_users"){
 	echo json_encode( $output );
 }else if ($action == "gdisconnect"){
 	//if (!isset($_SESSION['long_lived_access_token'])) echo "No one is logged";
-	if (empty($_SESSION['long_lived_access_token'])) echo "No one is logged";
+	
+	if (empty($_SESSION['long_lived_access_token'])) $output['error']="No one is logged";
 	else{
 		$url = 'https://accounts.google.com/o/oauth2/revoke?token='.
 				$_SESSION['long_lived_access_token']->access_token;
@@ -446,16 +447,18 @@ if ($action == "get_users"){
 			unset($_SESSION['username']);
 			unset($_SESSION['email']);
 			unset($_SESSION['picture']);
-			echo "Succesfully disconnected";
+			$output['success']="Succesfully disconnected";
 		}else{
 			unset($_SESSION['long_lived_access_token']);
 			unset($_SESSION['userid']);
 			unset($_SESSION['username']);
 			unset($_SESSION['email']);
 			unset($_SESSION['picture']);
-			echo "Failed to revoke token for given user ($httpcode - $response - token=".substr($_SESSION['long_lived_access_token']->access_token,0,5)."...";
+			$output['error']="Failed to revoke token for given user ($httpcode - $response - token=".substr($_SESSION['long_lived_access_token']->access_token,0,5)."...";
 		}
 	}
+	header('Content-type: application/json');
+	echo json_encode( $output );
 }else{
 	$output['msg']="unsupported action";
 	header('Content-type: application/json');
