@@ -128,8 +128,8 @@ function login_screen(){
    <span class="icon"></span>\
     <span class="buttonText"></span>\
 	</div>\
-	<br /><button id="exit" class="button exit" onclick="invitee_access()">Acceso Invitado (Offline)</button> \
-	<br /><button id="exit" class="button exit" onclick="exit_app()">Salir</button> \
+	<br /><button id="exit" class="button exit" onclick="invitee_access();">Acceso Invitado (Offline)</button> \
+	<br /><button id="exit" class="button exit" onclick="exit_app();">Salir</button> \
 	</div> \
 		';
 		// check if there is an option to change the window... see stackoverflow oauth.html to see how-to cordova
@@ -193,8 +193,9 @@ function signInCallback(authResult) {
                     user_data=result;
 					session_data.user=result.email;
 					session_data.user_access_level=result.access_level;
-					if(result.access_level=='admin'){ admin_screen();}
-					else{  menu_screen();}
+					//if(result.access_level=='admin'){ admin_screen();}
+					//else{
+						menu_screen();//}
 				} else if (authResult['error']) {
 					alert('There was an error: ' + authResult['error']);
 				} else {
@@ -228,7 +229,7 @@ function signInCallback(authResult) {
 }
 
 function gdisconnect(){
-	if(user.email=='invitado') login_screen();
+	if(user_data.email=='invitado'){ login_screen(); return;}
 	ajax_request_json(
 		backend_url+'ajaxdb.php?action=gdisconnect', 
 		function(result) {
@@ -246,7 +247,7 @@ function gdisconnect(){
 }
 
 function admin_screen(){
-	header_zone.innerHTML='<h1>CF '+user_data.email.substr(0,8)+' <a href="#" onclick="gdisconnect();">desc</a></h1>';
+	//header_zone.innerHTML='<h1>CF '+user_data.email.substr(0,8)+' <a href="#" onclick="gdisconnect();">desc</a></h1>';
 	ajax_request_json(
 		backend_url+'ajaxdb.php?action=get_users', 
 		function(data) {
@@ -273,6 +274,14 @@ function set_user(){
 	menu_screen();
 }
 
+function show_profile(){
+	alert("under construction");
+}
+
+function hamburger_close(){
+	hamburger_menu.classList.remove('open');
+}
+
 function menu_screen(){
 	allowBackExit();
 	var splash=document.getElementById("splash_screen");
@@ -292,14 +301,14 @@ function menu_screen(){
 		login_screen();
 	}else{
 		// TODO if admin administrar... lo de sujetos puede ir aquí tb...
-		hamburger_menu_content.innerHTML=''+user_data.email.substr(0,8)+'<ul>\
-		<li><a href="#" onclick="gdisconnect()">perfil</a></li>\
-		<li><a href="#" onclick="gdisconnect()">desconectar</a></li>\
+		hamburger_menu_content.innerHTML=''+user_data.email.substr(0,10)+'<ul>\
+		<li><a href="#" onclick="show_profile()">perfil</a></li>\
+		<li><a href="#" onclick="gdisconnect();hamburger_close();">desconectar</a></li>\
 		<li><a href="#" onclick="exit_app()">salir</a></li>\
 		</ul>';
 		header_zone.innerHTML='<a id="hamburger_icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">\
 		<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"/></svg></a><h1>Conciencia Fonológica</h1>';
-		hamburger_icon=document.getElementById('hamburger_icon');
+		var hamburger_icon=document.getElementById('hamburger_icon');
 		hamburger_icon.addEventListener('click', function(e) {
 			hamburger_menu.classList.toggle('open');
 			e.stopPropagation();
