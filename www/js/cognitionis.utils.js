@@ -129,13 +129,20 @@ var ResourceLoader={
 	check_load_status: function() {
 		ResourceLoader.media_load_time+=ResourceLoader.media_load_check_status_interval;
 		ResourceLoader.modal_dialog_msg.innerHTML='check_load_status '+ResourceLoader.media_load_time+' - progress: '+ResourceLoader.load_progressbar.value+' - max: '+ResourceLoader.load_progressbar.max
+		// If there is no media to load
 		if(ResourceLoader.num_images==0 && ResourceLoader.num_sounds==0){
 			document.body.removeChild(ResourceLoader.modal_load_window);
 			ResourceLoader.callback_on_load_end(); // start the app even if audio is not loaded
 			return;
 		}
 		if (ResourceLoader.load_progressbar.value == ResourceLoader.load_progressbar.max || ( ResourceLoader.load_progressbar.value==ResourceLoader.num_images && ResourceLoader.not_loaded['images'].length==0 && is_iOS ) ) {
-			if(ResourceLoader.load_progressbar.value==ResourceLoader.num_images){
+			if(ResourceLoader.load_progressbar.value == ResourceLoader.load_progressbar.max){
+				// If all media loaded
+				document.body.removeChild(ResourceLoader.modal_load_window);
+				ResourceLoader.callback_on_load_end(); // start the app even if audio is not loaded
+				return;				
+			}else if(ResourceLoader.load_progressbar.value==ResourceLoader.num_images){
+				// If all images loaded, check if lazy audio
 				if(!ResourceLoader.lazy_audio && !ResourceLoader.download_lazy_audio_active){
 					//clearInterval(ResourceLoader.load_interval); done by return+timeout
 					ResourceLoader.download_lazy_audio_active=true;
@@ -416,10 +423,8 @@ var ActivityTimer=function (){
 	this.started=false;
 	this.dom_anchor=undefined;
 	this.advance_timeout=null;
-	//var that=this // bad hack to store reference scopes
 }
 ActivityTimer.prototype.anchor_to_dom=function(elem){this.dom_anchor=elem;}
-
 ActivityTimer.prototype.start=function(){
 	if(this.dom_anchor==undefined){alert("ERROR: Starging an activity_timer without defining it first"); return;}
 	if(this.started){
@@ -430,7 +435,6 @@ ActivityTimer.prototype.start=function(){
 		this.advance_timeout=setTimeout(function(){this.advance()}.bind(this),1000)
 	}
 }
-
 ActivityTimer.prototype.advance=function(){
 	if(this.started){
 		++this.seconds
@@ -444,12 +448,10 @@ ActivityTimer.prototype.advance=function(){
 		this.start();
 	}
 }
-
 ActivityTimer.prototype.stop=function(){
 	clearTimeout(this.advance_timeout);
 	this.started=false;
 }
-
 ActivityTimer.prototype.reset=function (){	
 	this.stop();
 	this.dom_anchor.innerHTML="00:00:00";
@@ -974,9 +976,41 @@ var toggleClassBlink = function(blink_element,blink_class,blink_timeout,num_blin
 var hamburger_menu=document.getElementById('hamburger_menu');
 var hamburger_menu_content=document.getElementById('hamburger_menu_content');
 var hamburger_close=document.getElementById('hamburger_close');
-hamburger_close.addEventListener('click', function(e) {
+if(hamburger_close!=null){
+	hamburger_close.addEventListener('click', function(e) {
 			hamburger_menu.classList.remove('open');
 			e.stopPropagation();
 		});
+}
+var hamburger_close=function(){
+	hamburger_menu.classList.remove('open');
+}
+
+// Object Length
+function objectLength(obj) {
+  var result = 0;
+  for(var prop in obj) {
+		if (obj.hasOwnProperty(prop)) { 
+			result++;
+		}
+  }
+  return result;
+}
+
+
+/*
+	Select a random item from an array
+	Optionally provide a leave_out option
+*/
+var random_item=function(array, opt_leave_out){
+	var item=undefined;
+	do{
+		item = array[Math.floor(Math.random()*array.length)];
+	}while(typeof(opt_leave_out)!=='undefined' && item!==opt_leave_out);
+	return item;
+}
+
+
+
 
 

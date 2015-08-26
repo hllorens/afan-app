@@ -12,9 +12,12 @@ var sounds = [
 	// it can be dropbox https://dl.dropboxusercontent.com/u/188219/
 	//or absolute http://www.centroafan.com/afan-app-media/audio/...m4a"
 	// relative is the best to reuse it in the cordova app
-	"../../afan-app-media/audio/soundsSpriteVBR30-19kbps-100k.m4a"
+	"../../afan-app-media/audio/caca128ffmpeg.m4a"
+	//"../../afan-app-media/audio/soundsSpriteVBR30-19kbps-100k.m4a"
 	//"../../afan-app-media/audio/soundsSpriteABR56.30kbps.141k.m4a" --> va mal, tornar a generar
 ];
+
+
 
 var media_objects;
 var session_state="unset";
@@ -22,6 +25,8 @@ var header_zone=document.getElementById('header');
 var canvas_zone=document.getElementById('zone_canvas');
 
 var audio_sprite;
+var audio_sprite_name='soundsSpriteVBR30-19kbps-100k.m4a';
+var audio_sprite_name='caca128ffmpeg.m4a';
 
 // LOAD ACTIVITIES
 var json_test, json_training;
@@ -44,6 +49,37 @@ ajax_request('backend/ajaxdb.php?action=gen_session_state',function(text) {
 //backend_url='http://www.centroafan.com/afan-app-backend/'
 
 var audio_object_sprite_ref={
+a: {id: "a", start: 21.142, end: 21.844}, 
+b: {id: "b", start: 11.200, end: 11.706}, 
+bv: {id: "bv", start: 26.268, end: 27.476}, 
+ch: {id: "ch", start: 1.000, end: 1.981}, 
+d: {id: "d", start: 8.767, end: 10.200}, 
+e: {id: "e", start: 45.546, end: 46.347}, 
+f: {id: "f", start: 2.981, end: 4.297}, 
+g: {id: "g", start: 12.706, end: 13.907}, 
+i: {id: "i", start: 34.338, end: 35.033}, 
+j: {id: "j", start: 24.452, end: 25.268}, 
+k: {id: "k", start: 37.534, end: 38.247}, 
+l: {id: "l", start: 41.247, end: 42.551}, 
+m: {id: "m", start: 43.551, end: 44.546}, 
+n: {id: "n", start: 16.411, end: 17.767}, 
+ny: {id: "ny", start: 30.750, end: 31.647}, 
+o: {id: "o", start: 32.647, end: 33.338}, 
+p: {id: "p", start: 22.844, end: 23.452}, 
+r: {id: "r", start: 39.247, end: 40.247}, 
+rr: {id: "rr", start: 28.476, end: 29.750}, 
+s: {id: "s", start: 18.767, end: 20.142}, 
+t: {id: "t", start: 5.297, end: 5.802}, 
+u: {id: "u", start: 49.470, end: 50.282}, 
+y: {id: "y", start: 6.802, end: 7.767}, 
+z: {id: "z", start: 47.347, end: 48.470}, 
+zfx_correct: {id: "zfx_correct50", start: 14.907, end: 15.411}, 
+zfx_wrong: {id: "zfx_wrong50", start: 36.033, end: 36.534}, 
+zsilence_start: {id: "zsilence_start", start: 0.100, end: 0.700}, 
+
+};
+
+/*
 	a: {id: "a50", start: 19.158, end: 19.658}, 
 	b: {id: "b50", start: 11.610, end: 12.107}, 
 	bv: {id: "bv50", start: 1.000, end: 1.496}, 
@@ -71,8 +107,7 @@ var audio_object_sprite_ref={
 	zfx_correct: {id: "zfx_correct50", start: 13.107, end: 13.610}, 
 	zfx_wrong: {id: "zfx_wrong50", start: 38.649, end: 39.150}, 
 	zsilence_start: {id: "zsilence_start", start: 0.100, end: 0.500}	
-};
-
+*/
 
 // constants
 var USE_ANSWERS = 3;
@@ -95,7 +130,7 @@ var current_activity_data={};
 var current_activity_index=0;
 var current_activity_played_times=0;
 
-var user_data={}
+var user_data={};
 var session_data={
 	user: null,
 	subject: "invitado",
@@ -172,7 +207,7 @@ function login_screen(){
 function invitee_access(){
 	session_data.user='invitado';
 	session_data.user_access_level='invitee';
-	user_data.email='invitado';
+	user_data.email='invitee';
 	user_data.display_name='invitado';
 	user_data.access_level='invitee';
 	menu_screen();
@@ -190,7 +225,9 @@ function signInCallback(authResult) {
 			function(result) {
 				if (result) {
 					if(debug){console.log(result);console.log("logged! "+result.email+" level:"+result.access_level);alert("logged! "+result.email+" level:"+result.access_level);}
-                    user_data=result;
+                    user_data.username=result.email;
+                    user_data.email=result.email;
+					user_data.access_level=result.access_level;
 					session_data.user=result.email;
 					session_data.user_access_level=result.access_level;
 					//if(result.access_level=='admin'){ admin_screen();}
@@ -229,7 +266,8 @@ function signInCallback(authResult) {
 }
 
 function gdisconnect(){
-	if(user_data.email=='invitado'){ login_screen(); return;}
+	hamburger_close();
+	if(user_data.email=='invitee'){ login_screen(); return;}
 	ajax_request_json(
 		backend_url+'ajaxdb.php?action=gdisconnect', 
 		function(result) {
@@ -278,9 +316,6 @@ function show_profile(){
 	alert("under construction");
 }
 
-function hamburger_close(){
-	hamburger_menu.classList.remove('open');
-}
 
 function menu_screen(){
 	allowBackExit();
@@ -300,14 +335,18 @@ function menu_screen(){
 	if(user_data.email==null){
 		login_screen();
 	}else{
+		var sign='<li><a href="#" onclick="hamburguer_close();show_profile()">profile</a></li>\
+				  <li><a href="#" onclick="hamburguer_close();gdisconnect()">desconectar</a></li>';
+		if(user_data.email=='invitee'){
+			sign='<li><a href="#" onclick="hamburger_close();login_screen()">login</a></li>';
+		}
 		// TODO if admin administrar... lo de sujetos puede ir aquí tb...
 		hamburger_menu_content.innerHTML=''+user_data.email.substr(0,10)+'<ul>\
-		<li><a href="#" onclick="show_profile()">perfil</a></li>\
-		<li><a href="#" onclick="gdisconnect();hamburger_close();">desconectar</a></li>\
+		'+sign+'\
 		<li><a href="#" onclick="exit_app()">salir</a></li>\
 		</ul>';
 		header_zone.innerHTML='<a id="hamburger_icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">\
-		<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"/></svg></a><h1>Conciencia Fonológica</h1>';
+		<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"/></svg></a> Conciencia Fonológica';
 		var hamburger_icon=document.getElementById('hamburger_icon');
 		hamburger_icon.addEventListener('click', function(e) {
 			hamburger_menu.classList.toggle('open');
@@ -327,6 +366,7 @@ function menu_screen(){
 		<nav id="responsive_menu">\
 		'+admin_opts+'\
 		<br /><button id="start-button" class="button" disabled="true">Practicar</button> \
+		<br /><button id="montesori" class="button" onclick="montesori()" disabled="true">Montesori</button> \
 		'+normal_opts+'\
 		<br /><button id="exit" class="button exit" onclick="exit_app()">Salir</button> \
 		</nav>\
@@ -349,6 +389,7 @@ function menu_screen(){
 					user_subjects=data;
 					select_fill_with_json(user_subjects,subjects_select_elem); 
 					document.getElementById("start-button").disabled=false;
+					document.getElementById("montesori").disabled=false;
 					if(user_data.access_level!='invitee'){
 						document.getElementById("start-test-button").disabled=false;
 						document.getElementById("manage-subjects").disabled=false;
@@ -359,6 +400,7 @@ function menu_screen(){
 		}else{
 			select_fill_with_json(user_subjects,subjects_select_elem);
 			document.getElementById("start-button").disabled=false;
+			document.getElementById("montesori").disabled=false;
 			if(user_data.access_level!='invitee'){
 				document.getElementById("start-test-button").disabled=false;
 				document.getElementById("manage-subjects").disabled=false;
@@ -369,10 +411,23 @@ function menu_screen(){
 }
 
 
+var montesori=function(){
+	preventBackExit();
+	header_zone.innerHTML='<h1 onclick="menu_screen()"> < Conciencia Fonológica</h1>';
+	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]!=undefined)
+		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
+	canvas_zone.innerHTML=' \
+	<div class="text-center">\
+	<p class="montesori">Un poc de montesori guai?</p>\
+	</div>\
+	';
+}
+
 var manage_subjects=function(){
 	preventBackExit();
 	header_zone.innerHTML='<h1 onclick="menu_screen()"> < Conciencia Fonológica</h1>';
-	session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
+	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]!=undefined)
+		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
 	canvas_zone.innerHTML=' \
 	<div class="text-center">\
     <button id="add-subject" class="button" onclick="add_subject()">Añadir</button>\
@@ -423,7 +478,7 @@ var add_subject=function(){
 		}else{
 			open_js_modal_content('<h1>Añadiendo... '+document.getElementById('new-alias').value+'</h1>');
 			ajax_request_json(
-			backend_url+'ajaxdb.php?action=add_subject&user='+document.getElementById('new-user').value+'&alias='+document.getElementById('new-alias').value+'&name='+document.getElementById('new-name').value+'&birthdate='+document.getElementById('new-birthdate').value+'&comments='+document.getElementById('new-comments').value, 
+			backend_url+'ajaxdb.php?action=add_subject&user='+user_data.email+'&alias='+document.getElementById('new-alias').value+'&name='+document.getElementById('new-name').value+'&birthdate='+document.getElementById('new-birthdate').value+'&comments='+document.getElementById('new-comments').value, 
 			function(data) {
 				if(data['success']!='undefined'){
 					user_subjects[data['success']]=data['data'];
@@ -449,7 +504,6 @@ var add_subject=function(){
 	var cancel_function=function(){ remove_modal("js-modal-window-alert"); };
 	var form_html='<form id="my-form" action="javascript:void(0);"> \
 			<ul class="errorMessages"></ul>\
-			<label for="new-user">Usuario</label><input id="new-user" type="text" value="afan" /><br /> \
 			<label for="new-alias">Alias</label><input id="new-alias" type="text" required="required" /><br /> \
 			<label for="new-name">Nombre</label><input id="new-name" type="text" required="required" /><br /> \
 			<label for="new-birthdate">Fecha Nac.</label><input id="new-birthdate" type="date" placeholder="yyyy-mm-dd" required="required" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"  /><br /> \
@@ -474,7 +528,7 @@ var edit_subject=function(sid){
 		}else{
 			open_js_modal_content('<h1>Actualizando... '+document.getElementById('new-alias').value+'</h1>');
 			ajax_request_json(
-			backend_url+'ajaxdb.php?action=update_subject&lid='+sid+'&user='+document.getElementById('new-user').value+'&alias='+document.getElementById('new-alias').value+'&name='+document.getElementById('new-name').value+'&birthdate='+document.getElementById('new-birthdate').value+'&comments='+document.getElementById('new-comments').value, 
+			backend_url+'ajaxdb.php?action=update_subject&lid='+sid+'&user='+user_data.email+'&alias='+document.getElementById('new-alias').value+'&name='+document.getElementById('new-name').value+'&birthdate='+document.getElementById('new-birthdate').value+'&comments='+document.getElementById('new-comments').value, 
 			function(data) {
 				if(data['success']!='undefined'){
 					user_subjects[data['success']]=data['data'];
@@ -506,7 +560,7 @@ var edit_subject=function(sid){
 	}
 	var form_html='<form id="my-form" action="javascript:void(0);"> \
 			<ul class="errorMessages"></ul>\
-			<label for="new-user">Usuario</label><input id="new-user" type="text" readonly="readonly" value="'+subj2edit.user+'" /><br /> \
+			<label>Usuario</label><input type="text" readonly="readonly" value="'+subj2edit.user+'" /><br /> \
 			<label for="new-alias">Alias</label><input id="new-alias" type="text" required="required" readonly="readonly" value="'+subj2edit.alias+'" /><br /> \
 			<label for="new-name">Nombre</label><input id="new-name" type="text" required="required" value="'+subj2edit.name+'" /><br /> \
 			<label for="new-birthdate">Fecha Nac.</label><input id="new-birthdate" type="date" placeholder="yyyy-mm-dd" required="required" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"  value="'+subj2edit.birthdate+'" /><br /> \
@@ -520,13 +574,19 @@ var edit_subject=function(sid){
 var explore_results=function(){
 	preventBackExit();
 	header_zone.innerHTML='<h1 onclick="menu_screen()"> < Conciencia Fonológica</h1>';
-	session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
 	canvas_zone.innerHTML=' \
 	<div class="text-center">\
 	<div id="results-div">cargando resultados...</div> \
 	<br /><button id="go-back" onclick="menu_screen()">Volver</button> \
 	</div>\
 	';
+	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]!=undefined)
+		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
+	else{
+		document.getElementById("results-div").innerHTML="Resultados user: "+user_data.email+" - subject: No hay sujetos<br />No hay resultados";
+		return;		
+	}
+					
 	if(!user_subject_results.hasOwnProperty(session_data.subject)){
 		ajax_request_json(
 			backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject, 
@@ -626,6 +686,11 @@ var explore_result_detail=function(session_id){
 
 
 var game=function(){
+	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]==undefined){
+		alert("Debe seleccionar algún sujeto.");
+		return;
+	}
+	
 	preventBackExit();
 	header_zone.innerHTML='<h1 onclick="menu_screen()"> < Conciencia Fonológica </h1>'; //<button id="go-back" onclick="menu_screen()">Salir</button>
 	if(ResourceLoader.not_loaded['sounds'].length!=0){
@@ -639,7 +704,7 @@ var game=function(){
 		//
 
 		// load audio in the object 
-		var audio_sprite_object=media_objects.sounds['soundsSpriteVBR30-19kbps-100k.m4a']; //soundsSpriteABR56.30kbps.141k.m4a, soundsSpriteVBR30-19kbps-100k.m4a
+		var audio_sprite_object=media_objects.sounds[audio_sprite_name]; // soundsSpriteABR56.30kbps.141k.m4a, soundsSpriteVBR30-19kbps-100k.m4a
 		audio_sprite=new AudioSprite(audio_sprite_object,audio_object_sprite_ref,debug);
 		
 		open_js_modal_content('<h1>Nivel 1: '+session_data.mode+'</h1>');

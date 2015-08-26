@@ -285,7 +285,7 @@ if ($action == "get_users"){
 }else if ($action == "gconnect"){
 		// REQUEST contains the AuthCode
 		// you can store this in a json file for more security
-		$gclient_secret = json_decode(file_get_contents("/home/hector/secrets/gclient_secret.json"));
+		$gclient_secret = json_decode(file_get_contents("/home/hector/secrets/gclient_secret_afan-app.json"));
 		$CLIENT_ID = $gclient_secret->client_id;
 		$CLIENT_SECRET = $gclient_secret->client_secret;
 		
