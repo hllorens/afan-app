@@ -176,6 +176,22 @@ button.backgroundRed{
     text-align: center;
 }
 
+@font-face {
+    font-family: myMontessori;
+    src: url(../fonts/memima.ttf);
+}
+
+
+.montessori-div{
+	background:#fff;
+	color:#000;
+}
+.montessori{
+	font-family: myMontessori; 
+	font-size:52px;
+	font-weight:bold;
+}
+
 /*.hover_red_border:hover{
 	border:2px solid red;
 }*/

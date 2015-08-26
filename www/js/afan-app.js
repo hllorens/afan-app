@@ -366,7 +366,7 @@ function menu_screen(){
 		<nav id="responsive_menu">\
 		'+admin_opts+'\
 		<br /><button id="start-button" class="button" disabled="true">Practicar</button> \
-		<br /><button id="montesori" class="button" onclick="montesori()" disabled="true">Montesori</button> \
+		<br /><button id="montessori" class="button" onclick="montessori()" disabled="true">Montessori</button> \
 		'+normal_opts+'\
 		<br /><button id="exit" class="button exit" onclick="exit_app()">Salir</button> \
 		</nav>\
@@ -389,7 +389,7 @@ function menu_screen(){
 					user_subjects=data;
 					select_fill_with_json(user_subjects,subjects_select_elem); 
 					document.getElementById("start-button").disabled=false;
-					document.getElementById("montesori").disabled=false;
+					document.getElementById("montessori").disabled=false;
 					if(user_data.access_level!='invitee'){
 						document.getElementById("start-test-button").disabled=false;
 						document.getElementById("manage-subjects").disabled=false;
@@ -400,7 +400,7 @@ function menu_screen(){
 		}else{
 			select_fill_with_json(user_subjects,subjects_select_elem);
 			document.getElementById("start-button").disabled=false;
-			document.getElementById("montesori").disabled=false;
+			document.getElementById("montessori").disabled=false;
 			if(user_data.access_level!='invitee'){
 				document.getElementById("start-test-button").disabled=false;
 				document.getElementById("manage-subjects").disabled=false;
@@ -411,14 +411,14 @@ function menu_screen(){
 }
 
 
-var montesori=function(){
+var montessori=function(){
 	preventBackExit();
 	header_zone.innerHTML='<h1 onclick="menu_screen()"> < Conciencia Fonológica</h1>';
 	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]!=undefined)
 		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
 	canvas_zone.innerHTML=' \
-	<div class="text-center">\
-	<p class="montesori">Un poc de montesori guai?</p>\
+	<div class="text-center montessori-div">\
+	<p class="montessori">Un poc de montessori guai?</p>\
 	</div>\
 	';
 }
