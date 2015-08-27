@@ -39,13 +39,13 @@
 		"type" : "sounds",
 		"sounds" : ["a", "\/", "l", "a"],
 		"level" : "1",
-		"answers" : ["ala", "bala", "casa", "rama", "cama", "palo"]
+		"answers" : ["ala", "bala", "casa", "rama", "cama"]
 	},
 	{
 		"type" : "sounds",
 		"sounds" : ["b", "a", "\/", "l", "a"],
 		"level" : "1",
-		"answers" : ["bala", "ala", "casa", "rama", "cama", "palo"]
+		"answers" : ["bala", "ala", "casa", "rama", "cama"]
 	},
 	{
 		"type" : "sounds",
@@ -69,7 +69,7 @@
 		"type" : "sounds",
 		"sounds" : ["g", "a", "\/", "t", "o"],
 		"level" : "1",
-		"answers" : ["gato", "pato", "raton", "mano", "sapo", "palo"]
+		"answers" : ["gato", "pato", "raton", "mano", "sapo"]
 	},
 	{
 		"type" : "sounds",
@@ -87,7 +87,7 @@
 		"type" : "sounds",
 		"sounds" : ["p", "a", "\/", "t", "o"],
 		"level" : "1",
-		"answers" : ["pato", "gato", "palo", "gato", "plato", "sapo"]
+		"answers" : ["pato", "gato", "plato", "sapo"]
 	},
 	{
 		"type" : "sounds",
@@ -105,7 +105,7 @@
 		"type" : "sounds",
 		"sounds" : ["s", "a", "\/", "p", "o"],
 		"level" : "1",
-		"answers" : ["sapo", "pato", "palo", "sopa", "gato", "mano"]
+		"answers" : ["sapo", "pato", "sopa", "gato", "mano"]
 	},
 	{
 		"type" : "sounds",
@@ -133,12 +133,6 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["p", "a", "\/", "l", "o"],
-		"level" : "1",
-		"answers" : ["palo", "pato", "sapo", "plato", "plano", "gato"]
-	},
-	{
-		"type" : "sounds",
 		"sounds" : ["rr", "o", "\/", "j", "o"],
 		"level" : "1",
 		"answers" : ["rojo", "ropa", "mono", "reloj", "perro", "reja"]
@@ -147,7 +141,7 @@
 		"type" : "sounds",
 		"sounds" : ["f", "a", "\/", "r", "o"],
 		"level" : "1",
-		"answers" : ["faro", "gato", "mano", "pato", "sapo", "palo"]
+		"answers" : ["faro", "gato", "mano", "pato", "sapo"]
 	},
 	{
 		"type" : "sounds",
@@ -171,7 +165,7 @@
 		"type" : "sounds",
 		"sounds" : ["g", "a", "\/", "t", "o"],
 		"level" : "1",
-		"answers" : ["gato", "pato", "raton", "mano", "sapo", "palo"]
+		"answers" : ["gato", "pato", "raton", "mano", "sapo"]
 	},
 	{
 		"type" : "sounds",
@@ -213,7 +207,7 @@
 		"type" : "sounds",
 		"sounds" : ["p", "e", "\/", "rr", "o"],
 		"level" : "1",
-		"answers" : ["perro", "pato", "pino", "palo", "reloj", "sapo"]
+		"answers" : ["perro", "pato", "pino", "reloj", "sapo"]
 	},
 	{
 		"type" : "sounds",
@@ -225,7 +219,7 @@
 		"type" : "sounds",
 		"sounds" : ["p", "l", "a", "\/", "t", "o"],
 		"level" : "1",
-		"answers" : ["plato", "plano", "pato", "palo", "gato", "pino"]
+		"answers" : ["plato", "plano", "pato", "gato", "pino"]
 	},
 	{
 		"type" : "sounds",
@@ -249,13 +243,13 @@
 		"type" : "sounds",
 		"sounds" : ["p", "a", "s", "\/", "t", "e", "l"],
 		"level" : "1",
-		"answers" : ["pastel", "papel", "pato", "plato", "gato", "palo"]
+		"answers" : ["pastel", "papel", "pato", "plato", "gato"]
 	},
 	{
 		"type" : "sounds",
 		"sounds" : ["p", "l", "a", "\/", "n", "o"],
 		"level" : "1",
-		"answers" : ["plano", "plato", "pino", "palo", "mano", "pato"]
+		"answers" : ["plano", "plato", "pino", "mano", "pato"]
 	},
 	{
 		"type" : "sounds",
@@ -283,7 +277,7 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["b", "a", "r", "\/", "c", "o"],
+		"sounds" : ["b", "a", "r", "\/", "k", "o"],
 		"level" : "1",
 		"answers" : ["barco", "brazo", "marco", "gato", "mano", "pato"]
 	},
@@ -297,7 +291,7 @@
 		"type" : "sounds",
 		"sounds" : ["rr", "e", "\/", "l", "o", "j"],
 		"level" : "1",
-		"answers" : ["reloj", "perro", "palo", "rojo", "reja", "ala"]
+		"answers" : ["reloj", "perro", "rojo", "reja", "ala"]
 	},
 	{
 		"type" : "sounds",
@@ -327,7 +321,7 @@
 		"type" : "sounds",
 		"sounds" : ["l", "a", "\/", "p", "i", "z"],
 		"level" : "1",
-		"answers" : ["lapiz", "sapo", "maiz", "palo", "papel", "casa"]
+		"answers" : ["lapiz", "sapo", "maiz", "papel", "casa"]
 	},
 	{
 		"type" : "sounds",
@@ -339,7 +333,7 @@
 		"type" : "sounds",
 		"sounds" : ["p", "a", "\/", "p", "e", "l"],
 		"level" : "1",
-		"answers" : ["papel", "pastel", "pato", "sapo", "palo", "lapiz"]
+		"answers" : ["papel", "pastel", "pato", "sapo", "lapiz"]
 	},
 	{
 		"type" : "sounds",
@@ -355,7 +349,7 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["c", "a", "\/", "y", "a"],
+		"sounds" : ["k", "a", "\/", "y", "a"],
 		"level" : "1",
 		"answers" : ["calla", "casa", "bala", "rama", "cama", "canya"]
 	},

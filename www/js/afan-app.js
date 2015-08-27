@@ -1,5 +1,10 @@
 "use strict";
 
+var QueryString=get_query_string();
+var game_mode=false;
+if(QueryString.hasOwnProperty('game_mode') && QueryString.game_mode=='true') game_mode=true;
+
+
 // MEDIA
 var images = [
 "../../afan-app-media/img/spacer158.png",
@@ -25,18 +30,23 @@ var header_zone=document.getElementById('header');
 var canvas_zone=document.getElementById('zone_canvas');
 
 var audio_sprite;
-var audio_sprite_name='soundsSpriteVBR30-19kbps-100k.m4a';
+//var audio_sprite_name='soundsSpriteVBR30-19kbps-100k.m4a';
 var audio_sprite_name='caca128ffmpeg.m4a';
 
+// not needed, already done in php. Maybe we should keep "original answer" with the correct letters
+//var letter_equivalence = { 'à':'a', 'á':'a', 'ç':'c', 'è':'e', 'é':'e', 'í':'i', 'ï':'i', 'ñ':'ny', 'ò':'o', 'ó':'o', 'ú':'u' };
+
 // LOAD ACTIVITIES
-var json_test, json_training;
+var json_test, json_training, json_activities;
 ajax_request_json("../data/test1.tsv.json",function(json){
     json_test=json; //console.log(json)
 });
 ajax_request_json("../data/train2.json", function(json) { //training1, training1-short
     json_training=json; //console.log(json)
+	json_activities=json_training;
 });
-var json_activities=json_training;
+
+
 
 ajax_request('backend/ajaxdb.php?action=gen_session_state',function(text) {
 	session_state=text;
@@ -295,6 +305,8 @@ function admin_screen(){
 				<div id="menu-content" class="text-center">\
 				User:  <select id="users-select"></select> \
 				<br /><button onclick="set_user()" class="button">Acceder</button> \
+			    <br /><button onclick="check_missing_elements()" class="button">Comprobar sonidos/imagenes</button> \
+			    <br /><button onclick="letter_reader()" class="button">Lector de sonidos</button> \
 				</div>\
 				';
 			users_select_elem=document.getElementById('users-select');
@@ -303,6 +315,69 @@ function admin_screen(){
 	);
 }
 
+var letter_reader=function(){
+			canvas_zone.innerHTML=' \
+				Sonidos a leer (separados por espacio) <input id="input_sounds" type="text" /> \
+				<button id="read-button" onclick="read_input_sounds()" class="button">Leer</button> \
+			    <br /><br /><button onclick="amdin_screen()" class="button">Volver</button> \
+				</div>\
+				';	
+}
+
+var read_input_sounds=function(){
+	document.getElementById("read-button").disabled=true;
+	var input_sounds=document.getElementById("input_sounds").value.replace(/[ ]+/g, " ").trim().split(" ");
+	if(audio_sprite==undefined){
+		var audio_sprite_object=media_objects.sounds[audio_sprite_name];
+		audio_sprite=new AudioSprite(audio_sprite_object,audio_object_sprite_ref,debug);
+	}
+	SoundChain.play_sound_arr(input_sounds, audio_sprite, letter_reader);
+}
+
+var check_missing_elements=function(){
+	var undefined_sounds={total:0};
+	var undefined_images={total:0};
+	var msg="";
+	for (var i=0;i<json_training.length;i++){
+		var act_sounds=json_training[i].sounds;
+		for (var s=0;s<act_sounds.length;s++){
+			if(act_sounds[s]=="\/") continue;
+			if(!audio_object_sprite_ref.hasOwnProperty(act_sounds[s]) && !undefined_sounds.hasOwnProperty(act_sounds[s])){
+				undefined_sounds[act_sounds[s]]=true;
+				undefined_sounds.total=undefined_sounds.total+1;
+				msg+="\n sound("+act_sounds[s]+") not found in training ("+json_training[i].answers[0]+").";
+			}
+		}
+		if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+json_training[i].answers[0]) 
+            && !undefined_images.hasOwnProperty(json_training[i].answers[0])){
+			undefined_images[json_training[i].answers[0]]=true;
+			undefined_images.total=undefined_images.total+1;
+			msg+="\n image("+json_training[i].answers[0]+") not found in training.";
+		}
+	}
+	for (var i=0;i<json_test.length;i++){
+		var act_sounds=json_test[i].sounds;
+		for (var s=0;s<act_sounds.length;s++){
+			if(act_sounds[s]=="\/") continue;
+			if(!audio_object_sprite_ref.hasOwnProperty(act_sounds[s]) && !undefined_sounds.hasOwnProperty(act_sounds[s])){
+				undefined_sounds[act_sounds[s]]=true;
+				undefined_sounds.total=undefined_sounds.total+1;
+				msg+="\n sound("+act_sounds[s]+") not found in test ("+json_test[i].answers[0]+").";
+			}
+		}
+		if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+json_test[i].answers[0]) 
+            && !undefined_images.hasOwnProperty(json_test[i].answers[0])){
+			undefined_images[json_test[i].answers[0]]=true;
+			undefined_images.total=undefined_images.total+1;
+			msg+="\n image("+json_test[i].answers[0]+") not found in test.";
+		}
+	}
+	if(msg==""){
+		alert("All elements are defined");
+	}else{
+		alert(msg+"\nMissing "+undefined_sounds.total+" sounds and "+undefined_images.total+" images")
+	}
+}
 
 function set_user(){
 	if(session_data.user!=users_select_elem.options[users_select_elem.selectedIndex].value){
@@ -328,13 +403,13 @@ function menu_screen(){
 		console.log('not_loaded sounds: '+ResourceLoader.not_loaded['sounds'].length);
 	}
 	
-	if(is_app){
+	/*if(is_app){
 		session_data.user='montsedeayala@gmail.com'; // will find a way to set the usr, by google account
-	}
+	}*/
 	
-	if(user_data.email==null){
+	if(user_data.email==null && !game_mode){
 		login_screen();
-	}else{
+	}else if(!game_mode){
 		var sign='<li><a href="#" onclick="hamburguer_close();show_profile()">profile</a></li>\
 				  <li><a href="#" onclick="hamburguer_close();gdisconnect()">desconectar</a></li>';
 		if(user_data.email=='invitee'){
@@ -365,8 +440,7 @@ function menu_screen(){
 		Participante:  <select id="subjects-select"></select> \
 		<nav id="responsive_menu">\
 		'+admin_opts+'\
-		<br /><button id="start-button" class="button" disabled="true">Practicar</button> \
-		<br /><button id="montessori" class="button" onclick="montessori()" disabled="true">Montessori</button> \
+		<br /><button id="start-button" class="button" disabled="true">Training</button> \
 		'+normal_opts+'\
 		<br /><button id="exit" class="button exit" onclick="exit_app()">Salir</button> \
 		</nav>\
@@ -389,7 +463,6 @@ function menu_screen(){
 					user_subjects=data;
 					select_fill_with_json(user_subjects,subjects_select_elem); 
 					document.getElementById("start-button").disabled=false;
-					document.getElementById("montessori").disabled=false;
 					if(user_data.access_level!='invitee'){
 						document.getElementById("start-test-button").disabled=false;
 						document.getElementById("manage-subjects").disabled=false;
@@ -400,13 +473,15 @@ function menu_screen(){
 		}else{
 			select_fill_with_json(user_subjects,subjects_select_elem);
 			document.getElementById("start-button").disabled=false;
-			document.getElementById("montessori").disabled=false;
 			if(user_data.access_level!='invitee'){
 				document.getElementById("start-test-button").disabled=false;
 				document.getElementById("manage-subjects").disabled=false;
 				document.getElementById("results").disabled=false;
 			}
 		}
+	}else{
+		//game_mode: go straight to training mode
+		game();
 	}
 }
 
@@ -419,6 +494,7 @@ var montessori=function(){
 	canvas_zone.innerHTML=' \
 	<div class="text-center montessori-div">\
 	<p class="montessori">Un poc de montessori guai?</p>\
+	<br /><button id="go-back" onclick="game()">Volver</button> \
 	</div>\
 	';
 }
@@ -684,8 +760,19 @@ var explore_result_detail=function(session_id){
 	}
 };
 
-
 var game=function(){
+	// activity selection (if game_mode, remove and restyle header/footer...)
+	canvas_zone.innerHTML=' \
+	<div class="text-center">\
+	<br /><button class="button" onclick="memoria_fonologica()">Mem. Fono.</button> \
+	<br /><button class="button" onclick="montessori()">Montessori</button> \
+	</div>\
+	';
+
+}
+
+
+var memoria_fonologica=function(){
 	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]==undefined){
 		alert("Debe seleccionar algún sujeto.");
 		return;
@@ -910,6 +997,10 @@ function nextActivity(){
 }
 
 function send_session_data(){
+	if(game_mode){
+		game(); // no data, no control, just go to play menu again
+	}
+
 	if(user_data.access_level=='invitee'){
 		canvas_zone.innerHTML+='<br />Los resultados no se pueden guardar para\
 			usuarios "invitados"<br /><br />\
