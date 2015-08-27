@@ -2,483 +2,501 @@
   background-image: url('../../../afan-app-media/img/wordimg-sprite.png');
   background-size: 100% auto;
 }
-.wordimage-lluvia {
+.wordimage-lombriz {
 	background-position: 0% 0%;
 }
 .wordimage-abeja {
-	background-position: 0% .6289%;
+	background-position: 0% .6060%;
 }
 .wordimage-aceite {
-	background-position: 0% 1.2578%;
+	background-position: 0% 1.2120%;
 }
 .wordimage-aeroplano {
-	background-position: 0% 1.8867%;
+	background-position: 0% 1.8180%;
 }
 .wordimage-ala {
-	background-position: 0% 2.5156%;
+	background-position: 0% 2.4240%;
 }
 .wordimage-almeja {
-	background-position: 0% 3.1445%;
+	background-position: 0% 3.0300%;
 }
 .wordimage-anciana {
-	background-position: 0% 3.7734%;
+	background-position: 0% 3.6360%;
 }
 .wordimage-antena {
-	background-position: 0% 4.4023%;
+	background-position: 0% 4.2420%;
 }
 .wordimage-arbol {
-	background-position: 0% 5.0312%;
+	background-position: 0% 4.8480%;
 }
 .wordimage-arco {
-	background-position: 0% 5.6601%;
+	background-position: 0% 5.4540%;
 }
 .wordimage-ardilla {
-	background-position: 0% 6.2890%;
+	background-position: 0% 6.0600%;
 }
 .wordimage-avion {
-	background-position: 0% 6.9179%;
+	background-position: 0% 6.6660%;
 }
 .wordimage-azul {
-	background-position: 0% 7.5468%;
+	background-position: 0% 7.2720%;
 }
 .wordimage-bala {
-	background-position: 0% 8.1757%;
+	background-position: 0% 7.8780%;
 }
 .wordimage-ballena {
-	background-position: 0% 8.8046%;
+	background-position: 0% 8.4840%;
 }
 .wordimage-bandera {
-	background-position: 0% 9.4335%;
+	background-position: 0% 9.0900%;
 }
 .wordimage-banyera {
-	background-position: 0% 10.0624%;
+	background-position: 0% 9.6960%;
 }
 .wordimage-barco {
-	background-position: 0% 10.6913%;
+	background-position: 0% 10.3020%;
 }
 .wordimage-bici {
-	background-position: 0% 11.3202%;
+	background-position: 0% 10.9080%;
 }
 .wordimage-bocadillo {
-	background-position: 0% 11.9491%;
+	background-position: 0% 11.5140%;
 }
 .wordimage-boca {
-	background-position: 0% 12.5780%;
+	background-position: 0% 12.1200%;
 }
 .wordimage-brazo {
-	background-position: 0% 13.2069%;
+	background-position: 0% 12.7260%;
 }
 .wordimage-buho {
-	background-position: 0% 13.8358%;
+	background-position: 0% 13.3320%;
 }
 .wordimage-cabra {
-	background-position: 0% 14.4647%;
+	background-position: 0% 13.9380%;
 }
 .wordimage-calcetines {
-	background-position: 0% 15.0936%;
+	background-position: 0% 14.5440%;
 }
 .wordimage-calla {
-	background-position: 0% 15.7225%;
+	background-position: 0% 15.1500%;
 }
 .wordimage-cama {
-	background-position: 0% 16.3514%;
+	background-position: 0% 15.7560%;
 }
 .wordimage-camara {
-	background-position: 0% 16.9803%;
+	background-position: 0% 16.3620%;
 }
 .wordimage-camello {
-	background-position: 0% 17.6092%;
+	background-position: 0% 16.9680%;
 }
 .wordimage-camino {
-	background-position: 0% 18.2381%;
+	background-position: 0% 17.5740%;
 }
 .wordimage-camion {
-	background-position: 0% 18.8670%;
+	background-position: 0% 18.1800%;
 }
 .wordimage-camisa {
-	background-position: 0% 19.4959%;
+	background-position: 0% 18.7860%;
 }
 .wordimage-campana {
-	background-position: 0% 20.1248%;
+	background-position: 0% 19.3920%;
 }
 .wordimage-campo {
-	background-position: 0% 20.7537%;
+	background-position: 0% 19.9980%;
 }
 .wordimage-cancion {
-	background-position: 0% 21.3826%;
+	background-position: 0% 20.6040%;
 }
 .wordimage-candado {
-	background-position: 0% 22.0115%;
+	background-position: 0% 21.2100%;
 }
 .wordimage-canya {
-	background-position: 0% 22.6404%;
+	background-position: 0% 21.8160%;
 }
 .wordimage-caracol {
-	background-position: 0% 23.2693%;
+	background-position: 0% 22.4220%;
 }
 .wordimage-carta {
-	background-position: 0% 23.8982%;
+	background-position: 0% 23.0280%;
 }
 .wordimage-casa {
-	background-position: 0% 24.5271%;
+	background-position: 0% 23.6340%;
 }
 .wordimage-cebra {
-	background-position: 0% 25.1560%;
+	background-position: 0% 24.2400%;
 }
 .wordimage-cerdo {
-	background-position: 0% 25.7849%;
+	background-position: 0% 24.8460%;
 }
 .wordimage-cerezas {
-	background-position: 0% 26.4138%;
+	background-position: 0% 25.4520%;
 }
 .wordimage-cerilla {
-	background-position: 0% 27.0427%;
+	background-position: 0% 26.0580%;
 }
 .wordimage-col {
-	background-position: 0% 27.6716%;
+	background-position: 0% 26.6640%;
 }
 .wordimage-comprar {
-	background-position: 0% 28.3005%;
+	background-position: 0% 27.2700%;
 }
 .wordimage-conejo {
-	background-position: 0% 28.9294%;
+	background-position: 0% 27.8760%;
 }
 .wordimage-copa {
-	background-position: 0% 29.5583%;
+	background-position: 0% 28.4820%;
 }
 .wordimage-corazon {
-	background-position: 0% 30.1872%;
+	background-position: 0% 29.0880%;
 }
 .wordimage-corbata {
-	background-position: 0% 30.8161%;
+	background-position: 0% 29.6940%;
 }
 .wordimage-cortinas {
-	background-position: 0% 31.4450%;
+	background-position: 0% 30.3000%;
 }
 .wordimage-cuatro {
-	background-position: 0% 32.0739%;
+	background-position: 0% 30.9060%;
 }
 .wordimage-cuchara {
-	background-position: 0% 32.7028%;
+	background-position: 0% 31.5120%;
 }
 .wordimage-dardo {
-	background-position: 0% 33.3317%;
+	background-position: 0% 32.1180%;
 }
 .wordimage-diana {
-	background-position: 0% 33.9606%;
+	background-position: 0% 32.7240%;
 }
 .wordimage-diccionario {
-	background-position: 0% 34.5895%;
+	background-position: 0% 33.3300%;
 }
 .wordimage-dulce {
-	background-position: 0% 35.2184%;
+	background-position: 0% 33.9360%;
 }
 .wordimage-elefante {
-	background-position: 0% 35.8473%;
+	background-position: 0% 34.5420%;
 }
 .wordimage-ensalada {
-	background-position: 0% 36.4762%;
+	background-position: 0% 35.1480%;
 }
 .wordimage-escenario {
-	background-position: 0% 37.1051%;
+	background-position: 0% 35.7540%;
 }
 .wordimage-faro {
-	background-position: 0% 37.7340%;
+	background-position: 0% 36.3600%;
 }
 .wordimage-flor {
-	background-position: 0% 38.3629%;
+	background-position: 0% 36.9660%;
 }
 .wordimage-foca {
-	background-position: 0% 38.9918%;
+	background-position: 0% 37.5720%;
 }
 .wordimage-fresa {
-	background-position: 0% 39.6207%;
+	background-position: 0% 38.1780%;
 }
 .wordimage-gallina {
-	background-position: 0% 40.2496%;
+	background-position: 0% 38.7840%;
 }
 .wordimage-gasolina {
-	background-position: 0% 40.8785%;
+	background-position: 0% 39.3900%;
 }
 .wordimage-gato {
-	background-position: 0% 41.5074%;
+	background-position: 0% 39.9960%;
 }
 .wordimage-goma {
-	background-position: 0% 42.1363%;
+	background-position: 0% 40.6020%;
+}
+.wordimage-gorra {
+	background-position: 0% 41.2080%;
+}
+.wordimage-gorro {
+	background-position: 0% 41.8140%;
 }
 .wordimage-hoja {
-	background-position: 0% 42.7652%;
+	background-position: 0% 42.4200%;
 }
 .wordimage-hormiga {
-	background-position: 0% 43.3941%;
+	background-position: 0% 43.0260%;
 }
 .wordimage-hueso {
-	background-position: 0% 44.0230%;
+	background-position: 0% 43.6320%;
 }
 .wordimage-huevo {
-	background-position: 0% 44.6519%;
+	background-position: 0% 44.2380%;
 }
 .wordimage-jaula {
-	background-position: 0% 45.2808%;
+	background-position: 0% 44.8440%;
 }
 .wordimage-jirafa {
-	background-position: 0% 45.9097%;
+	background-position: 0% 45.4500%;
 }
 .wordimage-koala {
-	background-position: 0% 46.5386%;
+	background-position: 0% 46.0560%;
 }
 .wordimage-lampara {
-	background-position: 0% 47.1675%;
+	background-position: 0% 46.6620%;
 }
 .wordimage-lapiz {
-	background-position: 0% 47.7964%;
+	background-position: 0% 47.2680%;
 }
 .wordimage-leche {
-	background-position: 0% 48.4253%;
+	background-position: 0% 47.8740%;
 }
 .wordimage-libros {
-	background-position: 0% 49.0542%;
+	background-position: 0% 48.4800%;
 }
 .wordimage-limon {
-	background-position: 0% 49.6831%;
+	background-position: 0% 49.0860%;
+}
+.wordimage-lluvia {
+	background-position: 0% 49.6920%;
 }
 .wordimage-abrigo {
-	background-position: 0% 50.3120%;
-}
-.wordimage-lombriz {
-	background-position: 0% 50.9409%;
+	background-position: 0% 50.2980%;
 }
 .wordimage-madera {
-	background-position: 0% 51.5698%;
+	background-position: 0% 50.9040%;
 }
 .wordimage-maiz {
-	background-position: 0% 52.1987%;
+	background-position: 0% 51.5100%;
 }
 .wordimage-mano {
-	background-position: 0% 52.8276%;
+	background-position: 0% 52.1160%;
 }
 .wordimage-manzana {
-	background-position: 0% 53.4565%;
+	background-position: 0% 52.7220%;
 }
 .wordimage-maracas {
-	background-position: 0% 54.0854%;
+	background-position: 0% 53.3280%;
 }
 .wordimage-marco {
-	background-position: 0% 54.7143%;
+	background-position: 0% 53.9340%;
 }
 .wordimage-mariquita {
-	background-position: 0% 55.3432%;
+	background-position: 0% 54.5400%;
 }
 .wordimage-martillo {
-	background-position: 0% 55.9721%;
+	background-position: 0% 55.1460%;
 }
 .wordimage-mesa {
-	background-position: 0% 56.6010%;
+	background-position: 0% 55.7520%;
 }
 .wordimage-mono {
-	background-position: 0% 57.2299%;
+	background-position: 0% 56.3580%;
 }
 .wordimage-monte {
-	background-position: 0% 57.8588%;
+	background-position: 0% 56.9640%;
 }
 .wordimage-morsa {
-	background-position: 0% 58.4877%;
+	background-position: 0% 57.5700%;
 }
 .wordimage-murcielago {
-	background-position: 0% 59.1166%;
+	background-position: 0% 58.1760%;
 }
 .wordimage-naranja {
-	background-position: 0% 59.7455%;
+	background-position: 0% 58.7820%;
 }
 .wordimage-noria {
-	background-position: 0% 60.3744%;
+	background-position: 0% 59.3880%;
 }
 .wordimage-obrero {
-	background-position: 0% 61.0033%;
+	background-position: 0% 59.9940%;
 }
 .wordimage-oreja {
-	background-position: 0% 61.6322%;
+	background-position: 0% 60.6000%;
 }
 .wordimage-oruga {
-	background-position: 0% 62.2611%;
+	background-position: 0% 61.2060%;
 }
 .wordimage-oso {
-	background-position: 0% 62.8900%;
+	background-position: 0% 61.8120%;
 }
 .wordimage-oveja {
-	background-position: 0% 63.5189%;
+	background-position: 0% 62.4180%;
 }
 .wordimage-pajaro {
-	background-position: 0% 64.1478%;
+	background-position: 0% 63.0240%;
 }
 .wordimage-pala {
-	background-position: 0% 64.7767%;
+	background-position: 0% 63.6300%;
 }
 .wordimage-pantano {
-	background-position: 0% 65.4056%;
+	background-position: 0% 64.2360%;
 }
 .wordimage-papel {
-	background-position: 0% 66.0345%;
+	background-position: 0% 64.8420%;
 }
 .wordimage-paraguas {
-	background-position: 0% 66.6634%;
+	background-position: 0% 65.4480%;
 }
 .wordimage-pastel {
-	background-position: 0% 67.2923%;
+	background-position: 0% 66.0540%;
 }
 .wordimage-patata {
-	background-position: 0% 67.9212%;
+	background-position: 0% 66.6600%;
 }
 .wordimage-pato {
-	background-position: 0% 68.5501%;
+	background-position: 0% 67.2660%;
 }
 .wordimage-pera {
-	background-position: 0% 69.1790%;
+	background-position: 0% 67.8720%;
 }
 .wordimage-percha {
-	background-position: 0% 69.8079%;
+	background-position: 0% 68.4780%;
 }
 .wordimage-perro {
-	background-position: 0% 70.4368%;
+	background-position: 0% 69.0840%;
 }
 .wordimage-pescado {
-	background-position: 0% 71.0657%;
+	background-position: 0% 69.6900%;
 }
 .wordimage-pez {
-	background-position: 0% 71.6946%;
+	background-position: 0% 70.2960%;
 }
 .wordimage-piedra {
-	background-position: 0% 72.3235%;
+	background-position: 0% 70.9020%;
 }
 .wordimage-pino {
-	background-position: 0% 72.9524%;
+	background-position: 0% 71.5080%;
 }
 .wordimage-pinya {
-	background-position: 0% 73.5813%;
+	background-position: 0% 72.1140%;
+}
+.wordimage-pinza {
+	background-position: 0% 72.7200%;
+}
+.wordimage-plancha {
+	background-position: 0% 73.3260%;
 }
 .wordimage-plano {
-	background-position: 0% 74.2102%;
+	background-position: 0% 73.9320%;
 }
 .wordimage-platano {
-	background-position: 0% 74.8391%;
+	background-position: 0% 74.5380%;
 }
 .wordimage-plato {
-	background-position: 0% 75.4680%;
+	background-position: 0% 75.1440%;
 }
 .wordimage-pluma {
-	background-position: 0% 76.0969%;
+	background-position: 0% 75.7500%;
+}
+.wordimage-preso {
+	background-position: 0% 76.3560%;
 }
 .wordimage-puente {
-	background-position: 0% 76.7258%;
+	background-position: 0% 76.9620%;
 }
 .wordimage-queso {
-	background-position: 0% 77.3547%;
+	background-position: 0% 77.5680%;
 }
 .wordimage-rama {
-	background-position: 0% 77.9836%;
+	background-position: 0% 78.1740%;
 }
 .wordimage-raton {
-	background-position: 0% 78.6125%;
+	background-position: 0% 78.7800%;
 }
 .wordimage-regadera {
-	background-position: 0% 79.2414%;
+	background-position: 0% 79.3860%;
+}
+.wordimage-reja {
+	background-position: 0% 79.9920%;
 }
 .wordimage-reloj {
-	background-position: 0% 79.8703%;
+	background-position: 0% 80.5980%;
 }
 .wordimage-rino {
-	background-position: 0% 80.4992%;
+	background-position: 0% 81.2040%;
 }
 .wordimage-rojo {
-	background-position: 0% 81.1281%;
+	background-position: 0% 81.8100%;
 }
 .wordimage-ropa {
-	background-position: 0% 81.7570%;
+	background-position: 0% 82.4160%;
 }
 .wordimage-sal {
-	background-position: 0% 82.3859%;
+	background-position: 0% 83.0220%;
 }
 .wordimage-sandia {
-	background-position: 0% 83.0148%;
+	background-position: 0% 83.6280%;
 }
 .wordimage-sapo {
-	background-position: 0% 83.6437%;
+	background-position: 0% 84.2340%;
 }
 .wordimage-serpiente {
-	background-position: 0% 84.2726%;
+	background-position: 0% 84.8400%;
 }
 .wordimage-seta {
-	background-position: 0% 84.9015%;
+	background-position: 0% 85.4460%;
 }
 .wordimage-silbato {
-	background-position: 0% 85.5304%;
+	background-position: 0% 86.0520%;
 }
 .wordimage-sofa {
-	background-position: 0% 86.1593%;
+	background-position: 0% 86.6580%;
 }
 .wordimage-sol {
-	background-position: 0% 86.7882%;
+	background-position: 0% 87.2640%;
 }
 .wordimage-sombrero {
-	background-position: 0% 87.4171%;
+	background-position: 0% 87.8700%;
 }
 .wordimage-sombrilla {
-	background-position: 0% 88.0460%;
+	background-position: 0% 88.4760%;
 }
 .wordimage-sopa {
-	background-position: 0% 88.6749%;
+	background-position: 0% 89.0820%;
 }
 .wordimage-sorpresa {
-	background-position: 0% 89.3038%;
+	background-position: 0% 89.6880%;
 }
 .wordimage-television {
-	background-position: 0% 89.9327%;
+	background-position: 0% 90.2940%;
 }
 .wordimage-tigre {
-	background-position: 0% 90.5616%;
+	background-position: 0% 90.9000%;
 }
 .wordimage-tijeras {
-	background-position: 0% 91.1905%;
+	background-position: 0% 91.5060%;
 }
 .wordimage-tomate {
-	background-position: 0% 91.8194%;
+	background-position: 0% 92.1120%;
 }
 .wordimage-topo {
-	background-position: 0% 92.4483%;
+	background-position: 0% 92.7180%;
 }
 .wordimage-tornillo {
-	background-position: 0% 93.0772%;
+	background-position: 0% 93.3240%;
 }
 .wordimage-tortuga {
-	background-position: 0% 93.7061%;
+	background-position: 0% 93.9300%;
 }
 .wordimage-tostadora {
-	background-position: 0% 94.3350%;
+	background-position: 0% 94.5360%;
 }
 .wordimage-tranvia {
-	background-position: 0% 94.9639%;
+	background-position: 0% 95.1420%;
 }
 .wordimage-tren {
-	background-position: 0% 95.5928%;
+	background-position: 0% 95.7480%;
 }
 .wordimage-tres {
-	background-position: 0% 96.2217%;
+	background-position: 0% 96.3540%;
 }
 .wordimage-tuerca {
-	background-position: 0% 96.8506%;
+	background-position: 0% 96.9600%;
 }
 .wordimage-uvas {
-	background-position: 0% 97.4795%;
+	background-position: 0% 97.5660%;
 }
 .wordimage-vaca {
-	background-position: 0% 98.1084%;
+	background-position: 0% 98.1720%;
 }
 .wordimage-ventana {
-	background-position: 0% 98.7373%;
+	background-position: 0% 98.7780%;
 }
 .wordimage-verde {
-	background-position: 0% 99.3662%;
+	background-position: 0% 99.3840%;
 }
 .wordimage-vino {
-	background-position: 0% 99.9951%;
+	background-position: 0% 99.9900%;
 }

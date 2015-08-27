@@ -4,6 +4,7 @@ var QueryString=get_query_string();
 var game_mode=false;
 if(QueryString.hasOwnProperty('game_mode') && QueryString.game_mode=='true') game_mode=true;
 
+var app_name='COLE';
 
 // MEDIA
 var images = [
@@ -28,6 +29,12 @@ var media_objects;
 var session_state="unset";
 var header_zone=document.getElementById('header');
 var canvas_zone=document.getElementById('zone_canvas');
+var canvas_zone_vcentered=document.getElementById('zone_canvas_vcentered');
+
+if(game_mode){
+	canvas_zone.classList.remove("canvas-with-header");
+	canvas_zone.classList.add("canvas-full");
+}
 
 var audio_sprite;
 //var audio_sprite_name='soundsSpriteVBR30-19kbps-100k.m4a';
@@ -166,16 +173,14 @@ var user_subject_results={};
 var user_subject_result_detail={};
 
 function login_screen(){
-	header_zone.innerHTML='<h1>CF login</h1>';
-	canvas_zone.innerHTML=' <br />\
-	<div id="menu-content" class="text-center">\
+	header_zone.innerHTML='<h1>Acceso</h1>';
+	canvas_zone_vcentered.innerHTML='\
 	<div id="signinButton" class="button">Acceso Google\
    <span class="icon"></span>\
     <span class="buttonText"></span>\
 	</div>\
 	<br /><button id="exit" class="button exit" onclick="invitee_access();">Acceso Invitado (Offline)</button> \
 	<br /><button id="exit" class="button exit" onclick="exit_app();">Salir</button> \
-	</div> \
 		';
 		// check if there is an option to change the window... see stackoverflow oauth.html to see how-to cordova
 		// class g-signin2  only needed if render is not used
@@ -300,14 +305,11 @@ function admin_screen(){
 		backend_url+'ajaxdb.php?action=get_users', 
 		function(data) {
 			var users=data;
-			canvas_zone.innerHTML=' \
-				This is what an admin user will see \
-				<div id="menu-content" class="text-center">\
+			canvas_zone_vcentered.innerHTML=' \
 				User:  <select id="users-select"></select> \
 				<br /><button onclick="set_user()" class="button">Acceder</button> \
 			    <br /><button onclick="check_missing_elements()" class="button">Comprobar sonidos/imagenes</button> \
-			    <br /><button onclick="letter_reader()" class="button">Lector de sonidos</button> \
-				</div>\
+				<br /><button class="button" onclick="menu_screen()">Volver</button>\
 				';
 			users_select_elem=document.getElementById('users-select');
 			select_fill_with_json(users,users_select_elem);
@@ -316,11 +318,10 @@ function admin_screen(){
 }
 
 var letter_reader=function(){
-			canvas_zone.innerHTML=' \
+			canvas_zone_vcentered.innerHTML=' \
 				Sonidos a leer (separados por espacio) <input id="input_sounds" type="text" /> \
 				<button id="read-button" onclick="read_input_sounds()" class="button">Leer</button> \
-			    <br /><br /><button onclick="amdin_screen()" class="button">Volver</button> \
-				</div>\
+			    <br /><br /><button onclick="menu_screen()" class="button">Volver</button> \
 				';	
 }
 
@@ -397,7 +398,7 @@ function menu_screen(){
 	var splash=document.getElementById("splash_screen");
 	if(splash!=null && (ResourceLoader.lazy_audio==true || ResourceLoader.not_loaded['sounds'].length==0)){ splash.parentNode.removeChild(splash); }
 	if(media_objects===undefined) media_objects=ResourceLoader.ret_media; // in theory all are loaded at this point
-	header_zone.innerHTML='<h1>Conciencia Fonológica</h1>';
+	header_zone.innerHTML='<h1>'+app_name+'</h1>';
 	if(debug){
 		console.log('userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info);
 		console.log('not_loaded sounds: '+ResourceLoader.not_loaded['sounds'].length);
@@ -421,7 +422,7 @@ function menu_screen(){
 		<li><a href="#" onclick="exit_app()">salir</a></li>\
 		</ul>';
 		header_zone.innerHTML='<a id="hamburger_icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">\
-		<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"/></svg></a> Conciencia Fonológica';
+		<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"/></svg></a> '+app_name;
 		var hamburger_icon=document.getElementById('hamburger_icon');
 		hamburger_icon.addEventListener('click', function(e) {
 			hamburger_menu.classList.toggle('open');
@@ -429,13 +430,13 @@ function menu_screen(){
 		});
 
 		var admin_opts='<br /><button id="sel-usr" onclick="admin_screen()" class="button">Administrar</button>';
-		var normal_opts='<br /><button id="start-test-button" class="button" disabled="true">Test</button> \
+		var normal_opts='<button id="start-test-button" class="button" disabled="true">Test</button> \
+	    <br /><button id="read-letters" disabled="true" class="button" onclick="letter_reader()">Lector de sonidos</button> \
 		<br /><button id="manage-subjects" disabled="true" class="button" onclick="manage_subjects()">Participantes</button> \
 		<br /><button id="results" disabled="true" class="button" onclick="explore_results()">Resultados</button>';
 		if(user_data.access_level!='admin') admin_opts="";
 		if(user_data.access_level=='invitee'){ normal_opts=""; user_subjects={invitado:'invitado'}}
-		canvas_zone.innerHTML=' \
-		<div id="menu-content" class="text-center">\
+		canvas_zone_vcentered.innerHTML=' \
 		<div id="menu-logo-div"></div> \
 		Participante:  <select id="subjects-select"></select> \
 		<nav id="responsive_menu">\
@@ -444,7 +445,6 @@ function menu_screen(){
 		'+normal_opts+'\
 		<br /><button id="exit" class="button exit" onclick="exit_app()">Salir</button> \
 		</nav>\
-		</div>\
 		';
 
 		
@@ -465,6 +465,7 @@ function menu_screen(){
 					document.getElementById("start-button").disabled=false;
 					if(user_data.access_level!='invitee'){
 						document.getElementById("start-test-button").disabled=false;
+						document.getElementById("read-letters").disabled=false;
 						document.getElementById("manage-subjects").disabled=false;
 						document.getElementById("results").disabled=false;
 					}
@@ -475,6 +476,7 @@ function menu_screen(){
 			document.getElementById("start-button").disabled=false;
 			if(user_data.access_level!='invitee'){
 				document.getElementById("start-test-button").disabled=false;
+				document.getElementById("read-letters").disabled=false;
 				document.getElementById("manage-subjects").disabled=false;
 				document.getElementById("results").disabled=false;
 			}
@@ -488,10 +490,10 @@ function menu_screen(){
 
 var montessori=function(){
 	preventBackExit();
-	header_zone.innerHTML='<h1 onclick="menu_screen()"> < Conciencia Fonológica</h1>';
+	header_zone.innerHTML='<h1 onclick="menu_screen()"> < '+app_name+'</h1>';
 	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]!=undefined)
 		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
-	canvas_zone.innerHTML=' \
+	canvas_zone_vcentered.innerHTML=' \
 	<div class="text-center montessori-div">\
 	<p class="montessori">Un poc de montessori guai?</p>\
 	<br /><button id="go-back" onclick="game()">Volver</button> \
@@ -501,15 +503,13 @@ var montessori=function(){
 
 var manage_subjects=function(){
 	preventBackExit();
-	header_zone.innerHTML='<h1 onclick="menu_screen()"> < Conciencia Fonológica</h1>';
+	header_zone.innerHTML='<h1 onclick="menu_screen()"> < '+app_name+'</h1>';
 	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]!=undefined)
 		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
-	canvas_zone.innerHTML=' \
-	<div class="text-center">\
+	canvas_zone_vcentered.innerHTML=' \
     <button id="add-subject" class="button" onclick="add_subject()">Añadir</button>\
 	<div id="results-div">cargando participantes...</div> \
 	<br /><button id="go-back" onclick="menu_screen()">Volver</button> \
-	</div>\
 	';
 	var user_subjects_data=[];
 	for(var key in user_subjects){
@@ -649,12 +649,10 @@ var edit_subject=function(sid){
 
 var explore_results=function(){
 	preventBackExit();
-	header_zone.innerHTML='<h1 onclick="menu_screen()"> < Conciencia Fonológica</h1>';
-	canvas_zone.innerHTML=' \
-	<div class="text-center">\
+	header_zone.innerHTML='<h1 onclick="menu_screen()"> < '+app_name+'</h1>';
+	canvas_zone_vcentered.innerHTML=' \
 	<div id="results-div">cargando resultados...</div> \
 	<br /><button id="go-back" onclick="menu_screen()">Volver</button> \
-	</div>\
 	';
 	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]!=undefined)
 		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
@@ -715,12 +713,10 @@ var explore_results=function(){
 
 var explore_result_detail=function(session_id){
 	preventBackExit();
-	header_zone.innerHTML='<h1 onclick="menu_screen()"> < Conciencia Fonológica</h1>';
-	canvas_zone.innerHTML=' \
-	<div class="text-center">\
+	header_zone.innerHTML='<h1 onclick="menu_screen()"> < '+app_name+'</h1>';
+	canvas_zone_vcentered.innerHTML=' \
 	<div id="results-div">cargando detalle resultado '+session_id+'...</div> \
 	<br /><button id="go-back" onclick="explore_results()">Volver</button> \
-	</div>\
 	';
 	if(!user_subject_result_detail.hasOwnProperty(session_id)){
 		ajax_request_json(
@@ -762,24 +758,39 @@ var explore_result_detail=function(session_id){
 
 var game=function(){
 	// activity selection (if game_mode, remove and restyle header/footer...)
-	canvas_zone.innerHTML=' \
-	<div class="text-center">\
-	<br /><button class="button" onclick="memoria_fonologica()">Mem. Fono.</button> \
-	<br /><button class="button" onclick="montessori()">Montessori</button> \
-	</div>\
+	var extra_options="";
+	if(!game_mode) extra_options='<br /><button class="button" onclick="menu_screen()">Volver</button>';
+	canvas_zone_vcentered.innerHTML=' \
+	<br /><button class="button" onclick="conciencia()">Conciencia</button> \
+	<br /><button class="button" onclick="memoria()">Memoria</button> \
+	<br /><button class="button" onclick="ritmo()">Ritmo</button> \
+	<br /><button class="button" onclick="velocidad()">Velocidad</button> \
+	<br /><button class="button" onclick="montessori()">Montessori?</button> \
+	'+extra_options+'\
 	';
 
 }
 
+var memoria=function(){
+	alert("en construcción...");
+}
 
-var memoria_fonologica=function(){
+var ritmo=function(){
+	alert("en construcción...");
+}
+
+var velocidad=function(){
+	alert("en construcción...");
+}
+
+var conciencia=function(){
 	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]==undefined){
 		alert("Debe seleccionar algún sujeto.");
 		return;
 	}
 	
 	preventBackExit();
-	header_zone.innerHTML='<h1 onclick="menu_screen()"> < Conciencia Fonológica </h1>'; //<button id="go-back" onclick="menu_screen()">Salir</button>
+	header_zone.innerHTML='<h1 onclick="menu_screen()"> < '+app_name+' </h1>'; //<button id="go-back" onclick="menu_screen()">Salir</button>
 	if(ResourceLoader.not_loaded['sounds'].length!=0){
 		if(debug) console.log("Not loaded sounds: "+ResourceLoader.not_loaded['sounds'].length+"  "+ResourceLoader.not_loaded['sounds']);
 		ResourceLoader.load_media_wait_for_lazy_audio(game);
@@ -817,7 +828,7 @@ function start_activity_set(){
 		Correct : <span id="current_score_num">0</span>\
 		</div>';
 	}
-	canvas_zone.innerHTML=' \
+	canvas_zone_vcentered.innerHTML=' \
 		<div id="zone_score" class="cf">\
 		  <div class="col_left">\
 		    <div id="activity_timer_div">\
@@ -984,7 +995,7 @@ function nextActivity(){
 	remaining_rand_activities.splice(current_activity_index,1); // remove current activity
 	if(session_data.mode!="test") remove_modal();
 	if(remaining_rand_activities.length==0){
-		canvas_zone.innerHTML='NO HAY MAS ACTIVIDADES. FIN, sending...';
+		canvas_zone_vcentered.innerHTML='NO HAY MAS ACTIVIDADES. FIN, sending...';
 		if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
 		send_session_data();
 	}else{
@@ -1002,7 +1013,7 @@ function send_session_data(){
 	}
 
 	if(user_data.access_level=='invitee'){
-		canvas_zone.innerHTML+='<br />Los resultados no se pueden guardar para\
+		canvas_zone_vcentered.innerHTML+='<br />Los resultados no se pueden guardar para\
 			usuarios "invitados"<br /><br />\
 		<br /><button id="go-back" onclick="menu_screen()">Volver</button>';
 		return;
@@ -1017,7 +1028,7 @@ function send_session_data(){
 
 	xhr.onload = function () {
 		var data=JSON.parse(this.responseText);
-		canvas_zone.innerHTML+='<br />Server message: '+data.msg+'<br /><br />\
+		canvas_zone_vcentered.innerHTML+='<br />Server message: '+data.msg+'<br /><br />\
 		<br /><button id="go-back" onclick="menu_screen()">Volver</button>';
 	};
 

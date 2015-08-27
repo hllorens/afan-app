@@ -64,7 +64,9 @@ min-height: 80%; CANNOT BE A PERCENTAGE :() min-width:640px; */
 h1{font: normal 26px Monospace,Arial,sans-serif; margin: 5px; color: #722;}
 
 #header{display:block;position:absolute;top:0px; height:80px;width:100%;background-color:#fc5} /*overflow:hidden;*/
-#zone_canvas{position:absolute; overflow: hidden;background:#aea;top:80px; bottom:1%; width:100%;} /*#fee*/
+#zone_canvas{position:absolute; overflow: hidden;background:#aea; width:100%;} /*#fee*/
+.canvas-full{top:0px; bottom:0px;}
+.canvas-with-header{top:80px; bottom:1%;}
 /*HEIGHT perhaps use variables? css3?*/
 
 select, button {font-family:inherit;font-size:inherit;}
@@ -192,6 +194,20 @@ button.backgroundRed{
 	font-weight:bold;
 }
 
+
+.vertical-center-container {
+    display: table;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+}
+
+.vertical-center-content {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+
 /*.hover_red_border:hover{
 	border:2px solid red;
 }*/
@@ -218,7 +234,7 @@ button.backgroundRed{
 /*Galaxy S4  dips=360x640px, iphone 320x480px */
 @media screen and (max-width: 650px) {
 	#header{height:48px;}
-	#zone_canvas{top:48px;}
+	.canvas-with-header{top:48px;}
 	#results-table{font-size: 16px;}
 }
 
@@ -227,9 +243,8 @@ button.backgroundRed{
 	/*#header{height:37px;}
 	#zone_canvas{top:37px;}*/
 	#header{height:0px;}
-	#zone_canvas{top:0px;}
+	.canvas-with-header{top:0px; bottom:0;}
 	#h1{font-size:14px;}
-	#zone_canvas{bottom:0;}
 	#answers{width:60%;}
 	body{font-size:16px;}
 	#menu-logo-div{display:none;height:0;margin:0;padding:0;}
