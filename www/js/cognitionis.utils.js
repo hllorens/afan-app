@@ -1038,7 +1038,24 @@ var random_item=function(array, opt_leave_out){
 	return item;
 }
 
-
+/*
+	Select a random array of items from an array
+	Optionally provide a if you want to allow repetitions
+*/
+var random_array=function(array, num_elems, allow_repetition){
+	var item=undefined;
+	var items=[];
+	var remaining_array=array.slice(); // copy by value
+	var repetition=false;
+	if(typeof(allow_repetition)!=='undefined' && allow_repetition==true)
+		repetition=true;
+	do{
+		item = remaining_array[Math.floor(Math.random()*remaining_array.length)];
+		if(items.indexOf(item)!=-1 && !repetition){continue;}
+		else{items.push(item);}
+	}while(items.length<num_elems);
+	return items;
+}
 
 
 

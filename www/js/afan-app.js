@@ -130,6 +130,9 @@ zsilence_start: {id: "zsilence_start", start: 0.100, end: 0.700},
 var USE_ANSWERS = 3;
 var MAX_PLAYS=2;
 var MAX_TRAINING_ACTIVITIES=10;
+var MAX_MEMORY_LEVELS=7;
+
+
 
 var remaining_rand_activities=[];
 var correct_answer='undefined';
@@ -146,6 +149,7 @@ var activity_timer=new ActivityTimer();
 var current_activity_data={};
 var current_activity_index=0;
 var current_activity_played_times=0;
+var current_activity_memory_level=1;
 
 var user_data={};
 var session_data={
@@ -158,7 +162,7 @@ var session_data={
 	num_correct: 0,
 	num_answered: 0,
 	result: 0,
-	type: 'ord_fonemas',
+	type: 'conciencia',
 	mode: 'training',
     action: 'send_session_data_post',
 	details: []
@@ -300,7 +304,8 @@ function gdisconnect(){
 }
 
 function admin_screen(){
-	//header_zone.innerHTML='<h1>CF '+user_data.email.substr(0,8)+' <a href="#" onclick="gdisconnect();">desc</a></h1>';
+	// TODO hear and everywhere create a header function that manages hamburger and text without loosing functionality
+	// header_zone.innerHTML+='<span onclick="menu_screen()"> < '+app_name+' menu</span>'; // hamburger looses the event listener
 	ajax_request_json(
 		backend_url+'ajaxdb.php?action=get_users', 
 		function(data) {
@@ -488,24 +493,11 @@ function menu_screen(){
 }
 
 
-var montessori=function(){
-	preventBackExit();
-	header_zone.innerHTML='<h1 onclick="menu_screen()"> < '+app_name+'</h1>';
-	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]!=undefined)
-		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
-	canvas_zone_vcentered.innerHTML=' \
-	<div class="text-center montessori-div">\
-	<p class="montessori">Un poc de montessori guai?</p>\
-	<br /><button id="go-back" onclick="game()">Volver</button> \
-	</div>\
-	';
-}
-
 var manage_subjects=function(){
 	preventBackExit();
-	header_zone.innerHTML='<h1 onclick="menu_screen()"> < '+app_name+'</h1>';
 	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]!=undefined)
 		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
+	
 	canvas_zone_vcentered.innerHTML=' \
     <button id="add-subject" class="button" onclick="add_subject()">Añadir</button>\
 	<div id="results-div">cargando participantes...</div> \
@@ -649,7 +641,7 @@ var edit_subject=function(sid){
 
 var explore_results=function(){
 	preventBackExit();
-	header_zone.innerHTML='<h1 onclick="menu_screen()"> < '+app_name+'</h1>';
+		
 	canvas_zone_vcentered.innerHTML=' \
 	<div id="results-div">cargando resultados...</div> \
 	<br /><button id="go-back" onclick="menu_screen()">Volver</button> \
@@ -713,7 +705,7 @@ var explore_results=function(){
 
 var explore_result_detail=function(session_id){
 	preventBackExit();
-	header_zone.innerHTML='<h1 onclick="menu_screen()"> < '+app_name+'</h1>';
+		
 	canvas_zone_vcentered.innerHTML=' \
 	<div id="results-div">cargando detalle resultado '+session_id+'...</div> \
 	<br /><button id="go-back" onclick="explore_results()">Volver</button> \
@@ -760,37 +752,151 @@ var game=function(){
 	// activity selection (if game_mode, remove and restyle header/footer...)
 	var extra_options="";
 	if(!game_mode) extra_options='<br /><button class="button" onclick="menu_screen()">Volver</button>';
+	
 	canvas_zone_vcentered.innerHTML=' \
 	<br /><button class="button" onclick="conciencia()">Conciencia</button> \
 	<br /><button class="button" onclick="memoria()">Memoria</button> \
 	<br /><button class="button" onclick="ritmo()">Ritmo</button> \
 	<br /><button class="button" onclick="velocidad()">Velocidad</button> \
-	<br /><button class="button" onclick="montessori()">Montessori?</button> \
 	'+extra_options+'\
 	';
 
 }
 
 var memoria=function(){
-	alert("en construcción...");
+	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]==undefined){
+		alert("Debe seleccionar algún sujeto.");
+		return;
+	}
+		
+
+	canvas_zone_vcentered.innerHTML=' \
+	<br /><button class="button" onclick="memoria_visual()">Memoria Visual</button> \
+	<br /><button class="button" onclick="memoria_auditiva()">Memoria Auditiva</button> \
+	<br /><button class="button" onclick="game()">Volver</button>\
+	';
 }
 
+var memoria_visual=function(){
+	preventBackExit();
+	session_data.type="memoria_visual";
+	/** Se presentan imágenes al usuario que se van abriendo y tapando como cartas
+	 ** Luego desaparecen, y salen 9 opciones a ordenar
+	 ** Se inicia con una carta y se va incrementando hasta 7
+	 ** NO SE ADMITE REPETIDOS de manera q cuando hace click en una imágen esta
+	 ** Se queda marcada y no se puede hacer click (no superponer numeros pq puede distraer, solo ensombrecer)
+     ** CADA iteración el LA SECUENCIA PUEDE CAMBIAR (aunque dificulte la memorización)
+     ** CADA iteración el CONJUNTO DE IMG PUEDE CAMBIAR (aunque dificulte la memorización)
+     ** SI FALLA, TIENE UN INTENTO MÁS (SIN PENALIZACIÓN) EN EL MISMO NIVEL
+	 ** SI FALLA 2 VECES SEGUIDAS EN EL MISMO NIVEL (FIN DEL JUEGO)
+     ** LA INFORMACIÓN QUE SE GUARDA ES LA CANTIDAD DE ELEMENTOS QUE HA PODIDO RECORDAR
+     ** Y EL TIEMPO, ETC...
+	*/
+
+	// elegir 9 imagenes de forma aleatoria (sin repetidos)
+	// TODO donde saco el wordlist? del sprite del css?
+	var sprite_images=['pato','gato','sol','pez','tren','sal','col','reja','oreja','koala','bala','ala'];
+	var rand_images = random_array(sprite_images,9);
+	console.log(rand_images);
+
+	// elegir n imagenes segun el nivel alcanzado (sin repetidos)
+	var sol_images = random_array(rand_images,current_activity_memory_level);
+
+	console.log(rand_images);
+	console.log(sol_images);
+	// mostrar tapadas e ir abriendo en intervalos de 2 segundos
+	
+
+	// luego mostrar las 9 para q el usuario haga clik	
+
+	canvas_zone_vcentered.innerHTML='\
+	<br /><div id="xx">'+rand_images.toString()+'</div>\
+          <button id="go-back" onclick="game()">Volver</button> \
+	</div>\
+	';
+
+/*	for(var i=0; i<session_data.details.length ; ++i) {
+		var use=Math.floor(Math.random() * session_data.details.length)
+		while(used_answers.indexOf(use) != -1) use=Math.floor(Math.random() * USE_ANSWERS);
+		//answers_div.innerHTML+='<div id="answer'+i+'" class="hover_red_border" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"></div>'
+
+		var answer_i=current_activity_data['answers'][use];
+		answers_div.innerHTML+='<div id="answer'+i+'" onclick="check_correct(this.firstChild,correct_answer)" class="hover_red_border"  ></div>'; //onclick="check_correct(this,correct_answer)"  style="float:left;" stretchy no-limit-250
+		//if(media_objects.images[current_activity_data['answers'][use]+'.png']==undefined){
+		if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+current_activity_data['answers'][use])){
+			alert("ERROR: .wordimage-"+current_activity_data['answers'][use]+" not found in wordimg-sprite.css.");
+			document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
+        }else if(used_answers_text.hasOwnProperty(current_activity_data['answers'][use])){
+			alert("ERROR: "+current_activity_data['answers'][use]+" is already used contact the ADMIN.");
+			document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
+		}else{	
+			////document.getElementById("answer"+i).appendChild(media_objects.images[current_activity_data['answers'][use]+'.png']);
+			////document.getElementById("answer"+i).className += " wordimage wordimage-"+current_activity_data['answers'][use];
+			// TWO DIVS ARE NEEDED TO MAKE THIS RESPONSIBLE AND ALSO INCLUDE MAX-WIDTH...
+			document.getElementById("answer"+i).innerHTML += '<div class="wordimage wordimage-'+current_activity_data['answers'][use]+'"></div>';
+			////document.getElementById("answer"+i).innerHTML += '<img class="spacer"  src="spacer158.png"><img class="spritev wordimg-'+current_activity_data['answers'][use]+'" src="../../../afan-app-media/img/wordimg-sprite.png" />';		
+		}*/
+
+}
+
+var memoria_auditiva=function(){
+	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]==undefined){
+		alert("Debe seleccionar algún sujeto.");
+		return;
+	}	
+	preventBackExit();
+	session_data.type="memoria_auditiva";
+	canvas_zone_vcentered.innerHTML=' \
+	<div class="text-center montessori-div">\
+	<p class="montessori">MEMORIA AUDITIVA, en construcción</p>\
+	<br /><button id="go-back" onclick="game()">Volver</button> \
+	</div>\
+	';
+}
+
+
 var ritmo=function(){
-	alert("en construcción...");
+	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]==undefined){
+		alert("Debe seleccionar algún sujeto.");
+		return;
+	}	
+	preventBackExit();
+	session_data.type="ritmo";
+		
+	canvas_zone_vcentered.innerHTML=' \
+	<div class="text-center montessori-div">\
+	<p class="montessori">RITMO, en construcción</p>\
+	<br /><button id="go-back" onclick="game()">Volver</button> \
+	</div>\
+	';
 }
 
 var velocidad=function(){
-	alert("en construcción...");
+	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]==undefined){
+		alert("Debe seleccionar algún sujeto.");
+		return;
+	}	
+	preventBackExit();
+	session_data.type="velocidad";
+		
+	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]!=undefined)
+		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
+	canvas_zone_vcentered.innerHTML=' \
+	<div class="text-center montessori-div">\
+	<p class="montessori">VELOCIDAD. Un poc de montessori guai?</p>\
+	<br /><button id="go-back" onclick="game()">Volver</button> \
+	</div>\
+	';
 }
 
 var conciencia=function(){
 	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]==undefined){
 		alert("Debe seleccionar algún sujeto.");
 		return;
-	}
-	
+	}	
 	preventBackExit();
-	header_zone.innerHTML='<h1 onclick="menu_screen()"> < '+app_name+' </h1>'; //<button id="go-back" onclick="menu_screen()">Salir</button>
+	session_data.type="conciencia";
+		
 	if(ResourceLoader.not_loaded['sounds'].length!=0){
 		if(debug) console.log("Not loaded sounds: "+ResourceLoader.not_loaded['sounds'].length+"  "+ResourceLoader.not_loaded['sounds']);
 		ResourceLoader.load_media_wait_for_lazy_audio(game);
@@ -857,7 +963,7 @@ function start_activity_set(){
 		var start=Math.floor(Math.random()*(json_activities.length-(MAX_TRAINING_ACTIVITIES+1)));
 		remaining_rand_activities=json_activities.slice(start,start+MAX_TRAINING_ACTIVITIES);
 	}else{
-		remaining_rand_activities=json_activities.slice();
+		remaining_rand_activities=json_activities.slice(); // copy by value
 	}
 	document.getElementById('remaining_activities_num').innerHTML=""+(remaining_rand_activities.length-1);
 	if(session_data.mode=="training"){
