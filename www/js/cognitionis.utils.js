@@ -418,21 +418,34 @@ function isInteger(value) {     // in the future javacript will have Number.isIn
 
 
 //////////////////// TIMER FOR A USER ACTIVITY OF ANY KIND ////////////// 
-var ActivityTimer=function (){	
+var ActivityTimer=function (tricker_cb,limit_end_sec,end_cb){	
 	this.seconds=0;
 	this.started=false;
 	this.dom_anchor=undefined;
 	this.advance_timeout=null;
+	this.tricker_callback=undefined;
+	if(tricker_cb!==undefined){this.tricker_callback=tricker_cb;}
+	this.limit_end_seconds=undefined;
+	if(limit_end_sec!==undefined){this.limit_end_seconds=limit_end_sec;}
+	this.end_callback=undefined;
+	if(end_cb!==undefined){this.end_callback=end_cb;}
 }
 ActivityTimer.prototype.anchor_to_dom=function(elem){this.dom_anchor=elem;}
+ActivityTimer.prototype.set_tricker_callback=function(cb){this.tricker_callback=cb;}
+ActivityTimer.prototype.set_limit_end_seconds=function(sec){this.limit_end_seconds=sec;}
+ActivityTimer.prototype.set_end_callback=function(cb){this.end_callback=cb;}
 ActivityTimer.prototype.start=function(){
-	if(this.dom_anchor==undefined){alert("ERROR: Starging an activity_timer without defining it first"); return;}
+	if(this.dom_anchor==undefined && this.tricker_callback==undefined){
+		alert("ERROR: Starging an activity_timer without defining dom_anchor or tricker_callback"); return;
+	}
 	if(this.started){
-		console.log("ERROR: activity_timer already started")	
+		console.log("ERROR: activity_timer already started");	
 	}else{
 		this.started=true
-		this.dom_anchor.innerHTML="00:"+pad_string( (this.seconds / 60) >> 0,2,"0")+":"+pad_string(this.seconds % 60,2,"0")
-		this.advance_timeout=setTimeout(function(){this.advance()}.bind(this),1000)
+		if(this.dom_anchor!=undefined){
+			this.dom_anchor.innerHTML="00:"+pad_string( (this.seconds / 60) >> 0,2,"0")+":"+pad_string(this.seconds % 60,2,"0");
+		}
+		this.advance_timeout=setTimeout(function(){this.advance()}.bind(this),1000);
 	}
 }
 ActivityTimer.prototype.advance=function(){
@@ -441,8 +454,19 @@ ActivityTimer.prototype.advance=function(){
 		// seconds only is easier and calculations are fast...
 		//if (this.seconds>=60){++this.minutes;this.seconds=0}
 		//this.dom_anchor.innerHTML=pad_string(activity_timer_minutes,2,"0")+":"+pad_string(this.seconds,2,"0")
-		this.dom_anchor.innerHTML="00:"+pad_string( (this.seconds / 60) >> 0,2,"0")+":"+pad_string(this.seconds % 60,2,"0")
-		this.advance_timeout=setTimeout(function(){this.advance()}.bind(this),1000)
+		if(this.dom_anchor!=undefined){
+			this.dom_anchor.innerHTML="00:"+pad_string( (this.seconds / 60) >> 0,2,"0")+":"+pad_string(this.seconds % 60,2,"0");
+		}
+		if(this.tricker_callback!=undefined){
+			this.tricker_callback();
+		}
+		if(this.limit_end_seconds!=undefined && this.seconds>=this.limit_end_seconds){
+			this.stop();
+			if(this.end_callback!=undefined){this.end_callback();}
+			else{console.log('Timer stopped at limit_end_seconds but not end_callback found');}			
+		}else{
+			this.advance_timeout=setTimeout(function(){this.advance()}.bind(this),1000);
+		}
 	}else{
 		console.log("ERROR: activity_timer not started. Starting it.");
 		this.start();
@@ -454,10 +478,14 @@ ActivityTimer.prototype.stop=function(){
 }
 ActivityTimer.prototype.reset=function (){	
 	this.stop();
-	this.dom_anchor.innerHTML="00:00:00";
+	if(this.dom_anchor!=undefined){
+		this.dom_anchor.innerHTML="00:00:00";
+	}
 	this.seconds=0; // this.minutes=0
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 
 /// Audio Sprite //////////////////////
@@ -975,9 +1003,9 @@ var toggleClassBlink = function(blink_element,blink_class,blink_timeout,num_blin
 
 var hamburger_menu=document.getElementById('hamburger_menu');
 var hamburger_menu_content=document.getElementById('hamburger_menu_content');
-var hamburger_close=document.getElementById('hamburger_close');
-if(hamburger_close!=null){
-	hamburger_close.addEventListener('click', function(e) {
+var hamburger_close_button=document.getElementById('hamburger_close');
+if(hamburger_close_button!=null){
+	hamburger_close_button.addEventListener('click', function(e) {
 			hamburger_menu.classList.remove('open');
 			e.stopPropagation();
 		});
@@ -1006,7 +1034,7 @@ var random_item=function(array, opt_leave_out){
 	var item=undefined;
 	do{
 		item = array[Math.floor(Math.random()*array.length)];
-	}while(typeof(opt_leave_out)!=='undefined' && item!==opt_leave_out);
+	}while(typeof(opt_leave_out)!=='undefined' && item==opt_leave_out);
 	return item;
 }
 

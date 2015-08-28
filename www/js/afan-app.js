@@ -411,8 +411,8 @@ function menu_screen(){
 	if(user_data.email==null && !game_mode){
 		login_screen();
 	}else if(!game_mode){
-		var sign='<li><a href="#" onclick="hamburguer_close();show_profile()">profile</a></li>\
-				  <li><a href="#" onclick="hamburguer_close();gdisconnect()">desconectar</a></li>';
+		var sign='<li><a href="#" onclick="hamburger_close();show_profile()">profile</a></li>\
+				  <li><a href="#" onclick="hamburger_close();gdisconnect()">desconectar</a></li>';
 		if(user_data.email=='invitee'){
 			sign='<li><a href="#" onclick="hamburger_close();login_screen()">login</a></li>';
 		}
