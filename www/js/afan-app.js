@@ -28,6 +28,7 @@ var sounds = [
 var media_objects;
 var session_state="unset";
 var header_zone=document.getElementById('header');
+var header_text=undefined;
 var canvas_zone=document.getElementById('zone_canvas');
 var canvas_zone_vcentered=document.getElementById('zone_canvas_vcentered');
 
@@ -304,8 +305,7 @@ function gdisconnect(){
 }
 
 function admin_screen(){
-	// TODO hear and everywhere create a header function that manages hamburger and text without loosing functionality
-	// header_zone.innerHTML+='<span onclick="menu_screen()"> < '+app_name+' menu</span>'; // hamburger looses the event listener
+	header_text.innerHTML=' < '+app_name+' menu';
 	ajax_request_json(
 		backend_url+'ajaxdb.php?action=get_users', 
 		function(data) {
@@ -403,7 +403,6 @@ function menu_screen(){
 	var splash=document.getElementById("splash_screen");
 	if(splash!=null && (ResourceLoader.lazy_audio==true || ResourceLoader.not_loaded['sounds'].length==0)){ splash.parentNode.removeChild(splash); }
 	if(media_objects===undefined) media_objects=ResourceLoader.ret_media; // in theory all are loaded at this point
-	header_zone.innerHTML='<h1>'+app_name+'</h1>';
 	if(debug){
 		console.log('userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info);
 		console.log('not_loaded sounds: '+ResourceLoader.not_loaded['sounds'].length);
@@ -426,13 +425,9 @@ function menu_screen(){
 		'+sign+'\
 		<li><a href="#" onclick="exit_app()">salir</a></li>\
 		</ul>';
-		header_zone.innerHTML='<a id="hamburger_icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">\
-		<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"/></svg></a> '+app_name;
-		var hamburger_icon=document.getElementById('hamburger_icon');
-		hamburger_icon.addEventListener('click', function(e) {
-			hamburger_menu.classList.toggle('open');
-			e.stopPropagation();
-		});
+		header_zone.innerHTML='<a id="hamburger_icon" onclick="hamburger_toggle(event)"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">\
+		<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"/></svg></a> <span id="header_text" onclick="menu_screen()">'+app_name+'</span>';
+        header_text=document.getElementById('header_text');
 
 		var admin_opts='<br /><button id="sel-usr" onclick="admin_screen()" class="button">Administrar</button>';
 		var normal_opts='<button id="start-test-button" class="button" disabled="true">Test</button> \
@@ -497,7 +492,7 @@ var manage_subjects=function(){
 	preventBackExit();
 	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]!=undefined)
 		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
-	
+	header_text.innerHTML=' < '+app_name+' menu';
 	canvas_zone_vcentered.innerHTML=' \
     <button id="add-subject" class="button" onclick="add_subject()">Añadir</button>\
 	<div id="results-div">cargando participantes...</div> \
@@ -641,7 +636,7 @@ var edit_subject=function(sid){
 
 var explore_results=function(){
 	preventBackExit();
-		
+	header_text.innerHTML=' < '+app_name+' menu';
 	canvas_zone_vcentered.innerHTML=' \
 	<div id="results-div">cargando resultados...</div> \
 	<br /><button id="go-back" onclick="menu_screen()">Volver</button> \
@@ -705,7 +700,6 @@ var explore_results=function(){
 
 var explore_result_detail=function(session_id){
 	preventBackExit();
-		
 	canvas_zone_vcentered.innerHTML=' \
 	<div id="results-div">cargando detalle resultado '+session_id+'...</div> \
 	<br /><button id="go-back" onclick="explore_results()">Volver</button> \
@@ -751,8 +745,10 @@ var explore_result_detail=function(session_id){
 var game=function(){
 	// activity selection (if game_mode, remove and restyle header/footer...)
 	var extra_options="";
-	if(!game_mode) extra_options='<br /><button class="button" onclick="menu_screen()">Volver</button>';
-	
+	if(!game_mode){
+        extra_options='<br /><button class="button" onclick="menu_screen()">Volver</button>';
+        header_text.innerHTML=' < '+app_name+' menu';
+    }
 	canvas_zone_vcentered.innerHTML=' \
 	<br /><button class="button" onclick="conciencia()">Conciencia</button> \
 	<br /><button class="button" onclick="memoria()">Memoria</button> \
@@ -899,7 +895,7 @@ var conciencia=function(){
 		
 	if(ResourceLoader.not_loaded['sounds'].length!=0){
 		if(debug) console.log("Not loaded sounds: "+ResourceLoader.not_loaded['sounds'].length+"  "+ResourceLoader.not_loaded['sounds']);
-		ResourceLoader.load_media_wait_for_lazy_audio(game);
+		ResourceLoader.load_media_wait_for_lazy_audio(conciencia);
 	}else{
 		// logic
 		//random number within activity numbers of level1 (0 for now)

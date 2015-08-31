@@ -1000,19 +1000,38 @@ var toggleClassBlink = function(blink_element,blink_class,blink_timeout,num_blin
 }
 
 // HAMBURGER MENU
-
 var hamburger_menu=document.getElementById('hamburger_menu');
 var hamburger_menu_content=document.getElementById('hamburger_menu_content');
 var hamburger_close_button=document.getElementById('hamburger_close');
 if(hamburger_close_button!=null){
 	hamburger_close_button.addEventListener('click', function(e) {
-			hamburger_menu.classList.remove('open');
 			e.stopPropagation();
+			hamburger_menu.classList.remove('open');
 		});
+    /* TODO Review this so that if you click inside hamburger it does not close... */
+    var bodytag=document.getElementsByTagName('body')[0];
+    bodytag.addEventListener('click',function(){
+        hamburger_close(); 
+    });
+}
+if(hamburger_menu!=null){
+ 	hamburger_menu.addEventListener('click', function(e) {
+            //avoid closing menu when clicking inside
+			e.stopPropagation();
+		});   
 }
 var hamburger_close=function(){
 	hamburger_menu.classList.remove('open');
 }
+var hamburger_toggle=function(e){
+    if(e==undefined) e=window.event;
+	e.stopPropagation();
+	hamburger_menu.classList.toggle('open');
+}
+
+
+
+
 
 // Object Length
 function objectLength(obj) {
