@@ -292,33 +292,6 @@ var ResourceLoader={
 
 
 // MODAL WINDOWS
-function open_js_modal_alert_demo(){  //(title_text, text_text){
-	var modal_window=document.createElement("div")
-	modal_window.id="js-modal-window"; modal_window.className="js-modal-window"
-
-	var modal_dialog=document.createElement("div")
-	modal_dialog.className="js-modal-dialog";
-	var close_elem=document.createElement('a')
-	close_elem.innerHTML="x"
-	close_elem.href="javascript:void(0)"
-	close_elem.onclick=function (){
-		var elem_to_remove=document.getElementById("js-modal-window")
-		elem_to_remove.parentNode.removeChild(elem_to_remove)
-	}
-
-	var title_elem=document.createElement('h2')
-	title_elem.innerHTML="aaa" //title_text
-
-	var text_elem=document.createElement('p')
-	text_elem.innerHTML="bbb" //text_text
-
-	modal_dialog.appendChild(close_elem)
-	modal_dialog.appendChild(title_elem)
-	modal_dialog.appendChild(text_elem)
-
-	modal_window.appendChild(modal_dialog)
-	document.body.appendChild(modal_window)
-}
 
 // it would be great to objectify this to easily interact with it (e.g., modify text)
 function open_js_modal_alert(title_text, text_text, accept_function, cancel_function){
@@ -378,6 +351,28 @@ var open_js_modal_content=function(html_content){
 	return modal_window;
 }
 
+function open_js_modal_content_accept(html_content){
+	var modal_window=document.createElement("div")
+	modal_window.id="js-modal-window"; modal_window.className="js-modal-window"
+	var modal_dialog=document.createElement("div");
+	modal_dialog.className="js-modal-dialog";
+	modal_dialog.innerHTML=html_content;
+
+	var close_elem=document.createElement('button')
+	close_elem.innerHTML="Ok"
+	close_elem.href="javascript:void(0)"
+	close_elem.onclick=function (){
+		var elem_to_remove=document.getElementById("js-modal-window")
+		elem_to_remove.parentNode.removeChild(elem_to_remove)
+	}
+
+	modal_dialog.appendChild(close_elem)
+	modal_window.appendChild(modal_dialog)
+	document.body.appendChild(modal_window);
+	return modal_window;
+}
+
+
 var remove_modal=function (id2remove){
 	var id_remove='js-modal-window';
 	if(id2remove!==undefined) id_remove=id2remove;
@@ -392,6 +387,7 @@ var open_js_modal_content_timeout=function(html_content, timeout_ms){
 
 
 // STRING UTILS ///////////////////////////////////
+
 function pad_string(val, digits, pad_char){
     var val_str = val + "", pad_str=""
     if(val_str.length < digits){
@@ -400,6 +396,8 @@ function pad_string(val, digits, pad_char){
    }else
         return val_str;
 }
+
+// function 2_decimals --> .toFixed(2)
 
 function get_resource_name(resource_url){
 	if(resource_url.indexOf('/')!=-1) return resource_url.substring(resource_url.lastIndexOf('/')+1);
@@ -1051,9 +1049,16 @@ function objectLength(obj) {
 */
 var random_item=function(array, opt_leave_out){
 	var item=undefined;
+	var leave_out="__youWillNeverFindMe__";
+	if(typeof(opt_leave_out)!=='undefined') leave_out=opt_leave_out;
+	var way_out_of_infinite_loop=0;
 	do{
 		item = array[Math.floor(Math.random()*array.length)];
-	}while(typeof(opt_leave_out)!=='undefined' && item==opt_leave_out);
+		way_out_of_infinite_loop++;
+		//console.log("randomizing "+item+" leave out "+leave_out);
+	}while(item==leave_out && way_out_of_infinite_loop!=1000);
+	if(way_out_of_infinite_loop==1000)
+		throw new Error("cognitionis random_item >1000, leave_out="+leave_out);
 	return item;
 }
 
