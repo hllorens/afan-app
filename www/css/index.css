@@ -63,10 +63,10 @@ min-height: 80%; CANNOT BE A PERCENTAGE :() min-width:640px; */
 
 h1{font: normal 26px Monospace,Arial,sans-serif; margin: 5px; color: #722;}
 
-#header{display:block;position:absolute;top:0px; height:80px;width:100%;background-color:#fc5} /*overflow:hidden;*/
+#header{display:block;position:absolute;top:0px; height:48px;width:100%;background-color:#fc5} /*overflow:hidden;*/
 #zone_canvas{position:absolute; overflow: hidden;background:#aea; width:100%;} /*#fee*/
 .canvas-full{top:0px; bottom:0px;}
-.canvas-with-header{top:80px; bottom:1%;}
+.canvas-with-header{top:48px; bottom:1%;}
 /*HEIGHT perhaps use variables? css3?*/
 
 select, button {font-family:inherit;font-size:inherit;}
@@ -118,6 +118,15 @@ button.button{
 }
 
 
+button.minibutton{
+	font-size:12px;
+	border:1px solid #733;
+	background-color: #eee;
+	min-width:40px;min-height:40px;
+	margin:0px; padding:0px;
+}
+
+
 button.backgroundRed{
     background-color: #faa;
 }
@@ -143,6 +152,37 @@ button.backgroundRed{
 
 .text-center{
 	text-align:center;
+}
+
+.fixed-bottom-right{
+	position:absolute;
+	bottom:8px;
+	right:8px;
+}
+
+.covered{
+	background:#965;
+}
+
+.membox{
+	width:16%; max-width:150px;
+ 	text-align:center;
+	/*float:left;*/
+	display:inline-block;
+	border:1px solid #a55; /*original border color #fee*/
+	background-color: #eee; /*d99, fbb*/
+	/* on two divs (use .hover_red_border div too) */
+	padding:1px;
+	margin:0; /*used to be 0 1px*/
+	/* on one div (IMPOSSIBLE, there is no max-padding-top)
+	padding-top:31%;  
+	max-padding-top:250px;*/
+}
+
+.membox div{
+	margin: 0 auto;
+	/*width:30%;  seems to default to 100 that is what we want...*/
+	padding-top:100%;  /*force square shape */
 }
 
 .hover_red_border{

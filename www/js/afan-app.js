@@ -133,24 +133,24 @@ var MAX_PLAYS=2;
 var MAX_TRAINING_ACTIVITIES=10;
 var MAX_MEMORY_LEVELS=7;
 
-
-
-var remaining_rand_activities=[];
-var correct_answer='undefined';
-var current_activity_type='undefined'; // to avoid loading all the html
-
 //optional??
 var zone_sound=null;
 var dom_score_correct;
 var dom_score_answered;
 
-
+// TODO: each game vars... to be encapsulated in objects
+var remaining_rand_activities=[];
+var correct_answer='undefined';
+var current_activity_type='undefined'; // to avoid loading all the html
 var activity_timer=new ActivityTimer();
-
 var current_activity_data={};
 var current_activity_index=0;
 var current_activity_played_times=0;
-var current_activity_memory_level=1;
+var current_activity_memory_level=3;
+var current_activity_memory_pattern=undefined;
+var current_activity_memory_options=undefined;
+var current_activity_memory_uncovered=0;
+
 
 var user_data={};
 var session_data={
@@ -791,48 +791,89 @@ var memoria_visual=function(){
 
 	// elegir 9 imagenes de forma aleatoria (sin repetidos)
 	// TODO donde saco el wordlist? del sprite del css?
+
+	current_activity_memory_uncovered=0;	
+
 	var sprite_images=['pato','gato','sol','pez','tren','sal','col','reja','oreja','koala','bala','ala'];
-	var rand_images = random_array(sprite_images,9);
-	console.log(rand_images);
+	current_activity_memory_options = random_array(sprite_images,9);
+	console.log(current_activity_memory_options);
 
 	// elegir n imagenes segun el nivel alcanzado (sin repetidos)
-	var sol_images = random_array(rand_images,current_activity_memory_level);
-
-	console.log(rand_images);
-	console.log(sol_images);
+	current_activity_memory_pattern = random_array(current_activity_memory_options,current_activity_memory_level);
+	console.log(current_activity_memory_pattern);
 	// mostrar tapadas e ir abriendo en intervalos de 2 segundos
+	memoria_visual_show_pattern();
+
+}
+
+var memoria_visual_show_pattern=function(){
+	// TODO instead of passing global varialbes create objects for each game
+	//      and then use this and .bind(this) for timeouts...
+    //      a better encapsulation
 	
-
-	// luego mostrar las 9 para q el usuario haga clik	
-
+	// TODO with a for loop create the divs...
+	var pattern_representation="";
+	for(var i=0;i<current_activity_memory_pattern.length;i++){
+		pattern_representation+='<div class="membox"><div class="wordimage wordimage-'+current_activity_memory_pattern[i]+' covered"></div></div>';
+	}
 	canvas_zone_vcentered.innerHTML='\
-	<br /><div id="xx">'+rand_images.toString()+'</div>\
-          <button id="go-back" onclick="game()">Volver</button> \
-	</div>\
+			<div id="xx">\
+			'+pattern_representation+'\
+			</div>\
+		  <button id="playb" class="button" onclick="memoria_visual_uncover_next()">PLAY</button>\
+          <button id="go-back" class="minibutton fixed-bottom-right" onclick="game()">Volver</button> \
 	';
+}
 
-/*	for(var i=0; i<session_data.details.length ; ++i) {
-		var use=Math.floor(Math.random() * session_data.details.length)
-		while(used_answers.indexOf(use) != -1) use=Math.floor(Math.random() * USE_ANSWERS);
-		//answers_div.innerHTML+='<div id="answer'+i+'" class="hover_red_border" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"></div>'
+var memoria_visual_uncover_next=function(){
+	// don't worry about recursion, all functions will end there
+	document.getElementById('playb').disabled=true;
+	if(current_activity_memory_uncovered==current_activity_memory_pattern.length){
+		current_activity_memory_uncovered=0;		
+		setTimeout(function(){memoria_visual_find_pattern();}, 4000);
+	}else{	//uncover...
+		var covered_div=document.getElementById('xx').children[current_activity_memory_uncovered].children[0];
+		covered_div.classList.remove('covered');
+		current_activity_memory_uncovered++;
+		setTimeout(function(){memoria_visual_uncover_next()}, 2600);
+	}
+}
 
-		var answer_i=current_activity_data['answers'][use];
-		answers_div.innerHTML+='<div id="answer'+i+'" onclick="check_correct(this.firstChild,correct_answer)" class="hover_red_border"  ></div>'; //onclick="check_correct(this,correct_answer)"  style="float:left;" stretchy no-limit-250
-		//if(media_objects.images[current_activity_data['answers'][use]+'.png']==undefined){
-		if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+current_activity_data['answers'][use])){
-			alert("ERROR: .wordimage-"+current_activity_data['answers'][use]+" not found in wordimg-sprite.css.");
-			document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
-        }else if(used_answers_text.hasOwnProperty(current_activity_data['answers'][use])){
-			alert("ERROR: "+current_activity_data['answers'][use]+" is already used contact the ADMIN.");
-			document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
-		}else{	
-			////document.getElementById("answer"+i).appendChild(media_objects.images[current_activity_data['answers'][use]+'.png']);
-			////document.getElementById("answer"+i).className += " wordimage wordimage-"+current_activity_data['answers'][use];
-			// TWO DIVS ARE NEEDED TO MAKE THIS RESPONSIBLE AND ALSO INCLUDE MAX-WIDTH...
-			document.getElementById("answer"+i).innerHTML += '<div class="wordimage wordimage-'+current_activity_data['answers'][use]+'"></div>';
-			////document.getElementById("answer"+i).innerHTML += '<img class="spacer"  src="spacer158.png"><img class="spritev wordimg-'+current_activity_data['answers'][use]+'" src="../../../afan-app-media/img/wordimg-sprite.png" />';		
-		}*/
+var memoria_visual_find_pattern=function(){
+	canvas_zone_vcentered.innerHTML='\
+			<div id="xx">\
+				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[0]+'"></div></div>\
+				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[1]+'"></div></div>\
+				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[2]+'"></div></div>\
+			</div>\
+			<div id="xx">\
+				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[3]+'"></div></div>\
+				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[4]+'"></div></div>\
+				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[5]+'"></div></div>\
+			</div>\
+			<div id="xx">\
+				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[6]+'"></div></div>\
+				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[7]+'"></div></div>\
+				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[8]+'"></div></div>\
+			</div>\
+          <button id="go-back" class="minibutton fixed-bottom-right" onclick="game()">Volver</button> \
+	';
+}
 
+
+var memoria_visual_check_click=function (element){
+	if(element.className.indexOf('covered')!=-1){ alert("covered"); return;} // already covered
+	var clicked_element=element.classList[1].split("-")[1];
+	if(clicked_element==current_activity_memory_pattern[current_activity_memory_uncovered]){
+		current_activity_memory_uncovered++;
+		element.classList.add('covered');
+		if(current_activity_memory_uncovered==current_activity_memory_pattern.length){
+			alert('you win!!');
+			game();
+		}
+	}else{
+		alert('WRONG,... YOU LOSE!');
+	}
 }
 
 var memoria_auditiva=function(){
