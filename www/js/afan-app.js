@@ -4,7 +4,7 @@ var QueryString=get_query_string();
 var game_mode=false;
 if(QueryString.hasOwnProperty('game_mode') && QueryString.game_mode=='true') game_mode=true;
 
-var app_name='COLE';
+var app_name='CoLE';
 
 // MEDIA
 var images = [
@@ -131,7 +131,7 @@ zsilence_start: {id: "zsilence_start", start: 0.100, end: 0.700},
 var USE_ANSWERS = 3;
 var MAX_PLAYS=2;
 var MAX_TRAINING_ACTIVITIES=10;
-var MAX_MEMORY_LEVELS=7;
+var MAX_MEMORY_LEVELS=6;
 
 //optional??
 var zone_sound=null;
@@ -146,7 +146,8 @@ var activity_timer=new ActivityTimer();
 var current_activity_data={};
 var current_activity_index=0;
 var current_activity_played_times=0;
-var current_activity_memory_level=3;
+var current_activity_memory_level=1;
+var current_activity_memory_level_passed_times=0;
 var current_activity_memory_pattern=undefined;
 var current_activity_memory_options=undefined;
 var current_activity_memory_uncovered=0;
@@ -323,11 +324,12 @@ function admin_screen(){
 }
 
 var letter_reader=function(){
-			canvas_zone_vcentered.innerHTML=' \
-				Sonidos a leer (separados por espacio) <input id="input_sounds" type="text" /> \
-				<button id="read-button" onclick="read_input_sounds()" class="button">Leer</button> \
-			    <br /><br /><button onclick="menu_screen()" class="button">Volver</button> \
-				';	
+    if(!check_if_sounds_loaded(letter_reader)){return;}
+    canvas_zone_vcentered.innerHTML=' \
+        Sonidos a leer (separados por espacio) <input id="input_sounds" type="text" /> \
+        <button id="read-button" onclick="read_input_sounds()" class="button">Leer</button> \
+        <br /><br /><button onclick="menu_screen()" class="button">Volver</button> \
+        ';	
 }
 
 var read_input_sounds=function(){
@@ -743,20 +745,50 @@ var explore_result_detail=function(session_id){
 };
 
 var game=function(){
+
+		// logic
+		//random number within activity numbers of level1 (0 for now)
+		//Fisher-Yates random at the beginning and then increment, or
+		// do not rand array but just select a random position of the remaining array
+		// ??
+
+
 	// activity selection (if game_mode, remove and restyle header/footer...)
+	session_data.num_correct=0;
 	var extra_options="";
 	if(!game_mode){
         extra_options='<br /><button class="button" onclick="menu_screen()">Volver</button>';
         header_text.innerHTML=' < '+app_name+' menu';
     }
-	canvas_zone_vcentered.innerHTML=' \
-	<br /><button class="button" onclick="conciencia()">Conciencia</button> \
-	<br /><button class="button" onclick="memoria()">Memoria</button> \
-	<br /><button class="button" onclick="ritmo()">Ritmo</button> \
-	<br /><button class="button" onclick="velocidad()">Velocidad</button> \
-	'+extra_options+'\
-	';
+	if(session_data.mode!="test") remove_modal();
+    canvas_zone_vcentered.innerHTML=' \
+    <br /><button class="button" onclick="conciencia()">Conciencia</button> \
+    <br /><button class="button" onclick="memoria()">Memoria</button> \
+    <br /><button class="button" onclick="ritmo()">Ritmo</button> \
+    <br /><button class="button" onclick="velocidad()">Velocidad</button> \
+    '+extra_options+'\
+    ';
 
+}
+
+var check_if_sounds_loaded=function(callback){
+    if(typeof(callback)!=='function'){alert("ERROR: check_if_sounds_loaded called without a callback.");throw new Error("check_if_sounds_loaded called without a callback.");}
+	canvas_zone_vcentered.innerHTML='...'; // for the user to notice
+	if(ResourceLoader.not_loaded['sounds'].length!=0){
+		if(debug) console.log("Not loaded sounds: "+ResourceLoader.not_loaded['sounds'].length+"  "+ResourceLoader.not_loaded['sounds']);
+		ResourceLoader.load_media_wait_for_lazy_audio(callback);
+        return false;
+	}else{
+		if(typeof(audio_sprite)==='undefined'){
+			// load audio in the object 
+			var audio_sprite_object=media_objects.sounds[audio_sprite_name]; // soundsSpriteABR56.30kbps.141k.m4a, soundsSpriteVBR30-19kbps-100k.m4a
+			audio_sprite=new AudioSprite(audio_sprite_object,audio_object_sprite_ref,debug);
+			audio_sprite.playSpriteRange('zsilence_start',callback);
+            return false;
+		}else{
+            return true;
+		}
+	}
 }
 
 var memoria=function(){
@@ -764,7 +796,20 @@ var memoria=function(){
 		alert("Debe seleccionar algún sujeto.");
 		return;
 	}
-		
+    preventBackExit();
+    if(!check_if_sounds_loaded(memoria)){return;}
+
+	if(current_activity_memory_level_passed_times==0 && current_activity_memory_level==1){		
+		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
+		session_data.age=calculateAge(user_subjects[session_data.subject]['age']); 
+		session_data.num_correct=0;
+		session_data.num_answered=MAX_MEMORY_LEVELS*2;
+		session_data.details=[];
+		var timestamp=new Date();
+		session_data.timestamp=timestamp.getFullYear()+"-"+
+			pad_string((timestamp.getMonth()+1),2,"0") + "-" + pad_string(timestamp.getDate(),2,"0") + " " +
+			 pad_string(timestamp.getHours(),2,"0") + ":"  + pad_string(timestamp.getMinutes(),2,"0");
+	}
 
 	canvas_zone_vcentered.innerHTML=' \
 	<br /><button class="button" onclick="memoria_visual()">Memoria Visual</button> \
@@ -774,7 +819,7 @@ var memoria=function(){
 }
 
 var memoria_visual=function(){
-	preventBackExit();
+	if(session_data.mode!="test") remove_modal();
 	session_data.type="memoria_visual";
 	/** Se presentan imágenes al usuario que se van abriendo y tapando como cartas
 	 ** Luego desaparecen, y salen 9 opciones a ordenar
@@ -792,7 +837,7 @@ var memoria_visual=function(){
 	// elegir 9 imagenes de forma aleatoria (sin repetidos)
 	// TODO donde saco el wordlist? del sprite del css?
 
-	current_activity_memory_uncovered=0;	
+	current_activity_memory_uncovered=0;
 
 	var sprite_images=['pato','gato','sol','pez','tren','sal','col','reja','oreja','koala','bala','ala'];
 	current_activity_memory_options = random_array(sprite_images,9);
@@ -801,6 +846,9 @@ var memoria_visual=function(){
 	// elegir n imagenes segun el nivel alcanzado (sin repetidos)
 	current_activity_memory_pattern = random_array(current_activity_memory_options,current_activity_memory_level);
 	console.log(current_activity_memory_pattern);
+
+
+
 	// mostrar tapadas e ir abriendo en intervalos de 2 segundos
 	memoria_visual_show_pattern();
 
@@ -868,20 +916,49 @@ var memoria_visual_check_click=function (element){
 		current_activity_memory_uncovered++;
 		element.classList.add('covered');
 		if(current_activity_memory_uncovered==current_activity_memory_pattern.length){
-			alert('you win!!');
-			game();
+			if(session_data.mode!="test"){
+				audio_sprite.playSpriteRange("zfx_correct");
+				open_js_modal_content('<div class="js-modal-img"><img src="'+media_objects.images['correct.png'].src+'"/></div>');
+			}
+			session_data.num_correct++;
+			if(current_activity_memory_level>=MAX_MEMORY_LEVELS){
+				console.log('Has superado el juego!'); // debe ser un modal
+				current_activity_memory_level=1;
+				current_activity_played_times=0;
+				current_activity_memory_level_passed_times=0;
+				if(session_data.mode=="test" && !game_mode) send_session_data();
+				else game();
+			}else{
+				current_activity_memory_level_passed_times++;
+				if(current_activity_memory_level_passed_times>=2){
+					console.log('siguiente nivel...'); // debe ser un modal
+					current_activity_memory_level_passed_times=0;
+					current_activity_memory_level++;
+				}
+				current_activity_played_times=0;
+				setTimeout(function(){memoria_visual();}, 2000);
+			}
 		}
 	}else{
-		alert('WRONG,... YOU LOSE!');
+		if(session_data.mode!="test"){
+			audio_sprite.playSpriteRange("zfx_wrong"); // add a callback to move forward after the sound plays...
+			open_js_modal_content('<div class="js-modal-img"><img src="'+media_objects.images['wrong.png'].src+'"/></div>');
+		}
+		current_activity_played_times++;
+		if(current_activity_played_times>=MAX_PLAYS){
+			current_activity_played_times=0;
+			current_activity_memory_level_passed_times=0;
+			current_activity_memory_level=1;
+			console.log('Ooooh! :( Has fallado dos veces. Fin del juego.'); // should be a modal
+			if(session_data.mode=="test" && !game_mode) send_session_data();
+			else game();
+		}else{
+			setTimeout(function(){memoria_visual();}, 2000);
+		}
 	}
 }
 
 var memoria_auditiva=function(){
-	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]==undefined){
-		alert("Debe seleccionar algún sujeto.");
-		return;
-	}	
-	preventBackExit();
 	session_data.type="memoria_auditiva";
 	canvas_zone_vcentered.innerHTML=' \
 	<div class="text-center montessori-div">\
@@ -896,7 +973,8 @@ var ritmo=function(){
 	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]==undefined){
 		alert("Debe seleccionar algún sujeto.");
 		return;
-	}	
+	}
+    if(!check_if_sounds_loaded(ritmo)){return;}
 	preventBackExit();
 	session_data.type="ritmo";
 		
@@ -912,7 +990,8 @@ var velocidad=function(){
 	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]==undefined){
 		alert("Debe seleccionar algún sujeto.");
 		return;
-	}	
+	}
+    if(!check_if_sounds_loaded(velocidad)){return;}
 	preventBackExit();
 	session_data.type="velocidad";
 		
@@ -930,27 +1009,14 @@ var conciencia=function(){
 	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]==undefined){
 		alert("Debe seleccionar algún sujeto.");
 		return;
-	}	
-	preventBackExit();
-	session_data.type="conciencia";
-		
-	if(ResourceLoader.not_loaded['sounds'].length!=0){
-		if(debug) console.log("Not loaded sounds: "+ResourceLoader.not_loaded['sounds'].length+"  "+ResourceLoader.not_loaded['sounds']);
-		ResourceLoader.load_media_wait_for_lazy_audio(conciencia);
-	}else{
-		// logic
-		//random number within activity numbers of level1 (0 for now)
-		//Fisher-Yates random at the beginning and then increment, or
-		// do not rand array but just select a random position of the remaining array
-		//
-
-		// load audio in the object 
-		var audio_sprite_object=media_objects.sounds[audio_sprite_name]; // soundsSpriteABR56.30kbps.141k.m4a, soundsSpriteVBR30-19kbps-100k.m4a
-		audio_sprite=new AudioSprite(audio_sprite_object,audio_object_sprite_ref,debug);
-		
-		open_js_modal_content('<h1>Nivel 1: '+session_data.mode+'</h1>');
-		audio_sprite.playSpriteRange('zsilence_start',start_activity_set);
 	}
+    if(!check_if_sounds_loaded(conciencia)){return;}
+    preventBackExit();
+    session_data.type="conciencia";
+    // TODO CREATE A FUNCTION SHOW LEVEL----------------
+    open_js_modal_content('<h1>Nivel 1: '+session_data.mode+'</h1>');
+    setTimeout(function(){start_activity_set();}, 1500);
+    // ----------------------------------------------
 }
 
 function start_activity_set(){
