@@ -128,7 +128,7 @@ var ResourceLoader={
 	},
 	check_load_status: function() {
 		ResourceLoader.media_load_time+=ResourceLoader.media_load_check_status_interval;
-		ResourceLoader.modal_dialog_msg.innerHTML='check_load_status '+ResourceLoader.media_load_time+' - progress: '+ResourceLoader.load_progressbar.value+' - max: '+ResourceLoader.load_progressbar.max
+		if(ResourceLoader.debug) ResourceLoader.modal_dialog_msg.innerHTML='check_load_status '+ResourceLoader.media_load_time+' - progress: '+ResourceLoader.load_progressbar.value+' - max: '+ResourceLoader.load_progressbar.max
 		// If there is no media to load
 		if(ResourceLoader.num_images==0 && ResourceLoader.num_sounds==0){
 			document.body.removeChild(ResourceLoader.modal_load_window);
@@ -147,12 +147,9 @@ var ResourceLoader={
 					//clearInterval(ResourceLoader.load_interval); done by return+timeout
 					ResourceLoader.download_lazy_audio_active=true;
 					ResourceLoader.media_load_time=0;
-					var confirm_div=document.createElement("div") // we can reuse the other div
-					confirm_div.id="confirm_div"
-					var ios_media_msg="Pula Ok para empezar"
-					if(user_language=='en-US') ios_media_msg="Click Ok to start"
-					confirm_div.innerHTML=ios_media_msg+' <button onclick="ResourceLoader.download_audio_ios()">Ok</button> '
-					ResourceLoader.modal_load_window.appendChild(confirm_div)
+					var ios_media_msg="Pula Ok para empezar";
+					if(user_language=='en-US') ios_media_msg="Click Ok to start";
+					ResourceLoader.modal_dialog_msg.innerHTML=ios_media_msg+' <button onclick="ResourceLoader.download_audio_ios()">Ok</button> ';				
 					return;
 				}else if(ResourceLoader.lazy_audio){
 					//clearInterval(ResourceLoader.load_interval); done by return+timeout
@@ -169,19 +166,17 @@ var ResourceLoader={
 		}
 		if (ResourceLoader.media_load_time==ResourceLoader.MEDIA_LOAD_TIMEOUT){
 			//clearInterval(ResourceLoader.load_interval); done by return+timeout
-			var retry_div=document.createElement("div") // we can reuse the other div
 			var err_msg="";
 			for(var i=0;i<ResourceLoader.not_loaded['images'].length;i++){
-				temp_obj=ResourceLoader.ret_media.images[get_resource_name(ResourceLoader.not_loaded['images'][i])];
+				var temp_obj=ResourceLoader.ret_media.images[get_resource_name(ResourceLoader.not_loaded['images'][i])];
 				err_msg+="<br />Load complete?"+temp_obj.complete
 			}
 			for(var i=0;i<ResourceLoader.not_loaded['sounds'].length;i++){
-				temp_obj=ResourceLoader.ret_media.sounds[get_resource_name(ResourceLoader.not_loaded['sounds'][i])];
+				var temp_obj=ResourceLoader.ret_media.sounds[get_resource_name(ResourceLoader.not_loaded['sounds'][i])];
 				err_msg+="<br />Error: "+temp_obj.error+  " - Ready: "+temp_obj.readyState+ " - Network: "+temp_obj.networkState;
 			}		
 			// re-try by a button to reload url, previously loaded stuff should be cached (fast load)
-			retry_div.innerHTML='ERROR: Load media timeout. Not loaded ('+(ResourceLoader.not_loaded['images'].length+ResourceLoader.not_loaded['sounds'].length)+'): '+ResourceLoader.not_loaded['images']+'<br/>'+ResourceLoader.not_loaded['sounds']+' <br /> <a href="">retry</a> '+err_msg
-			ResourceLoader.modal_load_window.appendChild(retry_div);
+			ResourceLoader.modal_dialog_msg.innerHTML='ERROR: Load media timeout. Not loaded ('+(ResourceLoader.not_loaded['images'].length+ResourceLoader.not_loaded['sounds'].length)+'): '+ResourceLoader.not_loaded['images']+'<br/>'+ResourceLoader.not_loaded['sounds']+' <br /> <a href="">retry</a> '+err_msg;
 			return;
 		}
 		// recursively call itself until done	ResourceLoader.load_interval = 
@@ -200,11 +195,9 @@ var ResourceLoader={
 			setTimeout(function(){ResourceLoader.callback_on_load_end()},500); // start the app
 		}else if (ResourceLoader.media_load_time==ResourceLoader.MEDIA_LOAD_TIMEOUT){
 			clearInterval(ResourceLoader.load_interval);
-			var retry_div=document.createElement("div"); // we can reuse the other div
 			var err_msg="";
-			// re-try by a button to reload url, previously loaded stuff should be cached (fast load)
-			retry_div.innerHTML='ERROR: Load lazy aduio timeout. Not loaded ('+ResourceLoader.not_loaded['sounds'].length+') <br /> <a href="">retry</a> '+err_msg;
-			ResourceLoader.modal_load_window.appendChild(retry_div);
+			// re-try by a button to reload url, previously loaded stuff should be cached already (fast load)
+			ResourceLoader.modal_dialog_msg.innerHTML='ERROR: Load lazy aduio timeout. Not loaded ('+ResourceLoader.not_loaded['sounds'].length+') <br /> <a href="">retry</a> '+err_msg;
 		}
 	},
 
@@ -434,10 +427,11 @@ ActivityTimer.prototype.set_limit_end_seconds=function(sec){this.limit_end_secon
 ActivityTimer.prototype.set_end_callback=function(cb){this.end_callback=cb;}
 ActivityTimer.prototype.start=function(){
 	if(this.dom_anchor==undefined && this.tricker_callback==undefined){
-		alert("ERROR: Starging an activity_timer without defining dom_anchor or tricker_callback"); return;
+		console.log("WARNING: Starging an activity_timer without defining dom_anchor or tricker_callback");
+        // but still run it... we might want it to be hidden from the user...
 	}
 	if(this.started){
-		console.log("ERROR: activity_timer already started");	
+		console.log("ERROR: activity_timer already started");
 	}else{
 		this.started=true
 		if(this.dom_anchor!=undefined){
@@ -499,7 +493,7 @@ var AudioSprite=function(audio_object, sprite_ref, activate_debug){
 	if(typeof(activate_debug)!=='undefined' && activate_debug==true) this.debug=activate_debug;
 }
 AudioSprite.FLOAT_THRESHOLD=0.005;	// for millisec comparison
-AudioSprite.AUDIO_RALENTIZATION_LAG=0.040; // margin for sound range ended check (default 0.040)
+AudioSprite.AUDIO_RALENTIZATION_LAG=0.005; // margin for sound range ended check (default 0.040)
 AudioSprite.CHECK_SOUND_POSITION_TIMEOUT=100; // verify if sprite ended timeout (ms)
 AudioSprite.CHECK_IF_SEEKED_PAUSED_MAX_INTENTS=5; // verify if audio paused and not seeking
 AudioSprite.prototype.playSpriteRange = function(range_id,callback_function) {
@@ -807,6 +801,25 @@ function selectorExistsInCSS(styleSheetName, selector) {
         if(cssRules[i].selectorText == selector) return true;
     }
     return false;
+}
+
+function getAllCSSselectorsMatching(styleSheetName, reg_ex){
+    var matched_selectors=[];
+    // Get the index of 'styleSheetName' from the document.styleSheets object
+    for (var i = 0; i < document.styleSheets.length; i++) {
+        var thisStyleSheet = document.styleSheets[i].href ? document.styleSheets[i].href.replace(/^.*[\\\/]/, '') : '';
+        if (thisStyleSheet == styleSheetName) { var idx = i; break; }
+    }
+    if (!idx) return matched_selectors; // We can't find the specified stylesheet
+
+    // Check the stylesheet for the specified selector
+    var styleSheet = document.styleSheets[idx];
+    var cssRules = styleSheet.rules ? styleSheet.rules : styleSheet.cssRules;
+    for (var i = 0; i < cssRules.length; ++i) {
+        if(reg_ex.test(cssRules[i].selectorText)) matched_selectors.push(cssRules[i].selectorText);
+    }
+    return matched_selectors;
+    
 }
 
 

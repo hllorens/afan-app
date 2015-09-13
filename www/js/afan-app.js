@@ -18,7 +18,8 @@ var sounds = [
 	// it can be dropbox https://dl.dropboxusercontent.com/u/188219/
 	//or absolute http://www.centroafan.com/afan-app-media/audio/...m4a"
 	// relative is the best to reuse it in the cordova app
-	"../../afan-app-media/audio/caca128ffmpeg.m4a"
+//	"../../afan-app-media/audio/caca128ffmpeg.m4a"
+	"../../afan-app-media/audio/letters128kbps.m4a"
 	//"../../afan-app-media/audio/soundsSpriteVBR30-19kbps-100k.m4a"
 	//"../../afan-app-media/audio/soundsSpriteABR56.30kbps.141k.m4a" --> va mal, tornar a generar
 ];
@@ -39,7 +40,8 @@ if(game_mode){
 
 var audio_sprite;
 //var audio_sprite_name='soundsSpriteVBR30-19kbps-100k.m4a';
-var audio_sprite_name='caca128ffmpeg.m4a';
+//var audio_sprite_name='caca128ffmpeg.m4a';
+var audio_sprite_name='letters128kbps.m4a';
 
 // not needed, already done in php. Maybe we should keep "original answer" with the correct letters
 //var letter_equivalence = { 'à':'a', 'á':'a', 'ç':'c', 'è':'e', 'é':'e', 'í':'i', 'ï':'i', 'ñ':'ny', 'ò':'o', 'ó':'o', 'ú':'u' };
@@ -66,38 +68,76 @@ ajax_request('backend/ajaxdb.php?action=gen_session_state',function(text) {
 //media_url='http://www.centroafan.com/afan-app-media/'
 //backend_url='http://www.centroafan.com/afan-app-backend/'
 
+// NOTE: to accelerate the sound edited: start+0.2 and end -0.1
 var audio_object_sprite_ref={
-a: {id: "a", start: 21.142, end: 21.844}, 
-b: {id: "b", start: 11.200, end: 11.706}, 
-bv: {id: "bv", start: 26.268, end: 27.476}, 
-ch: {id: "ch", start: 1.000, end: 1.981}, 
-d: {id: "d", start: 8.767, end: 10.200}, 
-e: {id: "e", start: 45.546, end: 46.347}, 
-f: {id: "f", start: 2.981, end: 4.297}, 
-g: {id: "g", start: 12.706, end: 13.907}, 
-i: {id: "i", start: 34.338, end: 35.033}, 
-j: {id: "j", start: 24.452, end: 25.268}, 
-k: {id: "k", start: 37.534, end: 38.247}, 
-l: {id: "l", start: 41.247, end: 42.551}, 
-m: {id: "m", start: 43.551, end: 44.546}, 
-n: {id: "n", start: 16.411, end: 17.767}, 
-ny: {id: "ny", start: 30.750, end: 31.647}, 
-o: {id: "o", start: 32.647, end: 33.338}, 
-p: {id: "p", start: 22.844, end: 23.452}, 
-r: {id: "r", start: 39.247, end: 40.247}, 
-rr: {id: "rr", start: 28.476, end: 29.750}, 
-s: {id: "s", start: 18.767, end: 20.142}, 
-t: {id: "t", start: 5.297, end: 5.802}, 
-u: {id: "u", start: 49.470, end: 50.282}, 
-y: {id: "y", start: 6.802, end: 7.767}, 
-z: {id: "z", start: 47.347, end: 48.470}, 
-zfx_correct: {id: "zfx_correct50", start: 14.907, end: 15.411}, 
-zfx_wrong: {id: "zfx_wrong50", start: 36.033, end: 36.534}, 
-zsilence_start: {id: "zsilence_start", start: 0.100, end: 0.700}, 
-
+	a: {id: "a", start: 20.418, end: 21.122}, 
+	b: {id: "b", start: 10.897, end: 11.598}, 
+	bv: {id: "bv", start: 26.423, end: 27.128}, 
+	ch: {id: "ch", start: 1.200, end: 1.597}, 
+	d: {id: "d", start: 8.898, end: 9.597}, 
+	e: {id: "e", start: 45.947, end: 46.646}, 
+	f: {id: "f", start: 2.897, end: 3.594}, 
+	g: {id: "g", start: 12.898, end: 13.600}, 
+	i: {id: "i", start: 34.433, end: 35.133}, 
+	j: {id: "j", start: 24.424, end: 25.123}, 
+	k: {id: "k", start: 37.934, end: 38.635}, 
+	l: {id: "l", start: 41.938, end: 42.643}, 
+	m: {id: "m", start: 43.943, end: 44.647}, 
+	n: {id: "n", start: 16.404, end: 17.117}, 
+	ny: {id: "ny", start: 30.427, end: 31.130}, 
+	o: {id: "o", start: 32.430, end: 33.133}, 
+	p: {id: "p", start: 22.422, end: 23.124}, 
+	r: {id: "r", start: 39.935, end: 40.638}, 
+	rr: {id: "rr", start: 28.428, end: 29.127}, 
+	s: {id: "s", start: 18.417, end: 19.118}, 
+	t: {id: "t", start: 4.894, end: 5.594}, 
+	u: {id: "u", start: 49.951, end: 50.651}, 
+	y: {id: "y", start: 6.894, end: 7.598}, 
+	z: {id: "z", start: 47.946, end: 48.651}, 
+	zfx_correct: {id: "zfx_correct50", start: 14.700, end: 15.204}, 
+	zfx_wrong: {id: "zfx_wrong50", start: 36.233, end: 36.734}, 
+	zsilence_start: {id: "zsilence_start", start: 0.100, end: 0.700}
 };
+var wordimage_image_ref=getAllCSSselectorsMatching("wordimg-sprite.css",new RegExp("wordimage-"));
+for(var i=0;i<wordimage_image_ref.length;i++){
+    wordimage_image_ref[i]=wordimage_image_ref[i].replace('.wordimage-','');
+}
+
+
 
 /*
+new original
+	a: {id: "a", start: 20.218, end: 21.222}, 
+	b: {id: "b", start: 10.697, end: 11.698}, 
+	bv: {id: "bv", start: 26.223, end: 27.228}, 
+	ch: {id: "ch", start: 1.000, end: 1.697}, 
+	d: {id: "d", start: 8.698, end: 9.697}, 
+	e: {id: "e", start: 45.747, end: 46.746}, 
+	f: {id: "f", start: 2.697, end: 3.694}, 
+	g: {id: "g", start: 12.698, end: 13.700}, 
+	i: {id: "i", start: 34.233, end: 35.233}, 
+	j: {id: "j", start: 24.224, end: 25.223}, 
+	k: {id: "k", start: 37.734, end: 38.735}, 
+	l: {id: "l", start: 41.738, end: 42.743}, 
+	m: {id: "m", start: 43.743, end: 44.747}, 
+	n: {id: "n", start: 16.204, end: 17.217}, 
+	ny: {id: "ny", start: 30.227, end: 31.230}, 
+	o: {id: "o", start: 32.230, end: 33.233}, 
+	p: {id: "p", start: 22.222, end: 23.224}, 
+	r: {id: "r", start: 39.735, end: 40.738}, 
+	rr: {id: "rr", start: 28.228, end: 29.227}, 
+	s: {id: "s", start: 18.217, end: 19.218}, 
+	t: {id: "t", start: 4.694, end: 5.694}, 
+	u: {id: "u", start: 49.751, end: 50.751}, 
+	y: {id: "y", start: 6.694, end: 7.698}, 
+	z: {id: "z", start: 47.746, end: 48.751}, 
+	zfx_correct: {id: "zfx_correct50", start: 14.700, end: 15.204}, 
+	zfx_wrong: {id: "zfx_wrong50", start: 36.233, end: 36.734}, 
+	zsilence_start: {id: "zsilence_start", start: 0.100, end: 0.700}
+
+
+
+
 	a: {id: "a50", start: 19.158, end: 19.658}, 
 	b: {id: "b50", start: 11.610, end: 12.107}, 
 	bv: {id: "bv50", start: 1.000, end: 1.496}, 
@@ -130,7 +170,7 @@ zsilence_start: {id: "zsilence_start", start: 0.100, end: 0.700},
 // constants
 var USE_ANSWERS = 3;
 var MAX_PLAYS=2;
-var MAX_TRAINING_ACTIVITIES=10;
+var MAX_TRAINING_ACTIVITIES=20;
 var MAX_MEMORY_LEVELS=6;
 
 //optional??
@@ -151,6 +191,7 @@ var current_activity_memory_level_passed_times=0;
 var current_activity_memory_pattern=undefined;
 var current_activity_memory_options=undefined;
 var current_activity_memory_uncovered=0;
+var current_activity_memory_already_incorrect=false;
 
 
 var user_data={};
@@ -179,6 +220,7 @@ var user_subject_results={};
 var user_subject_result_detail={};
 
 function login_screen(){
+	if(debug){alert('login_screen called');}
 	header_zone.innerHTML='<h1>Acceso</h1>';
 	canvas_zone_vcentered.innerHTML='\
 	<div id="signinButton" class="button">Acceso Google\
@@ -403,7 +445,7 @@ function show_profile(){
 function menu_screen(){
 	allowBackExit();
 	var splash=document.getElementById("splash_screen");
-	if(splash!=null && (ResourceLoader.lazy_audio==true || ResourceLoader.not_loaded['sounds'].length==0)){ splash.parentNode.removeChild(splash); }
+	if(splash!=null && (ResourceLoader.lazy_audio==true || ResourceLoader.not_loaded['sounds'].length==0)){ splash.parentNode.removeChild(splash); if(debug){alert('load1-complete');}}
 	if(media_objects===undefined) media_objects=ResourceLoader.ret_media; // in theory all are loaded at this point
 	if(debug){
 		console.log('userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info);
@@ -443,7 +485,7 @@ function menu_screen(){
 		Participante:  <select id="subjects-select"></select> \
 		<nav id="responsive_menu">\
 		'+admin_opts+'\
-		<br /><button id="start-button" class="button" disabled="true">Training</button> \
+		<br /><button id="start-button" class="button" disabled="true">Jugar</button> \
 		'+normal_opts+'\
 		<br /><button id="exit" class="button exit" onclick="exit_app()">Salir</button> \
 		</nav>\
@@ -711,6 +753,10 @@ var explore_result_detail=function(session_id){
 			backend_url+'ajaxdb.php?action=get_result_detail&session='+session_id+'&user='+session_data.user, 
 			function(data) {
 				user_subject_result_detail[session_id]=data; //cache (never changes)
+                if(user_subject_result_detail[session_id].elements.lenght==0 || user_subject_result_detail[session_id].elements.lenght==undefined){
+                    document.getElementById("results-div").innerHTML="session: "+user_subject_result_detail[session_id].general.session+"<br />No hay detalles";
+                    return;
+                }
 				document.getElementById("results-div").innerHTML="session: "+user_subject_result_detail[session_id].general.session+" - subject: "+user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
 				var results_table=document.getElementById("results-table");
 				DataTableSimple.call(results_table, {
@@ -727,6 +773,10 @@ var explore_result_detail=function(session_id){
 				} );
 			});
 	}else{
+        if(user_subject_result_detail[session_id].elements.lenght==0 || user_subject_result_detail[session_id].elements.lenght==undefined){
+            document.getElementById("results-div").innerHTML="session: "+user_subject_result_detail[session_id].general.session+"<br />No hay detalles";
+            return;
+        }
 		document.getElementById("results-div").innerHTML="session: "+user_subject_result_detail[session_id].general.session+" - subject: "+user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
 		var results_table=document.getElementById("results-table");
 		DataTableSimple.call(results_table, {
@@ -745,6 +795,7 @@ var explore_result_detail=function(session_id){
 };
 
 var game=function(){
+		if(debug){alert('game-called - game-mode? '+game_mode);}
 
 		// logic
 		//random number within activity numbers of level1 (0 for now)
@@ -754,13 +805,18 @@ var game=function(){
 
 
 	// activity selection (if game_mode, remove and restyle header/footer...)
+   
+    //reset game variables --------
 	session_data.num_correct=0;
+	session_data.num_answered=0;
+    activity_timer.reset();
+    //-----------------------------
 	var extra_options="";
 	if(!game_mode){
         extra_options='<br /><button class="button" onclick="menu_screen()">Volver</button>';
         header_text.innerHTML=' < '+app_name+' menu';
     }
-	if(session_data.mode!="test") remove_modal();
+	remove_modal(); // for safety...
     canvas_zone_vcentered.innerHTML=' \
     <br /><button class="button" onclick="conciencia()">Conciencia</button> \
     <br /><button class="button" onclick="memoria()">Memoria</button> \
@@ -799,17 +855,7 @@ var memoria=function(){
     preventBackExit();
     if(!check_if_sounds_loaded(memoria)){return;}
 
-	if(current_activity_memory_level_passed_times==0 && current_activity_memory_level==1){		
-		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
-		session_data.age=calculateAge(user_subjects[session_data.subject]['age']); 
-		session_data.num_correct=0;
-		session_data.num_answered=MAX_MEMORY_LEVELS*2;
-		session_data.details=[];
-		var timestamp=new Date();
-		session_data.timestamp=timestamp.getFullYear()+"-"+
-			pad_string((timestamp.getMonth()+1),2,"0") + "-" + pad_string(timestamp.getDate(),2,"0") + " " +
-			 pad_string(timestamp.getHours(),2,"0") + ":"  + pad_string(timestamp.getMinutes(),2,"0");
-	}
+
 
 	canvas_zone_vcentered.innerHTML=' \
 	<br /><button class="button" onclick="memoria_visual()">Memoria Visual</button> \
@@ -819,7 +865,7 @@ var memoria=function(){
 }
 
 var memoria_visual=function(){
-	if(session_data.mode!="test") remove_modal();
+	remove_modal();
 	session_data.type="memoria_visual";
 	/** Se presentan imágenes al usuario que se van abriendo y tapando como cartas
 	 ** Luego desaparecen, y salen 9 opciones a ordenar
@@ -837,9 +883,22 @@ var memoria_visual=function(){
 	// elegir 9 imagenes de forma aleatoria (sin repetidos)
 	// TODO donde saco el wordlist? del sprite del css?
 
+	if(current_activity_memory_level_passed_times==0 && current_activity_memory_level==1){		
+		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
+		session_data.age=calculateAge(user_subjects[session_data.subject]['birthdate']); 
+        activity_timer.reset();
+		session_data.num_correct=0;
+		session_data.num_answered=MAX_MEMORY_LEVELS; // *2
+		session_data.details=[];
+		var timestamp=new Date();
+		session_data.timestamp=timestamp.getFullYear()+"-"+
+			pad_string((timestamp.getMonth()+1),2,"0") + "-" + pad_string(timestamp.getDate(),2,"0") + " " +
+			 pad_string(timestamp.getHours(),2,"0") + ":"  + pad_string(timestamp.getMinutes(),2,"0");
+	}
+    
 	current_activity_memory_uncovered=0;
 
-	var sprite_images=['pato','gato','sol','pez','tren','sal','col','reja','oreja','koala','bala','ala'];
+	var sprite_images=wordimage_image_ref; //['pato','gato','sol','pez','tren','sal','col','reja','oreja','koala','bala','ala'];
 	current_activity_memory_options = random_array(sprite_images,9);
 	console.log(current_activity_memory_options);
 
@@ -888,6 +947,8 @@ var memoria_visual_uncover_next=function(){
 }
 
 var memoria_visual_find_pattern=function(){
+    activity_timer.reset();
+    activity_timer.start();
 	canvas_zone_vcentered.innerHTML='\
 			<div id="xx">\
 				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[0]+'"></div></div>\
@@ -911,51 +972,66 @@ var memoria_visual_find_pattern=function(){
 
 var memoria_visual_check_click=function (element){
 	if(element.className.indexOf('covered')!=-1){ alert("covered"); return;} // already covered
+    activity_timer.stop();
+    session_data.duration+=activity_timer.seconds;
+    activity_timer.reset();    
 	var clicked_element=element.classList[1].split("-")[1];
-	if(clicked_element==current_activity_memory_pattern[current_activity_memory_uncovered]){
-		current_activity_memory_uncovered++;
-		element.classList.add('covered');
-		if(current_activity_memory_uncovered==current_activity_memory_pattern.length){
-			if(session_data.mode!="test"){
-				audio_sprite.playSpriteRange("zfx_correct");
-				open_js_modal_content('<div class="js-modal-img"><img src="'+media_objects.images['correct.png'].src+'"/></div>');
-			}
-			session_data.num_correct++;
-			if(current_activity_memory_level>=MAX_MEMORY_LEVELS){
-				console.log('Has superado el juego!'); // debe ser un modal
-				current_activity_memory_level=1;
-				current_activity_played_times=0;
-				current_activity_memory_level_passed_times=0;
-				if(session_data.mode=="test" && !game_mode) send_session_data();
-				else game();
-			}else{
-				current_activity_memory_level_passed_times++;
-				if(current_activity_memory_level_passed_times>=2){
-					console.log('siguiente nivel...'); // debe ser un modal
-					current_activity_memory_level_passed_times=0;
-					current_activity_memory_level++;
-				}
-				current_activity_played_times=0;
-				setTimeout(function(){memoria_visual();}, 2000);
-			}
-		}
-	}else{
-		if(session_data.mode!="test"){
-			audio_sprite.playSpriteRange("zfx_wrong"); // add a callback to move forward after the sound plays...
-			open_js_modal_content('<div class="js-modal-img"><img src="'+media_objects.images['wrong.png'].src+'"/></div>');
-		}
-		current_activity_played_times++;
-		if(current_activity_played_times>=MAX_PLAYS){
-			current_activity_played_times=0;
-			current_activity_memory_level_passed_times=0;
-			current_activity_memory_level=1;
-			console.log('Ooooh! :( Has fallado dos veces. Fin del juego.'); // should be a modal
-			if(session_data.mode=="test" && !game_mode) send_session_data();
-			else game();
-		}else{
-			setTimeout(function(){memoria_visual();}, 2000);
-		}
-	}
+    
+	if(clicked_element!=current_activity_memory_pattern[current_activity_memory_uncovered]){
+        current_activity_memory_already_incorrect=true;
+    }
+    current_activity_memory_uncovered++;
+    element.classList.add('covered');
+    
+    if(current_activity_memory_uncovered==current_activity_memory_pattern.length){
+        var the_content='<h1>...siguiente actividad...</h1>';
+        if(current_activity_memory_already_incorrect==false){
+            if(session_data.mode!="test"){
+                audio_sprite.playSpriteRange("zfx_correct");
+                the_content='<div class="js-modal-img"><img src="'+media_objects.images['correct.png'].src+'"/></div>';
+            }
+            open_js_modal_content(the_content);
+            session_data.num_correct++;
+            if(current_activity_memory_level>=MAX_MEMORY_LEVELS){
+                console.log('Has superado el juego!'); // debe ser un modal
+                current_activity_memory_level=1;
+                current_activity_played_times=0;
+                current_activity_memory_level_passed_times=0;
+                if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
+                if(session_data.mode=="test" && !game_mode) setTimeout(function(){send_session_data();}, 2000);
+                else setTimeout(function(){game();}, 2000);
+            }else{
+                current_activity_memory_level_passed_times++;
+                //if((session_data.mode=="test" && !game_mode && current_activity_memory_level_passed_times>=2) || (session_data.mode!="test" || game_mode) ){
+                    console.log('siguiente nivel...'); // debe ser un modal
+                    current_activity_memory_level_passed_times=0;
+                    current_activity_memory_level++;
+                //}
+                current_activity_played_times=0;
+                setTimeout(function(){memoria_visual();}, 2000);
+            }
+        }else{
+            current_activity_memory_already_incorrect=false;
+            if(session_data.mode!="test"){
+                audio_sprite.playSpriteRange("zfx_wrong"); // add a callback to move forward after the sound plays...
+                the_content='<div class="js-modal-img"><img src="'+media_objects.images['wrong.png'].src+'"/></div>';
+            }
+            open_js_modal_content(the_content);
+            current_activity_played_times++;
+            if( (session_data.mode=="test" && !game_mode && current_activity_played_times>=MAX_PLAYS)  || ( (session_data.mode!="test" || game_mode) && current_activity_played_times>=10)){
+                console.log('incorrect memory...');
+                current_activity_played_times=0;
+                current_activity_memory_level_passed_times=0;
+                current_activity_memory_level=1;
+                console.log('Ooooh! :( Has fallado dos veces. Fin del juego.'); // should be a modal
+                if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
+                if(session_data.mode=="test" && !game_mode) setTimeout(function(){send_session_data();}, 2000);
+                else setTimeout(function(){game();}, 2000);
+            }else{
+                setTimeout(function(){memoria_visual();}, 2000);
+            }
+        }
+    }
 }
 
 var memoria_auditiva=function(){
@@ -1022,7 +1098,7 @@ var conciencia=function(){
 function start_activity_set(){
 	remove_modal();
 	session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
-	session_data.age=calculateAge(user_subjects[session_data.subject]['age']); 
+	session_data.age=calculateAge(user_subjects[session_data.subject]['birthdate']); 
 	session_data.num_correct=0;
 	session_data.num_answered=0;
 	session_data.details=[];
@@ -1093,10 +1169,9 @@ function activity(i){
 	for(var i=0; i<USE_ANSWERS ; ++i) {
 		var use=Math.floor(Math.random() * USE_ANSWERS)
 		while(used_answers.indexOf(use) != -1) use=Math.floor(Math.random() * USE_ANSWERS);
-		//answers_div.innerHTML+='<div id="answer'+i+'" class="hover_red_border" onclick="check_correct(this.innerHTML,correct_answer)" style="float:left;"></div>'
 
 		var answer_i=current_activity_data['answers'][use];
-		answers_div.innerHTML+='<div id="answer'+i+'" onclick="check_correct(this.firstChild,correct_answer)" class="hover_red_border"  ></div>'; //onclick="check_correct(this,correct_answer)"  style="float:left;" stretchy no-limit-250
+		answers_div.innerHTML+='<div id="answer'+i+'" onclick="check_correct_conciencia(this.firstChild,correct_answer)" class="hover_red_border"  ></div>'; //onclick="check_correct_conciencia(this,correct_answer)"  style="float:left;" stretchy no-limit-250
 		//if(media_objects.images[current_activity_data['answers'][use]+'.png']==undefined){
 		if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+current_activity_data['answers'][use])){
 			alert("ERROR: .wordimage-"+current_activity_data['answers'][use]+" not found in wordimg-sprite.css.");
@@ -1144,7 +1219,7 @@ var play_activity_sound=function(){
 };
 
 
-function check_correct(clicked_answer,correct_answer){
+function check_correct_conciencia(clicked_answer,correct_answer){
 	// do not allow cliking before or while uttering
 	if(current_activity_played_times==0 || SoundChain.audio_chain_waiting){
 		open_js_modal_content_timeout('<h1>Haz click en "play" antes que en el dibujo</h1>',2000);
@@ -1177,32 +1252,34 @@ function check_correct(clicked_answer,correct_answer){
 
 
 	activity_results.choice=clicked_answer;
+    var the_content='<h1>...siguiente actividad...</h1>';
 	if (clicked_answer==correct_answer){
 		session_data.num_correct++;
 		activity_results.result="correct";
 		if(session_data.mode!="test"){
 			audio_sprite.playSpriteRange("zfx_correct");
 			dom_score_correct.innerHTML=session_data.num_correct;
-			open_js_modal_content('<div class="js-modal-img"><img src="'+media_objects.images['correct.png'].src+'"/></div>');
+			the_content='<div class="js-modal-img"><img src="'+media_objects.images['correct.png'].src+'"/></div>';
 		}
 	}else{
 		activity_results.result="incorrect";
 		if(session_data.mode!="test"){
 			audio_sprite.playSpriteRange("zfx_wrong"); // add a callback to move forward after the sound plays...
-			open_js_modal_content('<div class="js-modal-img"><img src="'+media_objects.images['wrong.png'].src+'"/></div>');
+			the_content='<div class="js-modal-img"><img src="'+media_objects.images['wrong.png'].src+'"/></div>';
 		}
 	}
+    open_js_modal_content(the_content);
 	session_data.details.push(activity_results);
 	session_data.num_answered++;
 	dom_score_answered.innerHTML=session_data.num_answered;
-	var waiting_time=500;
+	var waiting_time=1000;
 	if(session_data.mode!="test") waiting_time=2000; // fire next activity after 2 seconds (time for displaying img and playing the sound)
 	setTimeout(function(){nextActivity()}, waiting_time);
 }
 
 function nextActivity(){
 	remaining_rand_activities.splice(current_activity_index,1); // remove current activity
-	if(session_data.mode!="test") remove_modal();
+	remove_modal();
 	if(remaining_rand_activities.length==0){
 		canvas_zone_vcentered.innerHTML='NO HAY MAS ACTIVIDADES. FIN, sending...';
 		if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
@@ -1220,6 +1297,7 @@ function send_session_data(){
 	if(game_mode){
 		game(); // no data, no control, just go to play menu again
 	}
+    remove_modal();
 
 	if(user_data.access_level=='invitee'){
 		canvas_zone_vcentered.innerHTML+='<br />Los resultados no se pueden guardar para\
@@ -1234,10 +1312,11 @@ function send_session_data(){
 	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	xhr.responsetype="json";
 	xhr.send("action=send_session_data_post&json_string="+(JSON.stringify(session_data))); 
+	canvas_zone_vcentered.innerHTML='<br />Fin del Test<br />...Enviando test al servidor...<br /><br />';
 
 	xhr.onload = function () {
 		var data=JSON.parse(this.responseText);
-		canvas_zone_vcentered.innerHTML+='<br />Server message: '+data.msg+'<br /><br />\
+		canvas_zone_vcentered.innerHTML='<br />Fin del Test<br />Server message: '+data.msg+'<br /><br />\
 		<br /><button id="go-back" onclick="menu_screen()">Volver</button>';
 	};
 
