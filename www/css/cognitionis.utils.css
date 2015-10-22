@@ -29,10 +29,10 @@
 
 .js-modal-dialog-progress {
 	width: 50%;
-	height:20px;
-	position: relative;
+	min-height:20px;
+	/*position: relative;*/
 	margin: 240px auto;
-	padding: 1% 2% 2% 2%;
+	padding: 0% 1% 1% 1%;
 	background: #eee;
 }
 
@@ -51,7 +51,10 @@
 progress {
 	width: 100%;
 	height: 5px;
-	/*height: 100%; breaks in chrome, ie, safari*/
+    margin:0; padding:0;
+    vertical-align:0;
+    display:block;
+	/*height: 100%; breaks in chrome, IE, safari*/
 }
 /* -------------------------------------------------------------------------- */
 
@@ -117,4 +120,11 @@ a.boxclose{
 .boxclose:before {
     content: "X";
 }
+
+.small-text{
+    font-size:10px;
+    margin:0;
+    padding: 2px 5px;
+}
+
 

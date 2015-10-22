@@ -18,10 +18,7 @@ var sounds = [
 	// it can be dropbox https://dl.dropboxusercontent.com/u/188219/
 	//or absolute http://www.centroafan.com/afan-app-media/audio/...m4a"
 	// relative is the best to reuse it in the cordova app
-//	"../../afan-app-media/audio/caca128ffmpeg.m4a"
 	"../../afan-app-media/audio/letters128kbps.m4a"
-	//"../../afan-app-media/audio/soundsSpriteVBR30-19kbps-100k.m4a"
-	//"../../afan-app-media/audio/soundsSpriteABR56.30kbps.141k.m4a" --> va mal, tornar a generar
 ];
 
 
@@ -45,28 +42,12 @@ var audio_sprite_name='letters128kbps.m4a';
 
 // not needed, already done in php. Maybe we should keep "original answer" with the correct letters
 //var letter_equivalence = { 'à':'a', 'á':'a', 'ç':'c', 'è':'e', 'é':'e', 'í':'i', 'ï':'i', 'ñ':'ny', 'ò':'o', 'ó':'o', 'ú':'u' };
-
-// LOAD ACTIVITIES
-var json_test, json_training, json_activities;
-ajax_request_json("../data/test1.tsv.json",function(json){
-    json_test=json; //console.log(json)
-});
-ajax_request_json("../data/train2.json", function(json) { //training1, training1-short
-    json_training=json; //console.log(json)
-	json_activities=json_training;
-});
-
-
+// to match img name (ascii) and answer
 
 ajax_request('backend/ajaxdb.php?action=gen_session_state',function(text) {
-	session_state=text;
-	//console.log(session_state);
+	session_state=text; //console.log(session_state);
 });
-// if media not found locally, url
-//image_src_start_exists=clicked_answer.indexOf("src=\""+media_url)
-//clicked_answer=clicked_answer.substring(image_src_start_exists+media_url.length+15,img_src_end)
-//media_url='http://www.centroafan.com/afan-app-media/'
-//backend_url='http://www.centroafan.com/afan-app-backend/'
+
 
 // NOTE: to accelerate the sound edited: start+0.2 and end -0.1
 var audio_object_sprite_ref={
@@ -103,69 +84,6 @@ for(var i=0;i<wordimage_image_ref.length;i++){
     wordimage_image_ref[i]=wordimage_image_ref[i].replace('.wordimage-','');
 }
 
-
-
-/*
-new original
-	a: {id: "a", start: 20.218, end: 21.222}, 
-	b: {id: "b", start: 10.697, end: 11.698}, 
-	bv: {id: "bv", start: 26.223, end: 27.228}, 
-	ch: {id: "ch", start: 1.000, end: 1.697}, 
-	d: {id: "d", start: 8.698, end: 9.697}, 
-	e: {id: "e", start: 45.747, end: 46.746}, 
-	f: {id: "f", start: 2.697, end: 3.694}, 
-	g: {id: "g", start: 12.698, end: 13.700}, 
-	i: {id: "i", start: 34.233, end: 35.233}, 
-	j: {id: "j", start: 24.224, end: 25.223}, 
-	k: {id: "k", start: 37.734, end: 38.735}, 
-	l: {id: "l", start: 41.738, end: 42.743}, 
-	m: {id: "m", start: 43.743, end: 44.747}, 
-	n: {id: "n", start: 16.204, end: 17.217}, 
-	ny: {id: "ny", start: 30.227, end: 31.230}, 
-	o: {id: "o", start: 32.230, end: 33.233}, 
-	p: {id: "p", start: 22.222, end: 23.224}, 
-	r: {id: "r", start: 39.735, end: 40.738}, 
-	rr: {id: "rr", start: 28.228, end: 29.227}, 
-	s: {id: "s", start: 18.217, end: 19.218}, 
-	t: {id: "t", start: 4.694, end: 5.694}, 
-	u: {id: "u", start: 49.751, end: 50.751}, 
-	y: {id: "y", start: 6.694, end: 7.698}, 
-	z: {id: "z", start: 47.746, end: 48.751}, 
-	zfx_correct: {id: "zfx_correct50", start: 14.700, end: 15.204}, 
-	zfx_wrong: {id: "zfx_wrong50", start: 36.233, end: 36.734}, 
-	zsilence_start: {id: "zsilence_start", start: 0.100, end: 0.700}
-
-
-
-
-	a: {id: "a50", start: 19.158, end: 19.658}, 
-	b: {id: "b50", start: 11.610, end: 12.107}, 
-	bv: {id: "bv50", start: 1.000, end: 1.496}, 
-	ch: {id: "ch50", start: 16.155, end: 16.657}, 
-	d: {id: "d50", start: 34.142, end: 34.644}, 
-	e: {id: "e50", start: 25.122, end: 25.624}, 
-	f: {id: "f50", start: 31.138, end: 31.640}, 
-	g: {id: "g50", start: 26.624, end: 27.120}, 
-	i: {id: "i50", start: 20.658, end: 21.121}, 
-	j: {id: "j50", start: 7.069, end: 7.568}, 
-	k: {id: "k50", start: 35.644, end: 36.144}, 
-	l: {id: "l50", start: 14.610, end: 15.155}, 
-	m: {id: "m50", start: 23.619, end: 24.122}, 
-	n: {id: "n50", start: 32.640, end: 33.142}, 
-	ny: {id: "ny50", start: 8.568, end: 9.111}, 
-	o: {id: "o50", start: 37.144, end: 37.649}, 
-	p: {id: "p50", start: 28.120, end: 28.609}, 
-	r: {id: "r50", start: 29.609, end: 30.138}, 
-	rr: {id: "rr50", start: 22.121, end: 22.619}, 
-	s: {id: "s50", start: 10.111, end: 10.610}, 
-	t: {id: "t50", start: 2.496, end: 2.996}, 
-	u: {id: "u50", start: 3.996, end: 4.496}, 
-	y: {id: "y50", start: 5.496, end: 6.069}, 
-	z: {id: "z50", start: 17.657, end: 18.158}, 
-	zfx_correct: {id: "zfx_correct50", start: 13.107, end: 13.610}, 
-	zfx_wrong: {id: "zfx_wrong50", start: 38.649, end: 39.150}, 
-	zsilence_start: {id: "zsilence_start", start: 0.100, end: 0.500}	
-*/
 
 // constants
 var USE_ANSWERS = 3;
@@ -230,32 +148,6 @@ function login_screen(){
 	<br /><button id="exit" class="button exit" onclick="invitee_access();">Acceso Invitado (Offline)</button> \
 	<br /><button id="exit" class="button exit" onclick="exit_app();">Salir</button> \
 		';
-		// check if there is an option to change the window... see stackoverflow oauth.html to see how-to cordova
-		// class g-signin2  only needed if render is not used
-	/*var params={
-		client_id: '125860785862-s07kh0j5tpb2drjkeqsifldn39krhh60.apps.googleusercontent.com'
-	}
-	gapi.auth2.init(params);
-	var options={
-		'scope': 'email profile',
-		'width': 200,
-		'height': 50,
-		'longtitle': false,
-		'theme': 'light',
-		'onsuccess': signInCallback,
-		'onfailure': signInCallback
-	}
-	  <span class="g-signin"\
-		data-scope="openid email" \
-		data-clientid="125860785862-s07kh0j5tpb2drjkeqsifldn39krhh60.apps.googleusercontent.com"\
-		data-redirecturi="postmessage"\
-		data-accesstype="offline"\
-		data-cookiepolicy="single_host_origin"\
-		data-callback="signInCallback"\
-		> \
-	  </span><!-- scope: openid email https://www.googleapis.com/auth/plus.login --> <!-- delete data-approvalprompt="force" when debugged, use another URI (e.g., server to avoid geting back to client?) -->\
-
-	gapi.signin2.render('signinButton', options)*/
 	gapi.signin.render('signinButton', {
 	  'callback': 'signInCallback',
 	  'clientid': '125860785862-s07kh0j5tpb2drjkeqsifldn39krhh60.apps.googleusercontent.com',
@@ -293,9 +185,7 @@ function signInCallback(authResult) {
 					user_data.access_level=result.access_level;
 					session_data.user=result.email;
 					session_data.user_access_level=result.access_level;
-					//if(result.access_level=='admin'){ admin_screen();}
-					//else{
-						menu_screen();//}
+					menu_screen();
 				} else if (authResult['error']) {
 					alert('There was an error: ' + authResult['error']);
 				} else {
@@ -303,28 +193,6 @@ function signInCallback(authResult) {
 				}
 			}
 		);
-		/*$.ajax({
-			type: 'POST',
-			url: 'backend/ajaxdb.php?action=gconnect&state='+session_state+'&code='+authResult['code'],
-			processData: false,
-			data: authResult['code'],
-			contentType: 'application/octet-stream; charset=utf-8',
-			success: function(result) {
-				if (result) {
-					if(debug){console.log(result);console.log("logged! "+result.email+" level:"+result.access_level);alert("logged! "+result.email+" level:"+result.access_level);}
-                    user_data=result;
-					session_data.user=result.email;
-					session_data.user_access_level=result.access_level;
-					if(result.access_level=='admin'){ admin_screen();}
-					else{  menu_screen();}
-				} else if (authResult['error']) {
-					alert('There was an error: ' + authResult['error']);
-				} else {
-					alert('Failed to make a server-side call. Check your configuration and console.</br>Result:'+ result);
-				}
-			}
-		});*/
-		
 	}
 }
 
@@ -336,14 +204,13 @@ function gdisconnect(){
 		function(result) {
 			if (result.hasOwnProperty('success')) {
 				if(debug) console.log(result.success);
-				login_screen();
 			} else {
 				if(!result.hasOwnProperty('error')) result.error="NO JSON RETURNED";
 				alert('Failed to disconnect.</br>Result:'+ result.error);
 			}
+            login_screen();
 		}
 	);
-
 	return false;
 }
 
@@ -446,7 +313,7 @@ function menu_screen(){
 	allowBackExit();
 	var splash=document.getElementById("splash_screen");
 	if(splash!=null && (ResourceLoader.lazy_audio==true || ResourceLoader.not_loaded['sounds'].length==0)){ splash.parentNode.removeChild(splash); if(debug){alert('load1-complete');}}
-	if(media_objects===undefined) media_objects=ResourceLoader.ret_media; // in theory all are loaded at this point
+	if(media_objects===undefined) media_objects=ResourceLoader.ret_media; // all should be loaded at this point
 	if(debug){
 		console.log('userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info);
 		console.log('not_loaded sounds: '+ResourceLoader.not_loaded['sounds'].length);
@@ -491,13 +358,10 @@ function menu_screen(){
 		</nav>\
 		';
 
-		
-		
-		//document.getElementById("splash-logo-div").appendChild(media_objects.images['key.png'])
 		subjects_select_elem=document.getElementById('subjects-select');
-		document.getElementById("start-button").onclick=function(){session_data.mode="training";json_activities=json_training;game()};
+		document.getElementById("start-button").onclick=function(){session_data.mode="training";game()};
 		if(user_data.access_level!='invitee'){
-			document.getElementById("start-test-button").onclick=function(){session_data.mode="test";json_activities=json_test;game()};
+			document.getElementById("start-test-button").onclick=function(){session_data.mode="test";game()};
 		}
 
 		if(user_subjects==null){
@@ -516,7 +380,16 @@ function menu_screen(){
 				}
 			);
 		}else{
-			select_fill_with_json(user_subjects,subjects_select_elem);
+            var selected_subject=undefined;
+            //TODO TODO TODO ... find out selected index in onchange of the select (store the last selected..)
+            //TODO TODO TODO ... find out selected index in onchange of the select (store the last selected..)
+            //TODO TODO TODO ... find out selected index in onchange of the select (store the last selected..)
+            //TODO TODO TODO ... find out selected index in onchange of the select (store the last selected..)
+            //TODO TODO TODO ... find out selected index in onchange of the select (store the last selected..)
+            //TODO TODO TODO ... find out selected index in onchange of the select (store the last selected..)
+            //TODO TODO TODO ... find out selected index in onchange of the select (store the last selected..)
+            //TODO TODO TODO ... find out selected index in onchange of the select (store the last selected..)
+			select_fill_with_json(user_subjects,subjects_select_elem,selected_subject);
 			document.getElementById("start-button").disabled=false;
 			if(user_data.access_level!='invitee'){
 				document.getElementById("start-test-button").disabled=false;
@@ -526,8 +399,7 @@ function menu_screen(){
 			}
 		}
 	}else{
-		//game_mode: go straight to training mode
-		game();
+		game(); // just training
 	}
 }
 
@@ -753,7 +625,7 @@ var explore_result_detail=function(session_id){
 			backend_url+'ajaxdb.php?action=get_result_detail&session='+session_id+'&user='+session_data.user, 
 			function(data) {
 				user_subject_result_detail[session_id]=data; //cache (never changes)
-                if(user_subject_result_detail[session_id].elements.lenght==0 || user_subject_result_detail[session_id].elements.lenght==undefined){
+                if(!user_subject_result_detail[session_id].hasOwnProperty('elements') || user_subject_result_detail[session_id].elements.length==0){
                     document.getElementById("results-div").innerHTML="session: "+user_subject_result_detail[session_id].general.session+"<br />No hay detalles";
                     return;
                 }
@@ -773,24 +645,24 @@ var explore_result_detail=function(session_id){
 				} );
 			});
 	}else{
-        if(user_subject_result_detail[session_id].elements.lenght==0 || user_subject_result_detail[session_id].elements.lenght==undefined){
+        if(!user_subject_result_detail[session_id].hasOwnProperty('elements') || user_subject_result_detail[session_id].elements.length==0){
             document.getElementById("results-div").innerHTML="session: "+user_subject_result_detail[session_id].general.session+"<br />No hay detalles";
-            return;
+        }else{
+            document.getElementById("results-div").innerHTML="session: "+user_subject_result_detail[session_id].general.session+" - subject: "+user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
+            var results_table=document.getElementById("results-table");
+            DataTableSimple.call(results_table, {
+                data: user_subject_result_detail[session_id].elements,
+                pagination: 6,
+                row_id: 'id',
+                columns: [
+                    //{ data: 'id' },
+                    { data: 'activity' },
+                    { data: 'choice' },
+                    { data: 'result',  special: 'red_incorrect' },
+                    { data: 'duration',  format: 'time_from_seconds_up_to_mins'}
+                ]
+            } );
         }
-		document.getElementById("results-div").innerHTML="session: "+user_subject_result_detail[session_id].general.session+" - subject: "+user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
-		var results_table=document.getElementById("results-table");
-		DataTableSimple.call(results_table, {
-			data: user_subject_result_detail[session_id].elements,
-			pagination: 6,
-			row_id: 'id',
-			columns: [
-				//{ data: 'id' },
-				{ data: 'activity' },
-				{ data: 'choice' },
-				{ data: 'result',  special: 'red_incorrect' },
-				{ data: 'duration',  format: 'time_from_seconds_up_to_mins'}
-			]
-		} );
 	}
 };
 
@@ -809,6 +681,11 @@ var game=function(){
     //reset game variables --------
 	session_data.num_correct=0;
 	session_data.num_answered=0;
+	session_data.duration=0;
+    session_data.details=[];
+    current_activity_memory_level=1;
+    current_activity_played_times=0;
+    current_activity_memory_level_passed_times=0;
     activity_timer.reset();
     //-----------------------------
 	var extra_options="";
@@ -889,6 +766,7 @@ var memoria_visual=function(){
         activity_timer.reset();
 		session_data.num_correct=0;
 		session_data.num_answered=MAX_MEMORY_LEVELS; // *2
+		session_data.duration=0;
 		session_data.details=[];
 		var timestamp=new Date();
 		session_data.timestamp=timestamp.getFullYear()+"-"+
@@ -1020,9 +898,9 @@ var memoria_visual_check_click=function (element){
             current_activity_played_times++;
             if( (session_data.mode=="test" && !game_mode && current_activity_played_times>=MAX_PLAYS)  || ( (session_data.mode!="test" || game_mode) && current_activity_played_times>=10)){
                 console.log('incorrect memory...');
+                current_activity_memory_level=1;
                 current_activity_played_times=0;
                 current_activity_memory_level_passed_times=0;
-                current_activity_memory_level=1;
                 console.log('Ooooh! :( Has fallado dos veces. Fin del juego.'); // should be a modal
                 if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
                 if(session_data.mode=="test" && !game_mode) setTimeout(function(){send_session_data();}, 2000);
@@ -1081,217 +959,14 @@ var velocidad=function(){
 	';
 }
 
-var conciencia=function(){
-	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]==undefined){
-		alert("Debe seleccionar algún sujeto.");
-		return;
-	}
-    if(!check_if_sounds_loaded(conciencia)){return;}
-    preventBackExit();
-    session_data.type="conciencia";
-    // TODO CREATE A FUNCTION SHOW LEVEL----------------
-    open_js_modal_content('<h1>Nivel 1: '+session_data.mode+'</h1>');
-    setTimeout(function(){start_activity_set();}, 1500);
-    // ----------------------------------------------
-}
-
-function start_activity_set(){
-	remove_modal();
-	session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
-	session_data.age=calculateAge(user_subjects[session_data.subject]['birthdate']); 
-	session_data.num_correct=0;
-	session_data.num_answered=0;
-	session_data.details=[];
-	var timestamp=new Date();
-	session_data.timestamp=timestamp.getFullYear()+"-"+
-		pad_string((timestamp.getMonth()+1),2,"0") + "-" + pad_string(timestamp.getDate(),2,"0") + " " +
-		 pad_string(timestamp.getHours(),2,"0") + ":"  + pad_string(timestamp.getMinutes(),2,"0");
-
-	var training_extra_fields='';
-	if(session_data.mode=="training"){
-		training_extra_fields='<div id="current_score">\
-		Correct : <span id="current_score_num">0</span>\
-		</div>';
-	}
-	canvas_zone_vcentered.innerHTML=' \
-		<div id="zone_score" class="cf">\
-		  <div class="col_left">\
-		    <div id="activity_timer_div">\
-		      Tiempo : <span id="activity_timer_span">00:00:00</span>\
-		    </div>\
-			'+training_extra_fields+'\
-		  </div>\
-		  <div class="col_right">\
-		    <div id="remaining_activities">\
-		      remaining activs : <span id="remaining_activities_num">0</span>\
-		    </div>\
-		    <div id="current_answered">\
-		      Answered : <span id="current_answered_num">0</span>\
-		    </div>\
-		  </div>\
-		</div> <!-- /#zone_score -->\
-	<div id="answers"></div><br class="clear" />\
-	<div id="sound">sound icon</div><br /> \
-	';
-	//get elements
-	dom_score_correct=document.getElementById('current_score_num');
-	dom_score_answered=document.getElementById('current_answered_num');
-	activity_timer.anchor_to_dom(document.getElementById('activity_timer_span'));
-	dom_score_answered.innerHTML=session_data.num_answered;
-	if(session_data.mode=="training"){ 
-		var start=Math.floor(Math.random()*(json_activities.length-(MAX_TRAINING_ACTIVITIES+1)));
-		remaining_rand_activities=json_activities.slice(start,start+MAX_TRAINING_ACTIVITIES);
-	}else{
-		remaining_rand_activities=json_activities.slice(); // copy by value
-	}
-	document.getElementById('remaining_activities_num').innerHTML=""+(remaining_rand_activities.length-1);
-	if(session_data.mode=="training"){
-		activity(Math.floor(Math.random()*remaining_rand_activities.length));
-	}else{
-		activity(0);
-	}
-}
-
-function activity(i){
-	document.getElementById('remaining_activities_num').innerHTML=""+(remaining_rand_activities.length-1);
-
-	activity_timer.reset();
-	current_activity_index=i;
-	current_activity_played_times=0;
-	if(debug) console.log(i+"--"+remaining_rand_activities);
-	current_activity_data=remaining_rand_activities[i]; //json_activities[i]
-	correct_answer=current_activity_data['answers'][0];
-
-	var answers_div=document.getElementById('answers');
-	answers_div.innerHTML="";
-	var used_answers=[];
-	var used_answers_text=[];
-	for(var i=0; i<USE_ANSWERS ; ++i) {
-		var use=Math.floor(Math.random() * USE_ANSWERS)
-		while(used_answers.indexOf(use) != -1) use=Math.floor(Math.random() * USE_ANSWERS);
-
-		var answer_i=current_activity_data['answers'][use];
-		answers_div.innerHTML+='<div id="answer'+i+'" onclick="check_correct_conciencia(this.firstChild,correct_answer)" class="hover_red_border"  ></div>'; //onclick="check_correct_conciencia(this,correct_answer)"  style="float:left;" stretchy no-limit-250
-		//if(media_objects.images[current_activity_data['answers'][use]+'.png']==undefined){
-		if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+current_activity_data['answers'][use])){
-			alert("ERROR: .wordimage-"+current_activity_data['answers'][use]+" not found in wordimg-sprite.css.");
-			document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
-        }else if(used_answers_text.hasOwnProperty(current_activity_data['answers'][use])){
-			alert("ERROR: "+current_activity_data['answers'][use]+" is already used contact the ADMIN.");
-			document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
-		}else{	
-			////document.getElementById("answer"+i).appendChild(media_objects.images[current_activity_data['answers'][use]+'.png']);
-			////document.getElementById("answer"+i).className += " wordimage wordimage-"+current_activity_data['answers'][use];
-			// TWO DIVS ARE NEEDED TO MAKE THIS RESPONSIBLE AND ALSO INCLUDE MAX-WIDTH...
-			document.getElementById("answer"+i).innerHTML += '<div class="wordimage wordimage-'+current_activity_data['answers'][use]+'"></div>';
-			////document.getElementById("answer"+i).innerHTML += '<img class="spacer"  src="spacer158.png"><img class="spritev wordimg-'+current_activity_data['answers'][use]+'" src="../../../afan-app-media/img/wordimg-sprite.png" />';		
-		}
-		
-		used_answers[used_answers.length]=use;
-		used_answers_text[used_answers_text.length]=current_activity_data['answers'][use];
-	}
-	
-	zone_sound=document.getElementById('sound');
-	zone_sound.innerHTML='<button id="playb" class="button" onclick="play_activity_sound()">PLAY</button> ';
-	var playb=document.getElementById('playb');
-	toggleClassBlink(playb,'backgroundRed',250,4);
-	/*setTimeout(function(){play_activity_sound();	}, 2000);*/
-}
-
-var play_activity_sound_finished=function(){
-	activity_timer.start();
-	current_activity_played_times++;
-	var playb=document.getElementById('playb');
-	if(current_activity_played_times < MAX_PLAYS){
-		playb.innerHTML="RE-PLAY"; // use icons (fixed % size) &#11208; &#11118; &#10704;
-		playb.disabled=false;
-	}else{
-		activity_timer.seconds+=2;
-		playb.innerHTML="haz click en un dibujo"; // use empty icon (to keep size)
-	}
-};
 
 
-var play_activity_sound=function(){
-	document.getElementById('playb').disabled=true;
-	activity_timer.stop();
-	SoundChain.play_sound_arr(current_activity_data['sounds'],audio_sprite,play_activity_sound_finished);
-};
 
 
-function check_correct_conciencia(clicked_answer,correct_answer){
-	// do not allow cliking before or while uttering
-	if(current_activity_played_times==0 || SoundChain.audio_chain_waiting){
-		open_js_modal_content_timeout('<h1>Haz click en "play" antes que en el dibujo</h1>',2000);
-		return;
-	} 
-	var activity_results={};
-	var timestamp=new Date();
-	var timestamp_str=timestamp.getFullYear()+"-"+
-		pad_string((timestamp.getMonth()+1),2,"0") + "-" + pad_string(timestamp.getDate(),2,"0") + " " +
-		 pad_string(timestamp.getHours(),2,"0") + ":"  + pad_string(timestamp.getMinutes(),2,"0") + 
-			":"  + pad_string(timestamp.getSeconds(),2,"0");
-	activity_timer.stop();
-	activity_results.type=session_data.type;
-	activity_results.mode=session_data.mode;
-	activity_results.level=session_data.level;
-	activity_results.activity=correct_answer;
-	activity_results.timestamp=timestamp_str;
-	activity_results.duration=activity_timer.seconds;
-	session_data.duration+=activity_timer.seconds;
-	if(typeof clicked_answer == "string"){ // it is not a sprite but an image
-		image_src_start_exists=clicked_answer.lastIndexOf("/")
-		if(image_src_start_exists==-1) image_src_start_exists=clicked_answer.indexOf("src=\"")
-		if (image_src_start_exists > -1){
-			img_src_end=clicked_answer.indexOf(".png\"",image_src_start_exists+1)
-			clicked_answer=clicked_answer.substring(image_src_start_exists+1,img_src_end)
-		}
-	}else{
-		clicked_answer=(clicked_answer.className.replace("wordimage wordimage-","")).trim();
-	}
 
 
-	activity_results.choice=clicked_answer;
-    var the_content='<h1>...siguiente actividad...</h1>';
-	if (clicked_answer==correct_answer){
-		session_data.num_correct++;
-		activity_results.result="correct";
-		if(session_data.mode!="test"){
-			audio_sprite.playSpriteRange("zfx_correct");
-			dom_score_correct.innerHTML=session_data.num_correct;
-			the_content='<div class="js-modal-img"><img src="'+media_objects.images['correct.png'].src+'"/></div>';
-		}
-	}else{
-		activity_results.result="incorrect";
-		if(session_data.mode!="test"){
-			audio_sprite.playSpriteRange("zfx_wrong"); // add a callback to move forward after the sound plays...
-			the_content='<div class="js-modal-img"><img src="'+media_objects.images['wrong.png'].src+'"/></div>';
-		}
-	}
-    open_js_modal_content(the_content);
-	session_data.details.push(activity_results);
-	session_data.num_answered++;
-	dom_score_answered.innerHTML=session_data.num_answered;
-	var waiting_time=1000;
-	if(session_data.mode!="test") waiting_time=2000; // fire next activity after 2 seconds (time for displaying img and playing the sound)
-	setTimeout(function(){nextActivity()}, waiting_time);
-}
 
-function nextActivity(){
-	remaining_rand_activities.splice(current_activity_index,1); // remove current activity
-	remove_modal();
-	if(remaining_rand_activities.length==0){
-		canvas_zone_vcentered.innerHTML='NO HAY MAS ACTIVIDADES. FIN, sending...';
-		if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
-		send_session_data();
-	}else{
-		if(remaining_rand_activities.length==1 || session_data.mode=="test"){
-			activity(0);
-		}else{
-			activity(Math.floor(Math.random()*remaining_rand_activities.length));
-		}
-	}
-}
+
 
 function send_session_data(){
 	if(game_mode){

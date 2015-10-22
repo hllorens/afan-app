@@ -8,7 +8,7 @@
 
 afan colors:
 green: #6a6   pastel: #aea
-yellow: #fa1  pastel: #fc5
+yellow: #fa1  pastel: #fc5   extra pastel #ffe4a3
 granate: #400;pastel: #faa
 white: #eee
 
@@ -161,7 +161,7 @@ button.backgroundRed{
 }
 
 .covered{
-	background:#965;
+	background:#ffe4a3;
 }
 
 .membox{

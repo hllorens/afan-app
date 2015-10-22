@@ -15,6 +15,18 @@ function is_cordova(){
 var html5_audiotypes={"mp3": "audio/mpeg","mp4": "audio/mp4","m4a": "audio/mp4",
 					  "ogg": "audio/ogg","wav": "audio/wav" };
 
+var JsonLazy={
+    data: {},
+    load: function(json_url, name, callback){
+        if(typeof(json_url)=='undefined' || typeof(name)=='undefined'
+            || typeof(callback)=='undefined')
+            throw Error('json_url, name or callback are not defined');
+        ajax_request_json(json_url,function(json){
+            JsonLazy.data[name]=json; //console.log(json)
+            callback();
+        });
+    }
+}
 
 /*
 * Load media
@@ -213,8 +225,12 @@ var ResourceLoader={
 		ResourceLoader.modal_dialog=document.createElement("div");
 		ResourceLoader.modal_dialog.id="js-modal-dialog";
 		ResourceLoader.modal_dialog.className="js-modal-dialog-progress";
+		ResourceLoader.modal_dialog_title=document.createElement("span");
+		ResourceLoader.modal_dialog_title.className="small-text";
+		ResourceLoader.modal_dialog_title.innerHTML="Loading...";
 		ResourceLoader.modal_dialog_msg=document.createElement("p");
 		ResourceLoader.modal_dialog_msg.id="js-modal-dialog-msg";
+		ResourceLoader.modal_dialog_msg.className="small-text";
 		ResourceLoader.load_progressbar=document.createElement("progress");
 		ResourceLoader.num_images=image_arr.length;
 		ResourceLoader.num_sounds=sound_arr.length;
@@ -224,6 +240,7 @@ var ResourceLoader={
 		ResourceLoader.not_loaded['sounds']=sound_arr.slice(); // to show in case of error and lazy load (required in iOS)
 		ResourceLoader.download_lazy_audio_active = false;
 
+		ResourceLoader.modal_dialog.appendChild(ResourceLoader.modal_dialog_title);
 		ResourceLoader.modal_dialog.appendChild(ResourceLoader.load_progressbar);
 		ResourceLoader.modal_dialog.appendChild(ResourceLoader.modal_dialog_msg);
 		ResourceLoader.modal_load_window.appendChild(ResourceLoader.modal_dialog);
@@ -776,11 +793,13 @@ DataTableSimple.link_function_id=function (table_config,i,table_row, table_colum
 };
 
 
-function select_fill_with_json(data,select_elem){
+function select_fill_with_json(data,select_elem, selected){
 	select_elem.innerHTML="";
 	for(var key in data){
 		if (data.hasOwnProperty(key)) {
-			select_elem.innerHTML+='<option value="' + key + '">' + key + '</option>';	
+            var selected_html="";
+            if(typeof(selected)!='undefined' && selected==key) selected_html='selected="selected"';
+			select_elem.innerHTML+='<option value="' + key + '" '+selected_html+'>' + key + '</option>';
 		}
 	}
 }
@@ -1071,7 +1090,7 @@ var random_item=function(array, opt_leave_out){
 		//console.log("randomizing "+item+" leave out "+leave_out);
 	}while(item==leave_out && way_out_of_infinite_loop!=1000);
 	if(way_out_of_infinite_loop==1000)
-		throw new Error("cognitionis random_item >1000, leave_out="+leave_out);
+		throw new Error("cognitionis random_item,  loop>1000, leave_out="+leave_out);
 	return item;
 }
 
