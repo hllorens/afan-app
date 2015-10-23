@@ -20,7 +20,7 @@ var JsonLazy={
     load: function(json_url, name, callback){
         if(typeof(json_url)=='undefined' || typeof(name)=='undefined'
             || typeof(callback)=='undefined')
-            throw Error('json_url, name or callback are not defined');
+            throw new Error('json_url, name or callback are not defined');
         ajax_request_json(json_url,function(json){
             JsonLazy.data[name]=json; //console.log(json)
             callback();
@@ -284,9 +284,20 @@ var ResourceLoader={
 		ResourceLoader.load_interval = setInterval(function() {
 			ResourceLoader.check_load_status_lazy_audio()}, 
 			ResourceLoader.media_load_check_status_interval);
-	}
+	},
+    
+	check_if_lazy_sounds_loaded: function(callback_function){
+        if(typeof(callback_function)==='undefined')
+            throw new Error('check_if_lazy_sounds_loaded callback_function undefined');
+        if(ResourceLoader.not_loaded['sounds'].length!=0){
+            if(ResourceLoader.debug) console.log("Not loaded sounds: "+ResourceLoader.not_loaded['sounds'].length+"  "+ResourceLoader.not_loaded['sounds']);
+            ResourceLoader.load_media_wait_for_lazy_audio(callback_function);
+            return false;        
+        }else{
+            return true;
+        }
+    }
 
-	
 };
 
 

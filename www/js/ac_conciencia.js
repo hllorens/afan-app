@@ -1,10 +1,6 @@
 "use strict";
 
 var conciencia=function(){
-	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]==undefined){
-		alert("Debe seleccionar algún sujeto.");
-		return;
-	}
     if(!check_if_sounds_loaded(conciencia)){return;}
     preventBackExit();
     session_data.type="conciencia";
@@ -32,8 +28,6 @@ var conciencia=function(){
 
 function conciencia_start(){
 	remove_modal();
-	session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
-	session_data.age=calculateAge(user_subjects[session_data.subject]['birthdate']); 
 	session_data.num_correct=0;
 	session_data.num_answered=0;
 	session_data.details=[];

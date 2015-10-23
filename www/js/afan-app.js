@@ -36,13 +36,10 @@ if(game_mode){
 }
 
 var audio_sprite;
-//var audio_sprite_name='soundsSpriteVBR30-19kbps-100k.m4a';
-//var audio_sprite_name='caca128ffmpeg.m4a';
 var audio_sprite_name='letters128kbps.m4a';
 
-// not needed, already done in php. Maybe we should keep "original answer" with the correct letters
+// already done in php? to match img name (ascii) and answer? Maybe keep "original answer" with the correct letters 
 //var letter_equivalence = { 'à':'a', 'á':'a', 'ç':'c', 'è':'e', 'é':'e', 'í':'i', 'ï':'i', 'ñ':'ny', 'ò':'o', 'ó':'o', 'ú':'u' };
-// to match img name (ascii) and answer
 
 ajax_request('backend/ajaxdb.php?action=gen_session_state',function(text) {
 	session_state=text; //console.log(session_state);
@@ -86,6 +83,7 @@ for(var i=0;i<wordimage_image_ref.length;i++){
 
 
 // constants
+// TODO: Move this to each activity object...
 var USE_ANSWERS = 3;
 var MAX_PLAYS=2;
 var MAX_TRAINING_ACTIVITIES=20;
@@ -132,10 +130,10 @@ var session_data={
 var subjects_select_elem="none";
 var users_select_elem="none";
 
-// Clear this if user changes, session...
-var user_subjects=null;
-var user_subject_results={};
-var user_subject_result_detail={};
+// Cache, clear this if user changes, session, or when they are modified...
+var cache_user_subjects=null;
+var cache_user_subject_results={};
+var cache_user_subject_result_detail={};
 
 function login_screen(){
 	if(debug){alert('login_screen called');}
@@ -211,7 +209,6 @@ function gdisconnect(){
             login_screen();
 		}
 	);
-	return false;
 }
 
 function admin_screen(){
@@ -219,7 +216,7 @@ function admin_screen(){
 	ajax_request_json(
 		backend_url+'ajaxdb.php?action=get_users', 
 		function(data) {
-			var users=data;
+			var users=data; // TODO: protect, if return is not good fail...
 			canvas_zone_vcentered.innerHTML=' \
 				User:  <select id="users-select"></select> \
 				<br /><button onclick="set_user()" class="button">Acceder</button> \
@@ -238,17 +235,15 @@ var letter_reader=function(){
         Sonidos a leer (separados por espacio) <input id="input_sounds" type="text" /> \
         <button id="read-button" onclick="read_input_sounds()" class="button">Leer</button> \
         <br /><br /><button onclick="menu_screen()" class="button">Volver</button> \
-        ';	
+        ';
 }
 
 var read_input_sounds=function(){
 	document.getElementById("read-button").disabled=true;
 	var input_sounds=document.getElementById("input_sounds").value.replace(/[ ]+/g, " ").trim().split(" ");
-	if(audio_sprite==undefined){
-		var audio_sprite_object=media_objects.sounds[audio_sprite_name];
-		audio_sprite=new AudioSprite(audio_sprite_object,audio_object_sprite_ref,debug);
-	}
-	SoundChain.play_sound_arr(input_sounds, audio_sprite, letter_reader);
+    if(check_if_sounds_loaded(read_input_sounds)){
+        SoundChain.play_sound_arr(input_sounds, audio_sprite, letter_reader);
+    }
 }
 
 var check_missing_elements=function(){
@@ -299,29 +294,42 @@ var check_missing_elements=function(){
 function set_user(){
 	if(session_data.user!=users_select_elem.options[users_select_elem.selectedIndex].value){
 		session_data.user=users_select_elem.options[users_select_elem.selectedIndex].value;
-		user_subjects=null;
+		cache_user_subjects=null; cache_user_subject_results={};
+        cache_user_subject_result_detail={};
 	}
 	menu_screen();
 }
 
+function set_subject(){
+    if(subjects_select_elem.options[subjects_select_elem.selectedIndex]!=undefined){
+        session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
+        session_data.age=calculateAge(cache_user_subjects[session_data.subject]['birthdate']); 
+    }
+}
+
 function show_profile(){
-	alert("under construction");
+    header_text.innerHTML=' < '+app_name+' menu';
+    canvas_zone_vcentered.innerHTML=' \
+        Usuario: '+user_data.email+'  <br />\
+        Acceso: '+user_data.access_level+'  <br />\
+        <br /><button class="button" onclick="menu_screen()">Volver</button>\
+        ';
 }
 
 
 function menu_screen(){
 	allowBackExit();
 	var splash=document.getElementById("splash_screen");
-	if(splash!=null && (ResourceLoader.lazy_audio==true || ResourceLoader.not_loaded['sounds'].length==0)){ splash.parentNode.removeChild(splash); if(debug){alert('load1-complete');}}
-	if(media_objects===undefined) media_objects=ResourceLoader.ret_media; // all should be loaded at this point
+	if(splash!=null && (ResourceLoader.lazy_audio==true || ResourceLoader.not_loaded['sounds'].length==0)){
+        splash.parentNode.removeChild(splash); if(debug){alert('load1-complete');}
+    }
+	if(media_objects===undefined) media_objects=ResourceLoader.ret_media;//pointer
 	if(debug){
 		console.log('userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info);
 		console.log('not_loaded sounds: '+ResourceLoader.not_loaded['sounds'].length);
 	}
 	
-	/*if(is_app){
-		session_data.user='montsedeayala@gmail.com'; // will find a way to set the usr, by google account
-	}*/
+	/*if(is_app){session_data.user='montsedeayala@gmail.com'; // will find a way to set the usr, by google account}*/
 	
 	if(user_data.email==null && !game_mode){
 		login_screen();
@@ -346,10 +354,10 @@ function menu_screen(){
 		<br /><button id="manage-subjects" disabled="true" class="button" onclick="manage_subjects()">Participantes</button> \
 		<br /><button id="results" disabled="true" class="button" onclick="explore_results()">Resultados</button>';
 		if(user_data.access_level!='admin') admin_opts="";
-		if(user_data.access_level=='invitee'){ normal_opts=""; user_subjects={invitado:'invitado'}}
+		if(user_data.access_level=='invitee'){ normal_opts=""; cache_user_subjects={invitado:'invitado'}}
 		canvas_zone_vcentered.innerHTML=' \
 		<div id="menu-logo-div"></div> \
-		Participante:  <select id="subjects-select"></select> \
+		Participante:  <select id="subjects-select" onchange="set_subject()"></select> \
 		<nav id="responsive_menu">\
 		'+admin_opts+'\
 		<br /><button id="start-button" class="button" disabled="true">Jugar</button> \
@@ -358,56 +366,41 @@ function menu_screen(){
 		</nav>\
 		';
 
-		subjects_select_elem=document.getElementById('subjects-select');
-		document.getElementById("start-button").onclick=function(){session_data.mode="training";game()};
-		if(user_data.access_level!='invitee'){
-			document.getElementById("start-test-button").onclick=function(){session_data.mode="test";game()};
-		}
-
-		if(user_subjects==null){
+		if(cache_user_subjects==null){
 			ajax_request_json(
 				backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user, 
 				function(data) {
-					user_subjects=data;
-					select_fill_with_json(user_subjects,subjects_select_elem); 
-					document.getElementById("start-button").disabled=false;
-					if(user_data.access_level!='invitee'){
-						document.getElementById("start-test-button").disabled=false;
-						document.getElementById("read-letters").disabled=false;
-						document.getElementById("manage-subjects").disabled=false;
-						document.getElementById("results").disabled=false;
-					}
+					cache_user_subjects=data;
+                    prepare_menu_when_subjects_loaded();
 				}
 			);
 		}else{
-            var selected_subject=undefined;
-            //TODO TODO TODO ... find out selected index in onchange of the select (store the last selected..)
-            //TODO TODO TODO ... find out selected index in onchange of the select (store the last selected..)
-            //TODO TODO TODO ... find out selected index in onchange of the select (store the last selected..)
-            //TODO TODO TODO ... find out selected index in onchange of the select (store the last selected..)
-            //TODO TODO TODO ... find out selected index in onchange of the select (store the last selected..)
-            //TODO TODO TODO ... find out selected index in onchange of the select (store the last selected..)
-            //TODO TODO TODO ... find out selected index in onchange of the select (store the last selected..)
-            //TODO TODO TODO ... find out selected index in onchange of the select (store the last selected..)
-			select_fill_with_json(user_subjects,subjects_select_elem,selected_subject);
-			document.getElementById("start-button").disabled=false;
-			if(user_data.access_level!='invitee'){
-				document.getElementById("start-test-button").disabled=false;
-				document.getElementById("read-letters").disabled=false;
-				document.getElementById("manage-subjects").disabled=false;
-				document.getElementById("results").disabled=false;
-			}
+            prepare_menu_when_subjects_loaded();
 		}
 	}else{
 		game(); // just training
 	}
 }
 
+var prepare_menu_when_subjects_loaded=function(){
+    subjects_select_elem=document.getElementById('subjects-select');
+    select_fill_with_json(cache_user_subjects,subjects_select_elem,session_data.subject);
+    set_subject();
+
+    document.getElementById("start-button").disabled=false;
+    document.getElementById("start-button").onclick=function(){session_data.mode="training";game()};
+    if(user_data.access_level!='invitee'){
+        document.getElementById("start-test-button").onclick=function(){session_data.mode="test";game()};
+        document.getElementById("start-test-button").disabled=false;
+        document.getElementById("read-letters").disabled=false;
+        document.getElementById("manage-subjects").disabled=false;
+        document.getElementById("results").disabled=false;
+    }
+}
+
 
 var manage_subjects=function(){
 	preventBackExit();
-	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]!=undefined)
-		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
 	header_text.innerHTML=' < '+app_name+' menu';
 	canvas_zone_vcentered.innerHTML=' \
     <button id="add-subject" class="button" onclick="add_subject()">Añadir</button>\
@@ -415,9 +408,9 @@ var manage_subjects=function(){
 	<br /><button id="go-back" onclick="menu_screen()">Volver</button> \
 	';
 	var user_subjects_data=[];
-	for(var key in user_subjects){
-		if (user_subjects.hasOwnProperty(key)) {
-			user_subjects_data.push(user_subjects[key]);
+	for(var key in cache_user_subjects){
+		if (cache_user_subjects.hasOwnProperty(key)) {
+			user_subjects_data.push(cache_user_subjects[key]);
 		}
 	}    
     
@@ -460,19 +453,10 @@ var add_subject=function(){
 			backend_url+'ajaxdb.php?action=add_subject&user='+user_data.email+'&alias='+document.getElementById('new-alias').value+'&name='+document.getElementById('new-name').value+'&birthdate='+document.getElementById('new-birthdate').value+'&comments='+document.getElementById('new-comments').value, 
 			function(data) {
 				if(data['success']!='undefined'){
-					user_subjects[data['success']]=data['data'];
+					cache_user_subjects[data['success']]=data['data'];
 					remove_modal();
 					remove_modal("js-modal-window-alert");
 					manage_subjects(); // to reload with the new user...
-					/*ajax_request_json(
-						backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user, 
-						function(data) {
-							user_subjects=data;
-							remove_modal();
-							remove_modal("js-modal-window-alert");
-							manage_subjects(); // to reload with the new user...
-						}
-					);*/
 				}else{
 					alert("ERROR: "+JSON.stringify(data));
 				}
@@ -510,19 +494,10 @@ var edit_subject=function(sid){
 			backend_url+'ajaxdb.php?action=update_subject&lid='+sid+'&user='+user_data.email+'&alias='+document.getElementById('new-alias').value+'&name='+document.getElementById('new-name').value+'&birthdate='+document.getElementById('new-birthdate').value+'&comments='+document.getElementById('new-comments').value, 
 			function(data) {
 				if(data['success']!='undefined'){
-					user_subjects[data['success']]=data['data'];
+					cache_user_subjects[data['success']]=data['data'];
 					remove_modal();
 					remove_modal("js-modal-window-alert");
 					manage_subjects(); // to reload with the new user...
-					/*ajax_request_json(
-						backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user, 
-						function(data) {
-							user_subjects=data;
-							remove_modal();
-							remove_modal("js-modal-window-alert");
-							manage_subjects(); // to reload with the new user...
-						}
-					);*/
 				}else{
 					alert("ERROR: "+JSON.stringify(data));
 				}
@@ -532,9 +507,9 @@ var edit_subject=function(sid){
 	};
 	var cancel_function=function(){ remove_modal("js-modal-window-alert"); };
 	var subj2edit={"id": sid, "alias":"", "name":"", "birthdate":"", "comments":"", "user":"afan"}
-	for(var key in user_subjects){
-		if (user_subjects.hasOwnProperty(key) && user_subjects[key]['id']==sid) {
-			subj2edit=user_subjects[key];
+	for(var key in cache_user_subjects){
+		if (cache_user_subjects.hasOwnProperty(key) && cache_user_subjects[key]['id']==sid) {
+			subj2edit=cache_user_subjects[key];
 		}
 	}
 	var form_html='<form id="my-form" action="javascript:void(0);"> \
@@ -557,61 +532,58 @@ var explore_results=function(){
 	<div id="results-div">cargando resultados...</div> \
 	<br /><button id="go-back" onclick="menu_screen()">Volver</button> \
 	';
-	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]!=undefined)
-		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
-	else{
+	if(session_data.subject=='invitado'){
 		document.getElementById("results-div").innerHTML="Resultados user: "+user_data.email+" - subject: No hay sujetos<br />No hay resultados";
-		return;		
-	}
-					
-	if(!user_subject_results.hasOwnProperty(session_data.subject)){
-		ajax_request_json(
-			backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject, 
-			function(data) {
-				user_subject_results[session_data.subject]=data; //cache (never changes)
-				if(user_subject_results[session_data.subject].elements.length==0){
-					document.getElementById("results-div").innerHTML="Resultados user: "+user_subject_results[session_data.subject].general.user+" - subject: <b>"+user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
-				}else{
-					document.getElementById("results-div").innerHTML="Resultados user: "+user_subject_results[session_data.subject].general.user+" - subject: <b>"+user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
-					var results_table=document.getElementById("results-table");
-					DataTableSimple.call(results_table, {
-						data: user_subject_results[session_data.subject].elements,
-						row_id: 'id',
-						pagination: 5,
-						columns: [
-							//{ data: 'id' },
-							{ data: 'timestamp', col_header: 'Id', link_function_id: 'explore_result_detail' },
-							{ data: 'type', col_header: 'Tipo',  format: 'first_4'},
-							{ data: 'mode', col_header: 'Modo',  format: 'first_4'},
-							{ data: 'age', col_header: 'Edad' },
-							{ data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
-							{ data: 'result', col_header: '%', format: 'percentage_int' } 
-						]
-					} );
-				}
-			});	
 	}else{
-		if(user_subject_results[session_data.subject].elements.length==0){
-			document.getElementById("results-div").innerHTML="Resultados user: "+user_subject_results[session_data.subject].general.user+" - subject: <b>"+user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
-		}else{
-			document.getElementById("results-div").innerHTML="Resultados user: "+user_subject_results[session_data.subject].general.user+" - subject: <b>"+user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
-			var results_table=document.getElementById("results-table");
-			DataTableSimple.call(results_table, {
-				data: user_subject_results[session_data.subject].elements,
-				row_id: 'id',
-				pagination: 5,
-				columns: [
-					//{ data: 'id' },
-					{ data: 'timestamp', col_header: 'Id', link_function_id: 'explore_result_detail' },
-					{ data: 'type', col_header: 'Tipo',  format: 'first_4'},
-					{ data: 'mode', col_header: 'Modo',  format: 'first_4'},
-					{ data: 'age', col_header: 'Edad' },
-					{ data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
-					{ data: 'result', col_header: '%', format: 'percentage_int' } 
-				]
-			} );
-		}
-	}
+        if(!cache_user_subject_results.hasOwnProperty(session_data.subject)){
+            ajax_request_json(
+                backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject, 
+                function(data) {
+                    cache_user_subject_results[session_data.subject]=data; //cache (never changes)
+                    if(cache_user_subject_results[session_data.subject].elements.length==0){
+                        document.getElementById("results-div").innerHTML="Resultados user: "+cache_user_subject_results[session_data.subject].general.user+" - subject: <b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
+                    }else{
+                        document.getElementById("results-div").innerHTML="Resultados user: "+cache_user_subject_results[session_data.subject].general.user+" - subject: <b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
+                        var results_table=document.getElementById("results-table");
+                        DataTableSimple.call(results_table, {
+                            data: cache_user_subject_results[session_data.subject].elements,
+                            row_id: 'id',
+                            pagination: 5,
+                            columns: [
+                                //{ data: 'id' },
+                                { data: 'timestamp', col_header: 'Id', link_function_id: 'explore_result_detail' },
+                                { data: 'type', col_header: 'Tipo',  format: 'first_4'},
+                                { data: 'mode', col_header: 'Modo',  format: 'first_4'},
+                                { data: 'age', col_header: 'Edad' },
+                                { data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
+                                { data: 'result', col_header: '%', format: 'percentage_int' } 
+                            ]
+                        } );
+                    }
+                });	
+        }else{
+            if(cache_user_subject_results[session_data.subject].elements.length==0){
+                document.getElementById("results-div").innerHTML="Resultados user: "+cache_user_subject_results[session_data.subject].general.user+" - subject: <b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
+            }else{
+                document.getElementById("results-div").innerHTML="Resultados user: "+cache_user_subject_results[session_data.subject].general.user+" - subject: <b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
+                var results_table=document.getElementById("results-table");
+                DataTableSimple.call(results_table, {
+                    data: cache_user_subject_results[session_data.subject].elements,
+                    row_id: 'id',
+                    pagination: 5,
+                    columns: [
+                        //{ data: 'id' },
+                        { data: 'timestamp', col_header: 'Id', link_function_id: 'explore_result_detail' },
+                        { data: 'type', col_header: 'Tipo',  format: 'first_4'},
+                        { data: 'mode', col_header: 'Modo',  format: 'first_4'},
+                        { data: 'age', col_header: 'Edad' },
+                        { data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
+                        { data: 'result', col_header: '%', format: 'percentage_int' } 
+                    ]
+                } );
+            }
+        }
+    }
 };
 
 var explore_result_detail=function(session_id){
@@ -620,19 +592,19 @@ var explore_result_detail=function(session_id){
 	<div id="results-div">cargando detalle resultado '+session_id+'...</div> \
 	<br /><button id="go-back" onclick="explore_results()">Volver</button> \
 	';
-	if(!user_subject_result_detail.hasOwnProperty(session_id)){
+	if(!cache_user_subject_result_detail.hasOwnProperty(session_id)){
 		ajax_request_json(
 			backend_url+'ajaxdb.php?action=get_result_detail&session='+session_id+'&user='+session_data.user, 
 			function(data) {
-				user_subject_result_detail[session_id]=data; //cache (never changes)
-                if(!user_subject_result_detail[session_id].hasOwnProperty('elements') || user_subject_result_detail[session_id].elements.length==0){
-                    document.getElementById("results-div").innerHTML="session: "+user_subject_result_detail[session_id].general.session+"<br />No hay detalles";
+				cache_user_subject_result_detail[session_id]=data; //cache (never changes)
+                if(!cache_user_subject_result_detail[session_id].hasOwnProperty('elements') || cache_user_subject_result_detail[session_id].elements.length==0){
+                    document.getElementById("results-div").innerHTML="session: "+cache_user_subject_result_detail[session_id].general.session+"<br />No hay detalles";
                     return;
                 }
-				document.getElementById("results-div").innerHTML="session: "+user_subject_result_detail[session_id].general.session+" - subject: "+user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
+				document.getElementById("results-div").innerHTML="session: "+cache_user_subject_result_detail[session_id].general.session+" - subject: "+cache_user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
 				var results_table=document.getElementById("results-table");
 				DataTableSimple.call(results_table, {
-					data: user_subject_result_detail[session_id].elements,
+					data: cache_user_subject_result_detail[session_id].elements,
 					pagination: 6,
 					row_id: 'id',
 					columns: [
@@ -645,13 +617,13 @@ var explore_result_detail=function(session_id){
 				} );
 			});
 	}else{
-        if(!user_subject_result_detail[session_id].hasOwnProperty('elements') || user_subject_result_detail[session_id].elements.length==0){
-            document.getElementById("results-div").innerHTML="session: "+user_subject_result_detail[session_id].general.session+"<br />No hay detalles";
+        if(!cache_user_subject_result_detail[session_id].hasOwnProperty('elements') || cache_user_subject_result_detail[session_id].elements.length==0){
+            document.getElementById("results-div").innerHTML="session: "+cache_user_subject_result_detail[session_id].general.session+"<br />No hay detalles";
         }else{
-            document.getElementById("results-div").innerHTML="session: "+user_subject_result_detail[session_id].general.session+" - subject: "+user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
+            document.getElementById("results-div").innerHTML="session: "+cache_user_subject_result_detail[session_id].general.session+" - subject: "+cache_user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
             var results_table=document.getElementById("results-table");
             DataTableSimple.call(results_table, {
-                data: user_subject_result_detail[session_id].elements,
+                data: cache_user_subject_result_detail[session_id].elements,
                 pagination: 6,
                 row_id: 'id',
                 columns: [
@@ -667,15 +639,18 @@ var explore_result_detail=function(session_id){
 };
 
 var game=function(){
-		if(debug){alert('game-called - game-mode? '+game_mode);}
-
-		// logic
-		//random number within activity numbers of level1 (0 for now)
-		//Fisher-Yates random at the beginning and then increment, or
-		// do not rand array but just select a random position of the remaining array
-		// ??
-
-
+    remove_modal(); // for safety...
+    if(debug){alert('game-called - game-mode? '+game_mode);}
+    
+    // CANNOT be here, in game-mode no clicks yet---------------------------
+    //if(!check_if_sounds_loaded(memoria)){return;}
+    // ----------------------------------------------------------------------
+    
+    // logic
+    //random number within activity numbers of level1 (0 for now)
+    //Fisher-Yates random at the beginning and then increment, or
+    // do not rand array but just select a random position of the remaining array
+    // ??
 	// activity selection (if game_mode, remove and restyle header/footer...)
    
     //reset game variables --------
@@ -693,7 +668,6 @@ var game=function(){
         extra_options='<br /><button class="button" onclick="menu_screen()">Volver</button>';
         header_text.innerHTML=' < '+app_name+' menu';
     }
-	remove_modal(); // for safety...
     canvas_zone_vcentered.innerHTML=' \
     <br /><button class="button" onclick="conciencia()">Conciencia</button> \
     <br /><button class="button" onclick="memoria()">Memoria</button> \
@@ -701,19 +675,15 @@ var game=function(){
     <br /><button class="button" onclick="velocidad()">Velocidad</button> \
     '+extra_options+'\
     ';
-
 }
 
+// IMPORTANT: Has to be called after 1 click so it cannot be game() since
+// in game-mode that one is the first function (no click)
 var check_if_sounds_loaded=function(callback){
-    if(typeof(callback)!=='function'){alert("ERROR: check_if_sounds_loaded called without a callback.");throw new Error("check_if_sounds_loaded called without a callback.");}
+    if(typeof(callback)!=='function'){throw new Error("check_if_sounds_loaded called without a callback.");}
 	canvas_zone_vcentered.innerHTML='...'; // for the user to notice
-	if(ResourceLoader.not_loaded['sounds'].length!=0){
-		if(debug) console.log("Not loaded sounds: "+ResourceLoader.not_loaded['sounds'].length+"  "+ResourceLoader.not_loaded['sounds']);
-		ResourceLoader.load_media_wait_for_lazy_audio(callback);
-        return false;
-	}else{
-		if(typeof(audio_sprite)==='undefined'){
-			// load audio in the object 
+	if(ResourceLoader.check_if_lazy_sounds_loaded(callback)){
+		if(typeof(audio_sprite)==='undefined'){// load audio in the object 
 			var audio_sprite_object=media_objects.sounds[audio_sprite_name]; // soundsSpriteABR56.30kbps.141k.m4a, soundsSpriteVBR30-19kbps-100k.m4a
 			audio_sprite=new AudioSprite(audio_sprite_object,audio_object_sprite_ref,debug);
 			audio_sprite.playSpriteRange('zsilence_start',callback);
@@ -724,210 +694,17 @@ var check_if_sounds_loaded=function(callback){
 	}
 }
 
+/******** EXTERNALIZE WHEN DONE *********************/
 var memoria=function(){
-	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]==undefined){
-		alert("Debe seleccionar algún sujeto.");
-		return;
-	}
-    preventBackExit();
     if(!check_if_sounds_loaded(memoria)){return;}
-
-
-
+    preventBackExit();
 	canvas_zone_vcentered.innerHTML=' \
 	<br /><button class="button" onclick="memoria_visual()">Memoria Visual</button> \
 	<br /><button class="button" onclick="memoria_auditiva()">Memoria Auditiva</button> \
 	<br /><button class="button" onclick="game()">Volver</button>\
 	';
 }
-
-var memoria_visual=function(){
-	remove_modal();
-	session_data.type="memoria_visual";
-	/** Se presentan imágenes al usuario que se van abriendo y tapando como cartas
-	 ** Luego desaparecen, y salen 9 opciones a ordenar
-	 ** Se inicia con una carta y se va incrementando hasta 7
-	 ** NO SE ADMITE REPETIDOS de manera q cuando hace click en una imágen esta
-	 ** Se queda marcada y no se puede hacer click (no superponer numeros pq puede distraer, solo ensombrecer)
-     ** CADA iteración el LA SECUENCIA PUEDE CAMBIAR (aunque dificulte la memorización)
-     ** CADA iteración el CONJUNTO DE IMG PUEDE CAMBIAR (aunque dificulte la memorización)
-     ** SI FALLA, TIENE UN INTENTO MÁS (SIN PENALIZACIÓN) EN EL MISMO NIVEL
-	 ** SI FALLA 2 VECES SEGUIDAS EN EL MISMO NIVEL (FIN DEL JUEGO)
-     ** LA INFORMACIÓN QUE SE GUARDA ES LA CANTIDAD DE ELEMENTOS QUE HA PODIDO RECORDAR
-     ** Y EL TIEMPO, ETC...
-	*/
-
-	// elegir 9 imagenes de forma aleatoria (sin repetidos)
-	// TODO donde saco el wordlist? del sprite del css?
-
-	if(current_activity_memory_level_passed_times==0 && current_activity_memory_level==1){		
-		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
-		session_data.age=calculateAge(user_subjects[session_data.subject]['birthdate']); 
-        activity_timer.reset();
-		session_data.num_correct=0;
-		session_data.num_answered=MAX_MEMORY_LEVELS; // *2
-		session_data.duration=0;
-		session_data.details=[];
-		var timestamp=new Date();
-		session_data.timestamp=timestamp.getFullYear()+"-"+
-			pad_string((timestamp.getMonth()+1),2,"0") + "-" + pad_string(timestamp.getDate(),2,"0") + " " +
-			 pad_string(timestamp.getHours(),2,"0") + ":"  + pad_string(timestamp.getMinutes(),2,"0");
-	}
-    
-	current_activity_memory_uncovered=0;
-
-	var sprite_images=wordimage_image_ref; //['pato','gato','sol','pez','tren','sal','col','reja','oreja','koala','bala','ala'];
-	current_activity_memory_options = random_array(sprite_images,9);
-	console.log(current_activity_memory_options);
-
-	// elegir n imagenes segun el nivel alcanzado (sin repetidos)
-	current_activity_memory_pattern = random_array(current_activity_memory_options,current_activity_memory_level);
-	console.log(current_activity_memory_pattern);
-
-
-
-	// mostrar tapadas e ir abriendo en intervalos de 2 segundos
-	memoria_visual_show_pattern();
-
-}
-
-var memoria_visual_show_pattern=function(){
-	// TODO instead of passing global varialbes create objects for each game
-	//      and then use this and .bind(this) for timeouts...
-    //      a better encapsulation
-	
-	// TODO with a for loop create the divs...
-	var pattern_representation="";
-	for(var i=0;i<current_activity_memory_pattern.length;i++){
-		pattern_representation+='<div class="membox"><div class="wordimage wordimage-'+current_activity_memory_pattern[i]+' covered"></div></div>';
-	}
-	canvas_zone_vcentered.innerHTML='\
-			<div id="xx">\
-			'+pattern_representation+'\
-			</div>\
-		  <button id="playb" class="button" onclick="memoria_visual_uncover_next()">PLAY</button>\
-          <button id="go-back" class="minibutton fixed-bottom-right" onclick="game()">Volver</button> \
-	';
-}
-
-var memoria_visual_uncover_next=function(){
-	// don't worry about recursion, all functions will end there
-	document.getElementById('playb').disabled=true;
-	if(current_activity_memory_uncovered==current_activity_memory_pattern.length){
-		current_activity_memory_uncovered=0;		
-		setTimeout(function(){memoria_visual_find_pattern();}, 4000);
-	}else{	//uncover...
-		var covered_div=document.getElementById('xx').children[current_activity_memory_uncovered].children[0];
-		covered_div.classList.remove('covered');
-		current_activity_memory_uncovered++;
-		setTimeout(function(){memoria_visual_uncover_next()}, 2600);
-	}
-}
-
-var memoria_visual_find_pattern=function(){
-    activity_timer.reset();
-    activity_timer.start();
-	canvas_zone_vcentered.innerHTML='\
-			<div id="xx">\
-				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[0]+'"></div></div>\
-				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[1]+'"></div></div>\
-				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[2]+'"></div></div>\
-			</div>\
-			<div id="xx">\
-				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[3]+'"></div></div>\
-				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[4]+'"></div></div>\
-				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[5]+'"></div></div>\
-			</div>\
-			<div id="xx">\
-				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[6]+'"></div></div>\
-				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[7]+'"></div></div>\
-				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[8]+'"></div></div>\
-			</div>\
-          <button id="go-back" class="minibutton fixed-bottom-right" onclick="game()">Volver</button> \
-	';
-}
-
-
-var memoria_visual_check_click=function (element){
-	if(element.className.indexOf('covered')!=-1){ alert("covered"); return;} // already covered
-    activity_timer.stop();
-    session_data.duration+=activity_timer.seconds;
-    activity_timer.reset();    
-	var clicked_element=element.classList[1].split("-")[1];
-    
-	if(clicked_element!=current_activity_memory_pattern[current_activity_memory_uncovered]){
-        current_activity_memory_already_incorrect=true;
-    }
-    current_activity_memory_uncovered++;
-    element.classList.add('covered');
-    
-    if(current_activity_memory_uncovered==current_activity_memory_pattern.length){
-        var the_content='<h1>...siguiente actividad...</h1>';
-        if(current_activity_memory_already_incorrect==false){
-            if(session_data.mode!="test"){
-                audio_sprite.playSpriteRange("zfx_correct");
-                the_content='<div class="js-modal-img"><img src="'+media_objects.images['correct.png'].src+'"/></div>';
-            }
-            open_js_modal_content(the_content);
-            session_data.num_correct++;
-            if(current_activity_memory_level>=MAX_MEMORY_LEVELS){
-                console.log('Has superado el juego!'); // debe ser un modal
-                current_activity_memory_level=1;
-                current_activity_played_times=0;
-                current_activity_memory_level_passed_times=0;
-                if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
-                if(session_data.mode=="test" && !game_mode) setTimeout(function(){send_session_data();}, 2000);
-                else setTimeout(function(){game();}, 2000);
-            }else{
-                current_activity_memory_level_passed_times++;
-                //if((session_data.mode=="test" && !game_mode && current_activity_memory_level_passed_times>=2) || (session_data.mode!="test" || game_mode) ){
-                    console.log('siguiente nivel...'); // debe ser un modal
-                    current_activity_memory_level_passed_times=0;
-                    current_activity_memory_level++;
-                //}
-                current_activity_played_times=0;
-                setTimeout(function(){memoria_visual();}, 2000);
-            }
-        }else{
-            current_activity_memory_already_incorrect=false;
-            if(session_data.mode!="test"){
-                audio_sprite.playSpriteRange("zfx_wrong"); // add a callback to move forward after the sound plays...
-                the_content='<div class="js-modal-img"><img src="'+media_objects.images['wrong.png'].src+'"/></div>';
-            }
-            open_js_modal_content(the_content);
-            current_activity_played_times++;
-            if( (session_data.mode=="test" && !game_mode && current_activity_played_times>=MAX_PLAYS)  || ( (session_data.mode!="test" || game_mode) && current_activity_played_times>=10)){
-                console.log('incorrect memory...');
-                current_activity_memory_level=1;
-                current_activity_played_times=0;
-                current_activity_memory_level_passed_times=0;
-                console.log('Ooooh! :( Has fallado dos veces. Fin del juego.'); // should be a modal
-                if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
-                if(session_data.mode=="test" && !game_mode) setTimeout(function(){send_session_data();}, 2000);
-                else setTimeout(function(){game();}, 2000);
-            }else{
-                setTimeout(function(){memoria_visual();}, 2000);
-            }
-        }
-    }
-}
-
-var memoria_auditiva=function(){
-	session_data.type="memoria_auditiva";
-	canvas_zone_vcentered.innerHTML=' \
-	<div class="text-center montessori-div">\
-	<p class="montessori">MEMORIA AUDITIVA, en construcción</p>\
-	<br /><button id="go-back" onclick="game()">Volver</button> \
-	</div>\
-	';
-}
-
-
 var ritmo=function(){
-	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]==undefined){
-		alert("Debe seleccionar algún sujeto.");
-		return;
-	}
     if(!check_if_sounds_loaded(ritmo)){return;}
 	preventBackExit();
 	session_data.type="ritmo";
@@ -939,12 +716,7 @@ var ritmo=function(){
 	</div>\
 	';
 }
-
 var velocidad=function(){
-	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]==undefined){
-		alert("Debe seleccionar algún sujeto.");
-		return;
-	}
     if(!check_if_sounds_loaded(velocidad)){return;}
 	preventBackExit();
 	session_data.type="velocidad";
@@ -958,7 +730,7 @@ var velocidad=function(){
 	</div>\
 	';
 }
-
+/*****************************************************/
 
 
 
@@ -969,31 +741,30 @@ var velocidad=function(){
 
 
 function send_session_data(){
-	if(game_mode){
-		game(); // no data, no control, just go to play menu again
-	}
     remove_modal();
+	if(game_mode){game();}
+    else{
+        if(user_data.access_level=='invitee'){
+            canvas_zone_vcentered.innerHTML+='<br />Los resultados no se pueden guardar para\
+                usuarios "invitados"<br /><br />\
+            <br /><button id="go-back" onclick="menu_screen()">Volver</button>';
+        }else{
+            if(debug) console.log(JSON.stringify(session_data));
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "http://www.centroafan.com/afan-app/www/"+backend_url+'ajaxdb.php',true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.responsetype="json";
+            xhr.send("action=send_session_data_post&json_string="+(JSON.stringify(session_data))); 
+            canvas_zone_vcentered.innerHTML='<br />Fin del Test<br />...Enviando test al servidor...<br /><br />';
 
-	if(user_data.access_level=='invitee'){
-		canvas_zone_vcentered.innerHTML+='<br />Los resultados no se pueden guardar para\
-			usuarios "invitados"<br /><br />\
-		<br /><button id="go-back" onclick="menu_screen()">Volver</button>';
-		return;
-	}
-	
-	if(debug) console.log(JSON.stringify(session_data));
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "http://www.centroafan.com/afan-app/www/"+backend_url+'ajaxdb.php',true);
-	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-	xhr.responsetype="json";
-	xhr.send("action=send_session_data_post&json_string="+(JSON.stringify(session_data))); 
-	canvas_zone_vcentered.innerHTML='<br />Fin del Test<br />...Enviando test al servidor...<br /><br />';
-
-	xhr.onload = function () {
-		var data=JSON.parse(this.responseText);
-		canvas_zone_vcentered.innerHTML='<br />Fin del Test<br />Server message: '+data.msg+'<br /><br />\
-		<br /><button id="go-back" onclick="menu_screen()">Volver</button>';
-	};
-
+            xhr.onload = function () {
+                var data=JSON.parse(this.responseText);
+                canvas_zone_vcentered.innerHTML='<br />Fin del Test<br />Datos guardados en el servidor.<br /><br />\
+                <br /><button id="go-back" onclick="menu_screen()">Volver</button>';
+                delete cache_user_subject_results[session_data.subject];
+                if(debug) console.log('Storing data. Server message: '+data.msg);
+            };
+        }
+    }
 }
 
