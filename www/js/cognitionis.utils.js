@@ -1,5 +1,7 @@
 "use strict";
 
+var monthNames=[ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 // USER DATA
 var user_language=window.navigator.userLanguage || window.navigator.language;
 var is_iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false );
@@ -55,7 +57,9 @@ var ResourceLoader={
 	load_image: function (resource_url){
 		//var image_object = new Image();
 		ResourceLoader.ret_media.images[get_resource_name(resource_url)]=new Image();
-		ResourceLoader.ret_media.images[get_resource_name(resource_url)].addEventListener("loadeddata", ResourceLoader.log_and_remove_from_not_loaded('loadeddata','images',resource_url)); // "load" (onload) -> not really loaded... try loadeddata
+		// event for "error" (onerror), useless will be logged anyway in browser console...
+        // "load" (onload) -> only means some data is got, to really know if it is loaded check .width property
+		ResourceLoader.ret_media.images[get_resource_name(resource_url)].addEventListener("load", ResourceLoader.log_and_remove_from_not_loaded('load','images',resource_url));
 		ResourceLoader.ret_media.images[get_resource_name(resource_url)].src = resource_url; // after? load begins as soon as src is set..
 		//return image_object; // not good for async stuff
 	},
@@ -87,18 +91,19 @@ var ResourceLoader={
 		if(ResourceLoader.debug) console.log(event_name+" ("+res_type+": "+res_url+") "+get_resource_name(res_url));
 		if(res_type=='sounds'){
 			if (ResourceLoader.ret_media.sounds[get_resource_name(res_url)]===undefined || ResourceLoader.ret_media.sounds[get_resource_name(res_url)].readyState==0){
-				if(ResourceLoader.debug) console.log("INFO: "+res_url+" fired canplaythrough but it is not loaded (undefined or readyState==0). ReadyState: "
-					+ResourceLoader.ret_media.sounds[get_resource_name(res_url)].readyState);
-				setTimeout(function() {ResourceLoader.check_for_audios_readyState4()}, ResourceLoader.media_load_check_status_interval);
-				return;
+				if(ResourceLoader.debug) console.log("INFO: "+res_url+" fired canplaythrough but it is not loaded (res="+ResourceLoader.ret_media.sounds[get_resource_name(res_url)]+" or readyState="+ResourceLoader.ret_media.sounds[get_resource_name(res_url)].readyState+")");
+				return; // break so this is still in "not_loaded"
 			}
 			ResourceLoader.ret_media.sounds[get_resource_name(res_url)].removeEventListener(event_name, ResourceLoader.log_and_remove_from_not_loaded);
 		}
 		if(res_type=='images'){
-			if (ResourceLoader.ret_media.images[get_resource_name(res_url)]===undefined || !ResourceLoader.ret_media.images[get_resource_name(res_url)].complete){
-				if(ResourceLoader.debug) console.log("INFO: "+res_url+" fired loaded but it is not loaded (undefined or complete==false).");
-				setTimeout(function() {ResourceLoader.check_for_images_complete()}, ResourceLoader.media_load_check_status_interval);
-				return;
+            // nonexistent appear as complete (doesn't work), so we use "width"
+			if (ResourceLoader.ret_media.images[get_resource_name(res_url)]===undefined ||
+                !ResourceLoader.ret_media.images[get_resource_name(res_url)].complete ||     
+                ResourceLoader.ret_media.images[get_resource_name(res_url)].width==0){
+				if(ResourceLoader.debug)
+                    console.log("INFO: "+res_url+" fired loaded but it is not loaded (res="+ResourceLoader.ret_media.images[get_resource_name(res_url)]+", complete="+ResourceLoader.ret_media.images[get_resource_name(res_url)].complete+" or width="+ResourceLoader.ret_media.images[get_resource_name(res_url)].width+").");
+				return; // break so this is still in "not loaded"
 			}
 			ResourceLoader.ret_media.images[get_resource_name(res_url)].removeEventListener(event_name, ResourceLoader.log_and_remove_from_not_loaded);
 		}
@@ -122,24 +127,22 @@ var ResourceLoader={
 				ResourceLoader.log_and_remove_from_not_loaded('readyState4','sounds',res_url);
 			}
 		}
-		if(ResourceLoader.not_loaded.sounds.length>0){
-			setTimeout(function() {ResourceLoader.check_for_audios_readyState4()}, ResourceLoader.media_load_check_status_interval);
-		}
 	},
 	check_for_images_complete: function(){
 		for(var i=0;i<ResourceLoader.not_loaded.images.length;i++){
 			var res_url=ResourceLoader.not_loaded.images[i];
-			if (ResourceLoader.ret_media.images[get_resource_name(res_url)]!==undefined && ResourceLoader.ret_media.images[get_resource_name(res_url)].complete){
+			if (ResourceLoader.ret_media.images[get_resource_name(res_url)]!==undefined && 
+                ResourceLoader.ret_media.images[get_resource_name(res_url)].complete &&
+                ResourceLoader.ret_media.images[get_resource_name(res_url)].width>0){
 				if(ResourceLoader.debug) console.log(res_url+" complete==true removing from not loaded.");
 				ResourceLoader.log_and_remove_from_not_loaded('complete==true','images',res_url);
 			}
 		}
-		if(ResourceLoader.not_loaded.images.length>0){
-			setTimeout(function() {ResourceLoader.check_for_images_complete()}, ResourceLoader.media_load_check_status_interval);
-		}
 	},
 	check_load_status: function() {
 		ResourceLoader.media_load_time+=ResourceLoader.media_load_check_status_interval;
+        ResourceLoader.check_for_images_complete(); // update images status
+        ResourceLoader.check_for_audios_readyState4() // update audios status        
 		if(ResourceLoader.debug) ResourceLoader.modal_dialog_msg.innerHTML='check_load_status '+ResourceLoader.media_load_time+' - progress: '+ResourceLoader.load_progressbar.value+' - max: '+ResourceLoader.load_progressbar.max
 		// If there is no media to load
 		if(ResourceLoader.num_images==0 && ResourceLoader.num_sounds==0){
@@ -181,7 +184,7 @@ var ResourceLoader={
 			var err_msg="";
 			for(var i=0;i<ResourceLoader.not_loaded['images'].length;i++){
 				var temp_obj=ResourceLoader.ret_media.images[get_resource_name(ResourceLoader.not_loaded['images'][i])];
-				err_msg+="<br />Load complete?"+temp_obj.complete
+				err_msg+="<br />Load "+get_resource_name(ResourceLoader.not_loaded['images'][i])+" complete="+temp_obj.complete+" width="+temp_obj.width;
 			}
 			for(var i=0;i<ResourceLoader.not_loaded['sounds'].length;i++){
 				var temp_obj=ResourceLoader.ret_media.sounds[get_resource_name(ResourceLoader.not_loaded['sounds'][i])];

@@ -143,7 +143,7 @@ function login_screen(){
    <span class="icon"></span>\
     <span class="buttonText"></span>\
 	</div>\
-	<br /><button id="exit" class="button exit" onclick="invitee_access();">Acceso Invitado (Offline)</button> \
+	<br /><button class="button exit" onclick="invitee_access();">Acceso Invitado (Offline)</button> \
 	<br /><button id="exit" class="button exit" onclick="exit_app();">Salir</button> \
 		';
 	gapi.signin.render('signinButton', {
