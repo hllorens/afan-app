@@ -1127,5 +1127,8 @@ var random_array=function(array, num_elems, allow_repetition){
 	return items;
 }
 
-
+var Asciify={};
+Asciify.latin_map={"á":"a","é":"e","í":"i","ó":"o","ú":"u"};
+Asciify.asciify=function(str){return str.replace(/[^A-Za-z0-9\[\] ]/g,function(a){return Asciify.latin_map[a]||a})};
+Asciify.isLatin=function(str){return str==Asciify.asciify(str)}
 

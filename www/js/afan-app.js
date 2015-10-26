@@ -716,20 +716,7 @@ var ritmo=function(){
 	</div>\
 	';
 }
-var velocidad=function(){
-    if(!check_if_sounds_loaded(velocidad)){return;}
-	preventBackExit();
-	session_data.type="velocidad";
-		
-	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]!=undefined)
-		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
-	canvas_zone_vcentered.innerHTML=' \
-	<div class="text-center montessori-div">\
-	<p class="montessori">VELOCIDAD. Un poc de montessori guai?</p>\
-	<br /><button id="go-back" onclick="game()">Volver</button> \
-	</div>\
-	';
-}
+
 /*****************************************************/
 
 
