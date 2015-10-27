@@ -55,10 +55,7 @@ var ResourceLoader={
 	debug: false,
 	
 	load_image: function (resource_url){
-		//var image_object = new Image();
 		ResourceLoader.ret_media.images[get_resource_name(resource_url)]=new Image();
-		// event for "error" (onerror), useless will be logged anyway in browser console...
-        // "load" (onload) -> only means some data is got, to really know if it is loaded check .width property
 		ResourceLoader.ret_media.images[get_resource_name(resource_url)].addEventListener("load", ResourceLoader.log_and_remove_from_not_loaded('load','images',resource_url));
 		ResourceLoader.ret_media.images[get_resource_name(resource_url)].src = resource_url; // after? load begins as soon as src is set..
 		//return image_object; // not good for async stuff
@@ -100,7 +97,8 @@ var ResourceLoader={
             // nonexistent appear as complete (doesn't work), so we use "width"
 			if (ResourceLoader.ret_media.images[get_resource_name(res_url)]===undefined ||
                 !ResourceLoader.ret_media.images[get_resource_name(res_url)].complete ||     
-                ResourceLoader.ret_media.images[get_resource_name(res_url)].width==0){
+                ResourceLoader.ret_media.images[get_resource_name(res_url)].width==0
+				){
 				if(ResourceLoader.debug)
                     console.log("INFO: "+res_url+" fired loaded but it is not loaded (res="+ResourceLoader.ret_media.images[get_resource_name(res_url)]+", complete="+ResourceLoader.ret_media.images[get_resource_name(res_url)].complete+" or width="+ResourceLoader.ret_media.images[get_resource_name(res_url)].width+").");
 				return; // break so this is still in "not loaded"
