@@ -1,5 +1,11 @@
 "use strict";
 
+var conciencia_help_title='Conciencia Auditiva';
+var conciencia_help='\
+    en construcción en construcción <br />en construcción <br />en construcción <br />\
+    en construcción <br />en construcción en construcción <br />en construcción <br />\
+';
+
 var conciencia=function(){
     if(!check_if_sounds_loaded(conciencia)){return;}
     preventBackExit();
@@ -39,7 +45,7 @@ function conciencia_start(){
 	var training_extra_fields='';
 	if(session_data.mode=="training"){
 		training_extra_fields='<div id="current_score">\
-		Correct : <span id="current_score_num">0</span>\
+		Correctas : <span id="current_score_num">0</span>\
 		</div>';
 	}
 	canvas_zone_vcentered.innerHTML=' \
@@ -52,16 +58,20 @@ function conciencia_start(){
 		  </div>\
 		  <div class="col_right">\
 		    <div id="remaining_activities">\
-		      remaining activs : <span id="remaining_activities_num">0</span>\
+		      Actividades restantes: <span id="remaining_activities_num">0</span>\
 		    </div>\
 		    <div id="current_answered">\
-		      Answered : <span id="current_answered_num">0</span>\
+		      Actividades finalizadas : <span id="current_answered_num">0</span>\
 		    </div>\
 		  </div>\
 		</div> <!-- /#zone_score -->\
 	<div id="answers"></div><br class="clear" />\
 	<div id="sound">sound icon</div><br /> \
-	';
+        <button id="help_button" class="minibutton fixed-bottom-left help">?</button> \
+        <button id="go-back" class="minibutton fixed-bottom-right">Volver</button> \
+        ';
+    document.getElementById("help_button").addEventListener(clickOrTouch,function(){open_js_modal_alert(conciencia_help_title,conciencia_help);});
+    document.getElementById("go-back").addEventListener(clickOrTouch,function(){game();});        
 	//get elements
 	dom_score_correct=document.getElementById('current_score_num');
 	dom_score_answered=document.getElementById('current_answered_num');
@@ -82,43 +92,51 @@ function conciencia_start(){
 }
 
 function conciencia_show_activity(i){
-	document.getElementById('remaining_activities_num').innerHTML=""+(remaining_rand_activities.length-1);
+    document.getElementById('remaining_activities_num').innerHTML=""+(remaining_rand_activities.length-1);
 
-	activity_timer.reset();
-	current_activity_index=i;
-	current_activity_played_times=0;
-	if(debug) console.log(i+"--"+remaining_rand_activities);
-	current_activity_data=remaining_rand_activities[i]; 
-	correct_answer=current_activity_data['answers'][0];
+    activity_timer.reset();
+    current_activity_index=i;
+    current_activity_played_times=0;
+    if(debug) console.log(i+"--"+remaining_rand_activities);
+    current_activity_data=remaining_rand_activities[i]; 
+    correct_answer=current_activity_data['answers'][0];
 
-	var answers_div=document.getElementById('answers');
-	answers_div.innerHTML="";
-	var used_answers=[];
-	var used_answers_text=[];
-	for(var i=0; i<USE_ANSWERS ; ++i) {
-		var use=Math.floor(Math.random() * USE_ANSWERS)
-		while(used_answers.indexOf(use) != -1) use=Math.floor(Math.random() * USE_ANSWERS);
+    var answers_div=document.getElementById('answers');
+    answers_div.innerHTML="";
+    var used_answers=[];
+    var used_answers_text=[];
+    for(var i=0; i<USE_ANSWERS ; ++i) {
+        var use=Math.floor(Math.random() * USE_ANSWERS)
+        while(used_answers.indexOf(use) != -1) use=Math.floor(Math.random() * USE_ANSWERS);
 
-		var answer_i=current_activity_data['answers'][use];
-		answers_div.innerHTML+='<div id="answer'+i+'" onclick="conciencia_check_correct(this.firstChild,correct_answer)" class="hover_red_border"  ></div>';
-		if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+current_activity_data['answers'][use])){
-			alert("ERROR: .wordimage-"+current_activity_data['answers'][use]+" not found in wordimg-sprite.css.");
-			document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
+        var answer_i=current_activity_data['answers'][use];
+        answers_div.innerHTML+='<div id="answer'+i+'" class="hover_red_border"  ></div>';
+        if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+current_activity_data['answers'][use])){
+            alert("ERROR: .wordimage-"+current_activity_data['answers'][use]+" not found in wordimg-sprite.css.");
+            document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
         }else if(used_answers_text.hasOwnProperty(current_activity_data['answers'][use])){
-			alert("ERROR: "+current_activity_data['answers'][use]+" is already used contact the ADMIN.");
-			document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
-		}else{
-			document.getElementById("answer"+i).innerHTML += '<div class="wordimage wordimage-'+current_activity_data['answers'][use]+'"></div>';
-		}
-		
-		used_answers[used_answers.length]=use;
-		used_answers_text[used_answers_text.length]=current_activity_data['answers'][use];
-	}
-	
-	zone_sound=document.getElementById('sound');
-	zone_sound.innerHTML='<button id="playb" class="button" onclick="conciencia_play_sound()">PLAY</button> ';
-	var playb=document.getElementById('playb');
-	toggleClassBlink(playb,'backgroundRed',250,4);
+            alert("ERROR: "+current_activity_data['answers'][use]+" is already used contact the ADMIN.");
+            document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
+        }else{
+            document.getElementById("answer"+i).innerHTML += '<div class="wordimage wordimage-'+current_activity_data['answers'][use]+'"></div>';
+        }
+        
+        used_answers[used_answers.length]=use;
+        used_answers_text[used_answers_text.length]=current_activity_data['answers'][use];
+    }
+
+    zone_sound=document.getElementById('sound');
+    zone_sound.innerHTML='<button id="playb" class="button">PLAY</button> ';
+    var playb=document.getElementById('playb');
+    toggleClassBlink(playb,'backgroundRed',250,4);
+    
+    playb.addEventListener(clickOrTouch,function(){conciencia_play_sound();});
+    var boxes=document.getElementsByClassName("hover_red_border");
+    for(var i=0;i<boxes.length;i++){
+        boxes[i].addEventListener(clickOrTouch,function(){
+            conciencia_check_correct(this.firstChild,correct_answer);
+            });
+    }
 }
 
 var conciencia_play_sound_finished=function(){

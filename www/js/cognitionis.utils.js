@@ -140,7 +140,7 @@ var ResourceLoader={
 	check_load_status: function() {
 		ResourceLoader.media_load_time+=ResourceLoader.media_load_check_status_interval;
         ResourceLoader.check_for_images_complete(); // update images status
-        ResourceLoader.check_for_audios_readyState4() // update audios status        
+        ResourceLoader.check_for_audios_readyState4(); // update audios status        
 		if(ResourceLoader.debug) ResourceLoader.modal_dialog_msg.innerHTML='check_load_status '+ResourceLoader.media_load_time+' - progress: '+ResourceLoader.load_progressbar.value+' - max: '+ResourceLoader.load_progressbar.max
 		// If there is no media to load
 		if(ResourceLoader.num_images==0 && ResourceLoader.num_sounds==0){
@@ -153,7 +153,7 @@ var ResourceLoader={
 				// If all media loaded
 				document.body.removeChild(ResourceLoader.modal_load_window);
 				ResourceLoader.callback_on_load_end(); // start the app even if audio is not loaded
-				return;				
+				return;
 			}else if(ResourceLoader.load_progressbar.value==ResourceLoader.num_images){
 				// If all images loaded, check if lazy audio
 				if(!ResourceLoader.lazy_audio && !ResourceLoader.download_lazy_audio_active){
@@ -162,7 +162,7 @@ var ResourceLoader={
 					ResourceLoader.media_load_time=0;
 					var ios_media_msg="Pula Ok para empezar";
 					if(user_language=='en-US') ios_media_msg="Click Ok to start";
-					ResourceLoader.modal_dialog_msg.innerHTML=ios_media_msg+' <button onclick="ResourceLoader.download_audio_ios()">Ok</button> ';				
+					ResourceLoader.modal_dialog_msg.innerHTML=ios_media_msg+' <button onclick="ResourceLoader.download_audio_ios()">Ok</button> ';
 					return;
 				}else if(ResourceLoader.lazy_audio){
 					//clearInterval(ResourceLoader.load_interval); done by return+timeout
@@ -198,6 +198,7 @@ var ResourceLoader={
 	},
 
 	check_load_status_lazy_audio: function () {
+        ResourceLoader.check_for_audios_readyState4(); // update audios status  
 		ResourceLoader.media_load_time+=ResourceLoader.media_load_check_status_interval;
 		if(ResourceLoader.debug)
 				ResourceLoader.modal_dialog_msg.innerHTML='check_load_status '+ResourceLoader.media_load_time+
@@ -228,7 +229,7 @@ var ResourceLoader={
 		ResourceLoader.modal_dialog.className="js-modal-dialog-progress";
 		ResourceLoader.modal_dialog_title=document.createElement("span");
 		ResourceLoader.modal_dialog_title.className="small-text";
-		ResourceLoader.modal_dialog_title.innerHTML="Loading...";
+		ResourceLoader.modal_dialog_title.innerHTML="Loading media...";
 		ResourceLoader.modal_dialog_msg=document.createElement("p");
 		ResourceLoader.modal_dialog_msg.id="js-modal-dialog-msg";
 		ResourceLoader.modal_dialog_msg.className="small-text";
@@ -265,16 +266,20 @@ var ResourceLoader={
 	load_media_wait_for_lazy_audio: function(callback_function){
 		ResourceLoader.callback_on_load_end=callback_function;
 		ResourceLoader.modal_load_window=document.createElement("div");
-		ResourceLoader.modal_load_window.className="js-modal-window";
+		ResourceLoader.modal_load_window.className="js-modal-window-transp";
 		ResourceLoader.modal_dialog=document.createElement("div");
-		ResourceLoader.modal_dialog.id="modal-dialog";
+		ResourceLoader.modal_dialog.id="js-modal-dialog";
 		ResourceLoader.modal_dialog.className="js-modal-dialog-progress";
+		ResourceLoader.modal_dialog_title=document.createElement("span");
+		ResourceLoader.modal_dialog_title.className="small-text";
+		ResourceLoader.modal_dialog_title.innerHTML="Loading audio (lazy)...";
 		ResourceLoader.modal_dialog_msg=document.createElement("p");
-		ResourceLoader.modal_dialog_msg.id="modal-dialog-msg";
+		ResourceLoader.modal_dialog_msg.id="js-modal-dialog-msg";
 		ResourceLoader.load_progressbar=document.createElement("progress");
 		ResourceLoader.num_images=0; ResourceLoader.num_sounds=ResourceLoader.not_loaded['sounds'].length;
 		ResourceLoader.load_progressbar.value=0; ResourceLoader.load_progressbar.max=ResourceLoader.num_images+ResourceLoader.num_sounds;
 
+		ResourceLoader.modal_dialog.appendChild(ResourceLoader.modal_dialog_title);
 		ResourceLoader.modal_dialog.appendChild(ResourceLoader.load_progressbar);
 		ResourceLoader.modal_dialog.appendChild(ResourceLoader.modal_dialog_msg);
 		ResourceLoader.modal_load_window.appendChild(ResourceLoader.modal_dialog);
@@ -301,10 +306,18 @@ var ResourceLoader={
 
 };
 
+// responsive
+var prevent_scrolling=function(){
+    document.body.addEventListener('touchmove', function(event) {
+        event.preventDefault();
+    }, false);
+}
 
-
-
-
+// avoid 300ms delay on touch...
+var clickOrTouch = (('ontouchend' in window)) ? 'touchend' : 'click';
+/* usage: document.getElementById('xxx').on(clickOrTouch, function() {
+             // do something
+          });*/
 
 
 
@@ -314,10 +327,12 @@ var ResourceLoader={
 
 
 // MODAL WINDOWS
-
 // it would be great to objectify this to easily interact with it (e.g., modify text)
+/*
+    If no accept or cancel functions are provided it shows a top right x to close
+*/
 function open_js_modal_alert(title_text, text_text, accept_function, cancel_function){
-	var modal_window=document.createElement("div")
+	var modal_window=document.createElement("div");
 	modal_window.id="js-modal-window-alert"; modal_window.className="js-modal-window";
 
 	var modal_dialog=document.createElement("div");
@@ -330,37 +345,37 @@ function open_js_modal_alert(title_text, text_text, accept_function, cancel_func
 	text_elem.id="js-modal-window-text";
 	text_elem.innerHTML=text_text
 
-	if(cancel_function===undefined){
+	if(typeof(cancel_function)=='undefined'){
 		var close_elem=document.createElement('a')
-		close_elem.innerHTML="x"
-		close_elem.href="javascript:void(0)"
+        close_elem.className="boxclose";
+		close_elem.href="javascript:void(0)";
 		close_elem.onclick=function (){
 			var elem_to_remove=document.getElementById("js-modal-window-alert");
 			elem_to_remove.parentNode.removeChild(elem_to_remove);
 		}
-		modal_dialog.appendChild(close_elem)
+		modal_dialog.appendChild(close_elem);
 	}
 
-	modal_dialog.appendChild(title_elem)
-	modal_dialog.appendChild(text_elem)
+	modal_dialog.appendChild(title_elem);
+	modal_dialog.appendChild(text_elem);
 
-	if(accept_function!==undefined){
-		var accept_button=document.createElement('button')
-		accept_button.innerHTML='Aceptar'
-		accept_button.onclick=accept_function
-		modal_dialog.appendChild(accept_button)
+	if(typeof(accept_function)!='undefined'){
+		var accept_button=document.createElement('button');
+		accept_button.innerHTML='Aceptar';
+		accept_button.onclick=accept_function;
+		modal_dialog.appendChild(accept_button);
 	}
 
-	if(cancel_function!==undefined){
-		var cancel_button=document.createElement('button')
-		cancel_button.innerHTML='Cancelar'
-		cancel_button.onclick=cancel_function
-		modal_dialog.appendChild(cancel_button)
+	if(typeof(cancel_function)!='undefined'){
+		var cancel_button=document.createElement('button');
+		cancel_button.innerHTML='Cancelar';
+		cancel_button.onclick=cancel_function;
+		modal_dialog.appendChild(cancel_button);
 	}
 
 
-	modal_window.appendChild(modal_dialog)
-	document.body.appendChild(modal_window)
+	modal_window.appendChild(modal_dialog);
+	document.body.appendChild(modal_window);
 }
 
 
@@ -1129,4 +1144,19 @@ var Asciify={};
 Asciify.latin_map={"á":"a","é":"e","í":"i","ó":"o","ú":"u"};
 Asciify.asciify=function(str){return str.replace(/[^A-Za-z0-9\[\] ]/g,function(a){return Asciify.latin_map[a]||a})};
 Asciify.isLatin=function(str){return str==Asciify.asciify(str)}
+
+var get_reduced_display_name=function(display_name, max_length){
+    if(typeof(max_length)=='undefined') max_length=12;
+    if(display_name.length>max_length){
+        var first_space_index=display_name.indexOf(" ");
+        console.log("first_space_index="+first_space_index);
+        if(first_space_index!=-1 && first_space_index<max_length){
+            display_name=display_name.substr(0,first_space_index);
+        }else{
+            display_name=display_name.substr(0,max_length);
+        }
+    }
+    return display_name
+}
+
 

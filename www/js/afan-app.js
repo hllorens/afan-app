@@ -139,11 +139,11 @@ function login_screen(){
 	if(debug){alert('login_screen called');}
 	header_zone.innerHTML='<h1>Acceso</h1>';
 	canvas_zone_vcentered.innerHTML='\
-	<div id="signinButton" class="button">Acceso Google\
+	<div id="signinButton" class="button">Google+\
    <span class="icon"></span>\
     <span class="buttonText"></span>\
 	</div>\
-	<br /><button class="button exit" onclick="invitee_access();">Acceso Invitado (Offline)</button> \
+	<br /><button class="button exit" onclick="invitee_access();">Invitado</button> \
 	<br /><button id="exit" class="button exit" onclick="exit_app();">Salir</button> \
 		';
 	gapi.signin.render('signinButton', {
@@ -163,7 +163,11 @@ function invitee_access(){
 	user_data.email='invitee';
 	user_data.display_name='invitado';
 	user_data.access_level='invitee';
-	menu_screen();
+    cache_user_subject_results[session_data.subject]={}
+    cache_user_subject_results[session_data.subject].general={'user':'invitado','subject':'invitado'}
+    cache_user_subject_results[session_data.subject].elements=[]
+    // cache_user_subject_result_detail is created lively in case of results
+    menu_screen();
 }
 
 
@@ -334,13 +338,13 @@ function menu_screen(){
 	if(user_data.email==null && !game_mode){
 		login_screen();
 	}else if(!game_mode){
-		var sign='<li><a href="#" onclick="hamburger_close();show_profile()">profile</a></li>\
+		var sign='<li><a href="#" onclick="hamburger_close();show_profile()">perfil</a></li>\
 				  <li><a href="#" onclick="hamburger_close();gdisconnect()">desconectar</a></li>';
 		if(user_data.email=='invitee'){
-			sign='<li><a href="#" onclick="hamburger_close();login_screen()">login</a></li>';
+			sign='<li><a href="#" onclick="hamburger_close();login_screen()">acceder</a></li>';
 		}
 		// TODO if admin administrar... lo de sujetos puede ir aquí tb...
-		hamburger_menu_content.innerHTML=''+user_data.email.substr(0,10)+'<ul>\
+		hamburger_menu_content.innerHTML=''+get_reduced_display_name(user_data.display_name)+'<ul>\
 		'+sign+'\
 		<li><a href="#" onclick="exit_app()">salir</a></li>\
 		</ul>';
@@ -349,23 +353,26 @@ function menu_screen(){
         header_text=document.getElementById('header_text');
 
 		var admin_opts='<br /><button id="sel-usr" onclick="admin_screen()" class="button">Administrar</button>';
-		var normal_opts='<button id="start-test-button" class="button" disabled="true">Test</button> \
+		var normal_opts='\
 	    <br /><button id="read-letters" disabled="true" class="button" onclick="letter_reader()">Lector de sonidos</button> \
 		<br /><button id="manage-subjects" disabled="true" class="button" onclick="manage_subjects()">Participantes</button> \
-		<br /><button id="results" disabled="true" class="button" onclick="explore_results()">Resultados</button>';
+		';
 		if(user_data.access_level!='admin') admin_opts="";
-		if(user_data.access_level=='invitee'){ normal_opts=""; cache_user_subjects={invitado:'invitado'}}
+		if(user_data.access_level=='invitee'){ normal_opts=""; cache_user_subjects={'invitado':'invitado'}}
 		canvas_zone_vcentered.innerHTML=' \
 		<div id="menu-logo-div"></div> \
 		Participante:  <select id="subjects-select" onchange="set_subject()"></select> \
 		<nav id="responsive_menu">\
 		'+admin_opts+'\
 		<br /><button id="start-button" class="button" disabled="true">Jugar</button> \
+        <button id="start-test-button" class="button" disabled="true">Test</button> \
 		'+normal_opts+'\
-		<br /><button id="exit" class="button exit" onclick="exit_app()">Salir</button> \
+        <br /><button id="results" disabled="true" class="button">Resultados</button>\
+		<br /><button id="exit_app" class="button exit" onclick="exit_app()">Salir</button> \
 		</nav>\
 		';
-
+        document.getElementById("results").addEventListener(clickOrTouch,function(){explore_results();});
+        document.getElementById("exit_app").addEventListener(clickOrTouch,function(){exit_app();});
 		if(cache_user_subjects==null){
 			ajax_request_json(
 				backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user, 
@@ -387,14 +394,14 @@ var prepare_menu_when_subjects_loaded=function(){
     select_fill_with_json(cache_user_subjects,subjects_select_elem,session_data.subject);
     set_subject();
 
+    document.getElementById("start-button").addEventListener(clickOrTouch,function(){session_data.mode="training";game();});
+    document.getElementById("start-test-button").addEventListener(clickOrTouch,function(){session_data.mode="test";game();});
     document.getElementById("start-button").disabled=false;
-    document.getElementById("start-button").onclick=function(){session_data.mode="training";game()};
+    document.getElementById("start-test-button").disabled=false;    
+    document.getElementById("results").disabled=false;
     if(user_data.access_level!='invitee'){
-        document.getElementById("start-test-button").onclick=function(){session_data.mode="test";game()};
-        document.getElementById("start-test-button").disabled=false;
         document.getElementById("read-letters").disabled=false;
         document.getElementById("manage-subjects").disabled=false;
-        document.getElementById("results").disabled=false;
     }
 }
 
@@ -530,58 +537,54 @@ var explore_results=function(){
 	header_text.innerHTML=' < '+app_name+' menu';
 	canvas_zone_vcentered.innerHTML=' \
 	<div id="results-div">cargando resultados...</div> \
-	<br /><button id="go-back" onclick="menu_screen()">Volver</button> \
+	<br /><button id="go-back" class="button" onclick="menu_screen()">Volver</button> \
 	';
-	if(session_data.subject=='invitado'){
-		document.getElementById("results-div").innerHTML="Resultados user: "+user_data.email+" - subject: No hay sujetos<br />No hay resultados";
-	}else{
-        if(!cache_user_subject_results.hasOwnProperty(session_data.subject)){
-            ajax_request_json(
-                backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject, 
-                function(data) {
-                    cache_user_subject_results[session_data.subject]=data; //cache (never changes)
-                    if(cache_user_subject_results[session_data.subject].elements.length==0){
-                        document.getElementById("results-div").innerHTML="Resultados user: "+cache_user_subject_results[session_data.subject].general.user+" - subject: <b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
-                    }else{
-                        document.getElementById("results-div").innerHTML="Resultados user: "+cache_user_subject_results[session_data.subject].general.user+" - subject: <b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
-                        var results_table=document.getElementById("results-table");
-                        DataTableSimple.call(results_table, {
-                            data: cache_user_subject_results[session_data.subject].elements,
-                            row_id: 'id',
-                            pagination: 5,
-                            columns: [
-                                //{ data: 'id' },
-                                { data: 'timestamp', col_header: 'Id', link_function_id: 'explore_result_detail' },
-                                { data: 'type', col_header: 'Tipo',  format: 'first_4'},
-                                { data: 'mode', col_header: 'Modo',  format: 'first_4'},
-                                { data: 'age', col_header: 'Edad' },
-                                { data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
-                                { data: 'result', col_header: '%', format: 'percentage_int' } 
-                            ]
-                        } );
-                    }
-                });	
+    if(!cache_user_subject_results.hasOwnProperty(session_data.subject)){
+        ajax_request_json(
+            backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject, 
+            function(data) {
+                cache_user_subject_results[session_data.subject]=data; //cache (never changes)
+                if(cache_user_subject_results[session_data.subject].elements.length==0){
+                    document.getElementById("results-div").innerHTML="Resultados "+cache_user_subject_results[session_data.subject].general.user+" - sujeto: <b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
+                }else{
+                    document.getElementById("results-div").innerHTML="Resultados "+cache_user_subject_results[session_data.subject].general.user+" - sujeto: <b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
+                    var results_table=document.getElementById("results-table");
+                    DataTableSimple.call(results_table, {
+                        data: cache_user_subject_results[session_data.subject].elements,
+                        row_id: 'id',
+                        pagination: 5,
+                        columns: [
+                            //{ data: 'id' },
+                            { data: 'timestamp', col_header: 'Id', link_function_id: 'explore_result_detail' },
+                            { data: 'type', col_header: 'Tipo',  format: 'first_4'},
+                            { data: 'mode', col_header: 'Modo',  format: 'first_4'},
+                            { data: 'age', col_header: 'Edad' },
+                            { data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
+                            { data: 'result', col_header: '%', format: 'percentage_int' } 
+                        ]
+                    } );
+                }
+            });	
+    }else{
+        if(cache_user_subject_results[session_data.subject].elements.length==0){
+            document.getElementById("results-div").innerHTML="Resultados "+cache_user_subject_results[session_data.subject].general.user+" - sujeto: <b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
         }else{
-            if(cache_user_subject_results[session_data.subject].elements.length==0){
-                document.getElementById("results-div").innerHTML="Resultados user: "+cache_user_subject_results[session_data.subject].general.user+" - subject: <b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
-            }else{
-                document.getElementById("results-div").innerHTML="Resultados user: "+cache_user_subject_results[session_data.subject].general.user+" - subject: <b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
-                var results_table=document.getElementById("results-table");
-                DataTableSimple.call(results_table, {
-                    data: cache_user_subject_results[session_data.subject].elements,
-                    row_id: 'id',
-                    pagination: 5,
-                    columns: [
-                        //{ data: 'id' },
-                        { data: 'timestamp', col_header: 'Id', link_function_id: 'explore_result_detail' },
-                        { data: 'type', col_header: 'Tipo',  format: 'first_4'},
-                        { data: 'mode', col_header: 'Modo',  format: 'first_4'},
-                        { data: 'age', col_header: 'Edad' },
-                        { data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
-                        { data: 'result', col_header: '%', format: 'percentage_int' } 
-                    ]
-                } );
-            }
+            document.getElementById("results-div").innerHTML="Resultados "+cache_user_subject_results[session_data.subject].general.user+" - sujeto: <b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
+            var results_table=document.getElementById("results-table");
+            DataTableSimple.call(results_table, {
+                data: cache_user_subject_results[session_data.subject].elements,
+                row_id: 'id',
+                pagination: 5,
+                columns: [
+                    //{ data: 'id' },
+                    { data: 'timestamp', col_header: 'Id', link_function_id: 'explore_result_detail' },
+                    { data: 'type', col_header: 'Tipo',  format: 'first_4'},
+                    { data: 'mode', col_header: 'Modo',  format: 'first_4'},
+                    { data: 'age', col_header: 'Edad' },
+                    { data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
+                    { data: 'result', col_header: '%', format: 'percentage_int' } 
+                ]
+            } );
         }
     }
 };
@@ -665,23 +668,31 @@ var game=function(){
     //-----------------------------
 	var extra_options="";
 	if(!game_mode){
-        extra_options='<br /><button class="button" onclick="menu_screen()">Volver</button>';
+        extra_options='<br /><button id="go_back_button" class="button">Volver</button>';
         header_text.innerHTML=' < '+app_name+' menu';
     }
     canvas_zone_vcentered.innerHTML=' \
-    <br /><button class="button" onclick="conciencia()">Conciencia</button> \
-    <br /><button class="button" onclick="memoria()">Memoria</button> \
-    <br /><button class="button" onclick="ritmo()">Ritmo</button> \
-    <br /><button class="button" onclick="velocidad()">Velocidad</button> \
+    <br /><button id="conciencia" class="button">Conciencia</button> \
+    <br /><button id="memoria" class="button">Memoria</button> \
+    <br /><button id="ritmo" class="button">Ritmo</button> \
+    <br /><button id="velocidad" class="button">Velocidad</button> \
     '+extra_options+'\
     ';
+    
+    document.getElementById("conciencia").addEventListener(clickOrTouch,function(){conciencia();});
+    document.getElementById("memoria").addEventListener(clickOrTouch,function(){memoria();});
+    document.getElementById("ritmo").addEventListener(clickOrTouch,function(){ritmo();});
+    document.getElementById("velocidad").addEventListener(clickOrTouch,function(){velocidad();});
+    if(!game_mode){
+        document.getElementById("go_back_button").addEventListener(clickOrTouch,function(){menu_screen();});
+    }
 }
 
 // IMPORTANT: Has to be called after 1 click so it cannot be game() since
 // in game-mode that one is the first function (no click)
 var check_if_sounds_loaded=function(callback){
     if(typeof(callback)!=='function'){throw new Error("check_if_sounds_loaded called without a callback.");}
-	canvas_zone_vcentered.innerHTML='...'; // for the user to notice
+	canvas_zone_vcentered.innerHTML='...pre-cargando sonidos...'; // for the user to notice
 	if(ResourceLoader.check_if_lazy_sounds_loaded(callback)){
 		if(typeof(audio_sprite)==='undefined'){// load audio in the object 
 			var audio_sprite_object=media_objects.sounds[audio_sprite_name]; // soundsSpriteABR56.30kbps.141k.m4a, soundsSpriteVBR30-19kbps-100k.m4a
@@ -699,22 +710,13 @@ var memoria=function(){
     if(!check_if_sounds_loaded(memoria)){return;}
     preventBackExit();
 	canvas_zone_vcentered.innerHTML=' \
-	<br /><button class="button" onclick="memoria_visual()">Memoria Visual</button> \
-	<br /><button class="button" onclick="memoria_auditiva()">Memoria Auditiva</button> \
-	<br /><button class="button" onclick="game()">Volver</button>\
+	<br /><button class="button" id="memoria_visual">Memoria Visual</button> \
+	<br /><button class="button" id="memoria_auditiva">Memoria Auditiva</button> \
+	<br /><button class="button" id="go_back_button">Volver</button>\
 	';
-}
-var ritmo=function(){
-    if(!check_if_sounds_loaded(ritmo)){return;}
-	preventBackExit();
-	session_data.type="ritmo";
-		
-	canvas_zone_vcentered.innerHTML=' \
-	<div class="text-center montessori-div">\
-	<p class="montessori">RITMO, en construcción</p>\
-	<br /><button id="go-back" onclick="game()">Volver</button> \
-	</div>\
-	';
+    document.getElementById("memoria_visual").addEventListener(clickOrTouch,function(){memoria_visual();});
+    document.getElementById("memoria_auditiva").addEventListener(clickOrTouch,function(){memoria_auditiva();});
+    document.getElementById("go_back_button").addEventListener(clickOrTouch,function(){game();});
 }
 
 /*****************************************************/
@@ -732,8 +734,21 @@ function send_session_data(){
 	if(game_mode){game();}
     else{
         if(user_data.access_level=='invitee'){
-            canvas_zone_vcentered.innerHTML+='<br />Los resultados no se pueden guardar para\
-                usuarios "invitados"<br /><br />\
+            var result_obj={
+                    id:""+cache_user_subject_results[session_data.subject].elements.length+1,
+                    type:session_data.type,
+                    mode:session_data.mode,
+                    age:session_data.age,
+                    num_answered:session_data.num_answered,
+                    num_correct:session_data.num_correct,
+                    result:session_data.result,
+                    level:session_data.level,
+                    duration:session_data.duration,
+                    timestamp:session_data.timestamp
+                };
+            cache_user_subject_results[session_data.subject].elements.push(result_obj);
+            canvas_zone_vcentered.innerHTML='<br />Resultados guardados temporalmente para\
+                usuario "invitado"<br /><br />\
             <br /><button id="go-back" onclick="menu_screen()">Volver</button>';
         }else{
             if(debug) console.log(JSON.stringify(session_data));
@@ -743,7 +758,6 @@ function send_session_data(){
             xhr.responsetype="json";
             xhr.send("action=send_session_data_post&json_string="+(JSON.stringify(session_data))); 
             canvas_zone_vcentered.innerHTML='<br />Fin del Test<br />...Enviando test al servidor...<br /><br />';
-
             xhr.onload = function () {
                 var data=JSON.parse(this.responseText);
                 canvas_zone_vcentered.innerHTML='<br />Fin del Test<br />Datos guardados en el servidor.<br /><br />\

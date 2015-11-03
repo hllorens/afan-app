@@ -16,6 +16,13 @@ var sentence_ref=[
 TODO: see kanban
 */
 
+var velocidad_help_title='Velocidad Lectora';
+var velocidad_help='\
+    en construcción en construcción <br />en construcción <br />en construcción <br />\
+    en construcción <br />en construcción en construcción <br />en construcción <br />\
+';
+
+
 var velocidad=function(){
     if(!check_if_sounds_loaded(velocidad)){return;}
     preventBackExit();
@@ -73,6 +80,7 @@ var velocidad_show_pattern=function(){
         <p class="montessori">Pulsa play para ver la frase</p>\
         </div>\
 		  <button id="playb" class="button" onclick="velocidad_uncover()">PLAY</button>\
+          <button class="minibutton fixed-bottom-left help" onclick="open_js_modal_alert(velocidad_help_title,velocidad_help)">?</button> \
           <button id="go-back" class="minibutton fixed-bottom-right" onclick="game()">Volver</button> \
 	';
 }

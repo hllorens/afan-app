@@ -1,5 +1,11 @@
 "use strict";
 
+var memoria_visual_help_title='Memoria Visual';
+var memoria_visual_help='\
+    en construcción en construcción <br />en construcción <br />en construcción <br />\
+    en construcción <br />en construcción en construcción <br />en construcción <br />\
+';
+
 var memoria_visual=function(){
 	remove_modal();
 	session_data.type="memoria_visual";
@@ -62,9 +68,13 @@ var memoria_visual_show_pattern=function(){
 			<div id="xx">\
 			'+pattern_representation+'\
 			</div>\
-		  <button id="playb" class="button" onclick="memoria_visual_uncover_next()">PLAY</button>\
-          <button id="go-back" class="minibutton fixed-bottom-right" onclick="game()">Volver</button> \
+		  <button id="playb" class="button">PLAY</button>\
+        <button id="help_button" class="minibutton fixed-bottom-left help">?</button> \
+        <button id="go-back" class="minibutton fixed-bottom-right">Volver</button> \
 	';
+    document.getElementById("playb").addEventListener(clickOrTouch,function(){memoria_visual_uncover_next();});
+    document.getElementById("help_button").addEventListener(clickOrTouch,function(){open_js_modal_alert(memoria_visual_help_title,memoria_visual_help);});
+    document.getElementById("go-back").addEventListener(clickOrTouch,function(){game();});
 }
 
 var memoria_visual_uncover_next=function(){
@@ -84,24 +94,33 @@ var memoria_visual_uncover_next=function(){
 var memoria_visual_find_pattern=function(){
     activity_timer.reset();
     activity_timer.start();
-	canvas_zone_vcentered.innerHTML='\
-			<div id="xx">\
-				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[0]+'"></div></div>\
-				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[1]+'"></div></div>\
-				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[2]+'"></div></div>\
-			</div>\
-			<div id="xx">\
-				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[3]+'"></div></div>\
-				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[4]+'"></div></div>\
-				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[5]+'"></div></div>\
-			</div>\
-			<div id="xx">\
-				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[6]+'"></div></div>\
-				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[7]+'"></div></div>\
-				<div class="membox"><div onclick="memoria_visual_check_click(this)" class="wordimage wordimage-'+current_activity_memory_options[8]+'"></div></div>\
-			</div>\
-          <button id="go-back" class="minibutton fixed-bottom-right" onclick="game()">Volver</button> \
-	';
+    canvas_zone_vcentered.innerHTML='\
+            <div>\
+                <div class="membox"><div class="wordimage wordimage-'+current_activity_memory_options[0]+'"></div></div>\
+                <div class="membox"><div class="wordimage wordimage-'+current_activity_memory_options[1]+'"></div></div>\
+                <div class="membox"><div class="wordimage wordimage-'+current_activity_memory_options[2]+'"></div></div>\
+            </div>\
+            <div>\
+                <div class="membox"><div class="wordimage wordimage-'+current_activity_memory_options[3]+'"></div></div>\
+                <div class="membox"><div class="wordimage wordimage-'+current_activity_memory_options[4]+'"></div></div>\
+                <div class="membox"><div class="wordimage wordimage-'+current_activity_memory_options[5]+'"></div></div>\
+            </div>\
+            <div>\
+                <div class="membox"><div class="wordimage wordimage-'+current_activity_memory_options[6]+'"></div></div>\
+                <div class="membox"><div class="wordimage wordimage-'+current_activity_memory_options[7]+'"></div></div>\
+                <div class="membox"><div class="wordimage wordimage-'+current_activity_memory_options[8]+'"></div></div>\
+            </div>\
+        <button id="help_button" class="minibutton fixed-bottom-left help">?</button> \
+        <button id="go-back" class="minibutton fixed-bottom-right">Volver</button> \
+    ';
+    document.getElementById("help_button").addEventListener(clickOrTouch,function(){open_js_modal_alert(memoria_visual_help_title,memoria_visual_help);});
+    document.getElementById("go-back").addEventListener(clickOrTouch,function(){game();});
+    var boxes=document.getElementsByClassName("wordimage");
+    for(var i=0;i<boxes.length;i++){
+        boxes[i].addEventListener(clickOrTouch,function(){
+            memoria_visual_check_click(this);
+            });
+    }
 }
 
 
