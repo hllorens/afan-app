@@ -3,10 +3,6 @@
 
 session_start(); 
 
-/*set_include_path(get_include_path() . PATH_SEPARATOR . '/home/hector/google-api-php-client/src/Google');
-////require_once '/home/hector/google-api-php-client/src/Google/autoload.php';
-require_once 'autoload.php';*/
-
 date_default_timezone_set('Europe/Madrid');
 
 function get_value($name){
@@ -23,8 +19,8 @@ $action=get_value("action");
 $timestamp_seconds=date("Y-m-d H:i:s");
 
 // access info (if not WordPress)
-// access info (if not WordPress)
-$db_credentials = json_decode(file_get_contents("/home/hector/secrets/db_credentials_afan-app.json"));
+$db_credentials = json_decode(file_get_contents("../../../../secrets/db_credentials_afan-app.json"));
+$gclient_secret = json_decode(file_get_contents("../../../../secrets/gclient_secret_afan-app.json"));
 
 $db_connection =  mysql_pconnect( $db_credentials->db_server, $db_credentials->user, $db_credentials->pass  ) or die( 'Could not open connection to server' );
 mysql_select_db( $db_credentials->db_name, $db_connection) or die( 'Could not select database' );
@@ -272,19 +268,7 @@ if ($action == "get_users"){
 	$state = md5(rand());
 	$_SESSION["state"]=$state;
 	echo "$state";
-/*}else if ($action == "show_secret"){
-		$filec=file_get_contents("/home/hector/secrets/gclient_secret.json");
-		echo "$filec";
-		$gclient_secret = json_decode($filec);
-		echo "<br /><br />printr:";
-		print_r($gclient_secret);
-		$CLIENT_ID = $gclient_secret->client_id;
-		$CLIENT_SECRET = $gclient_secret->client_secret;
-		echo "<br />AJAX client_id=$CLIENT_ID,secret=$CLIENT_SECRET";*/
 }else if ($action == "gconnect"){
-		// REQUEST contains the AuthCode
-		// you can store this in a json file for more security
-		$gclient_secret = json_decode(file_get_contents("/home/hector/secrets/gclient_secret_afan-app.json"));
 		$CLIENT_ID = $gclient_secret->client_id;
 		$CLIENT_SECRET = $gclient_secret->client_secret;
 		

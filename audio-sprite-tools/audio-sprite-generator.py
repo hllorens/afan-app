@@ -2,7 +2,7 @@
 
 silenceDuration = 1.0  # Seconds of silence between merged files (and at the beginning and end)
 outfile = "soundsSprite.wav"  # Output file. Will be saved in the path below.
-folder = "/home/hector/Desktop/mobile-afan-app-development/audio-all-files-and-sprite-scripts/audio-treated2/"
+folder = "./"
 
 # Prepare...
 import wave, os, glob
