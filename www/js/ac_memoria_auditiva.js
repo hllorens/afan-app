@@ -2,8 +2,7 @@
 
 var memoria_auditiva_help_title='Memoria Auditiva';
 var memoria_auditiva_help='\
-    en construcción en construcción <br />en construcción <br />en construcción <br />\
-    en construcción <br />en construcción en construcción <br />en construcción <br />\
+    Intenta memorizar las sílabas que vas a escuchar. Después tendrás que localizarlas respetando el orden en que las escuchaste.\
 ';
 
 
@@ -14,7 +13,9 @@ var memoria_auditiva=function(){
         <div class="text-center montessori-div">\
         <p class="montessori">en construcción</p>\
         </div>\
-        <button class="minibutton fixed-bottom-left help" onclick="open_js_modal_alert(memoria_auditiva_help_title,memoria_auditiva_help)">?</button> \
-        <button id="go-back" class="minibutton fixed-bottom-right" onclick="game()">Volver</button> \
-	';
+        <button id="help_button" class="minibutton fixed-bottom-left help">?</button> \
+        <button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
+        ';
+    document.getElementById("help_button").addEventListener(clickOrTouch,function(){open_js_modal_alert(memoria_auditiva_help_title,memoria_auditiva_help);});
+    document.getElementById("go-back").addEventListener(clickOrTouch,function(){game();});   
 }

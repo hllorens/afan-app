@@ -1,7 +1,7 @@
 "use strict";
 
 var ritmo_help_title='Ritmo';
-var ritmo_help='en construcción';
+var ritmo_help='Escucha la secuencia. Después tendrás que reproducirla.';
 
 
 var ritmo=function(){
@@ -13,8 +13,10 @@ var ritmo=function(){
         <div class="text-center montessori-div">\
         <p class="montessori">en construcción</p>\
         </div>\
-        <button class="minibutton fixed-bottom-left help" onclick="open_js_modal_alert(ritmo_help_title,ritmo_help)">?</button> \
-        <button id="go-back" class="minibutton fixed-bottom-right" onclick="game()">Volver</button> \
-    ';
+        <button id="help_button" class="minibutton fixed-bottom-left help">?</button> \
+        <button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
+        ';
+    document.getElementById("help_button").addEventListener(clickOrTouch,function(){open_js_modal_alert(ritmo_help_title,ritmo_help);});
+    document.getElementById("go-back").addEventListener(clickOrTouch,function(){game();});  
 }
 

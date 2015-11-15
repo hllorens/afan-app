@@ -16,7 +16,7 @@ white: #eee
 
 
 html{margin:0; padding:0; background: #111;}
-body{margin:0 auto; padding:0; font:normal 28px Monospace, Arial, sans-serif; color:#555; width:100%;
+body{margin:0 auto; padding:0; font:normal 28px Monospace, Arial, sans-serif; color:#111; width:100%;
     -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
     -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
     -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
@@ -46,7 +46,7 @@ a:hover{text-decoration:underline;}
 
 /* cognitionis responsive */
 img, embed, object, video {max-width: 100%;}
-nav a, button {min-width:48px;min-height:48px}
+nav a, button {min-width:48px;min-height:48px;cursor: pointer;}
 
 #page{
 	width:100%; max-width:1000px; min-width:320px;   
@@ -67,6 +67,9 @@ h1{font: normal 26px Monospace,Arial,sans-serif; margin: 5px; color: #722;}
 #zone_canvas{position:absolute; overflow: hidden;background:#aea; width:100%;} /*#fee*/
 .canvas-full{top:0px; bottom:0px;}
 .canvas-with-header{top:48px; bottom:1%;}
+#header_text:hover{
+	cursor:pointer;
+}
 /*HEIGHT perhaps use variables? css3?*/
 
 select, button {font-family:inherit;font-size:inherit;}
@@ -95,7 +98,7 @@ select, button {font-family:inherit;font-size:inherit;}
 }
 
 div.button{
-	border:2px solid #733;
+	border:2px solid #111;
     background-color: #eee;
 	min-width:48px;min-height:48px;
 	display:inline-block; /*make the div adjust to the content*/
@@ -138,6 +141,15 @@ button.help{
     font-weight: bold;
 }
 
+button.go-back{
+    color:#6a6;
+    background:#fc5;
+    border: 2px solid #6a6;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: bold;
+	padding: 5px 14px;
+}
 
 button.backgroundRed{
     background-color: #faa;
@@ -264,6 +276,24 @@ button.backgroundRed{
     display: table-cell;
     vertical-align: middle;
 }
+
+.js-modal-dialog {
+	background: #fff;
+	border-radius: 15px 50px 30px 5px;
+    border: 2px solid #6a6;
+}
+
+
+.js-modal-window h2 {
+	color:#6a6;
+}
+
+
+a.boxclose{
+    color: #6a6;
+    background: #ffe4a3;
+}
+
 
 
 /*.hover_red_border:hover{

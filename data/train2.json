@@ -43,7 +43,7 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["b", "a", "\/", "l", "a"],
+		"sounds" : ["bv", "a", "\/", "l", "a"],
 		"level" : "1",
 		"answers" : ["bala", "ala", "casa", "rama", "cama"]
 	},
@@ -175,7 +175,7 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["b", "i", "\/", "n", "o"],
+		"sounds" : ["bv", "i", "\/", "n", "o"],
 		"level" : "1",
 		"answers" : ["vino", "pino", "mano", "mono", "plano", "barco"]
 	},
@@ -223,7 +223,7 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["l", "i", "\/", "b", "r", "o", "s"],
+		"sounds" : ["l", "i", "\/", "bv", "r", "o", "s"],
 		"level" : "1",
 		"answers" : ["libros", "arbol", "vino", "cabra", "pino", "pinya"]
 	},
@@ -235,7 +235,7 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["k", "a", "\/", "b", "r", "a"],
+		"sounds" : ["k", "a", "\/", "bv", "r", "a"],
 		"level" : "1",
 		"answers" : ["cabra", "casa", "cama", "faro", "canya", "cuatro"]
 	},
@@ -277,7 +277,7 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["b", "a", "r", "\/", "k", "o"],
+		"sounds" : ["bv", "a", "r", "\/", "k", "o"],
 		"level" : "1",
 		"answers" : ["barco", "brazo", "marco", "gato", "mano", "pato"]
 	},
@@ -295,7 +295,7 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["b", "r", "a", "\/", "z", "o"],
+		"sounds" : ["bv", "r", "a", "\/", "z", "o"],
 		"level" : "1",
 		"answers" : ["brazo", "barco", "marco", "arco", "vino", "arbol"]
 	},
@@ -313,7 +313,7 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["b", "e", "r", "\/", "d", "e"],
+		"sounds" : ["bv", "e", "r", "\/", "d", "e"],
 		"level" : "1",
 		"answers" : ["verde", "leche", "percha", "mesa", "seta", "piedra"]
 	},
@@ -343,7 +343,7 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["u", "\/", "b", "a", "s"],
+		"sounds" : ["u", "\/", "bv", "a", "s"],
 		"level" : "1",
 		"answers" : ["uvas", "ala", "bala", "casa", "copa", "ropa"]
 	},
@@ -361,7 +361,7 @@
 	},
 	{
 		"type" : "sounds",
-		"sounds" : ["a", "r", "\/", "b", "o", "l"],
+		"sounds" : ["a", "r", "\/", "bv", "o", "l"],
 		"level" : "1",
 		"answers" : ["arbol", "arco", "brazo", "barco", "faro", "marco"]
 	},

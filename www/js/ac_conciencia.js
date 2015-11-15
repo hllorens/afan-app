@@ -2,8 +2,7 @@
 
 var conciencia_help_title='Conciencia Auditiva';
 var conciencia_help='\
-    en construcción en construcción <br />en construcción <br />en construcción <br />\
-    en construcción <br />en construcción en construcción <br />en construcción <br />\
+    Intenta unir mentalmente los sonidos que vas escuchando. Â¿QuÃ© palabra se forma? \
 ';
 
 var conciencia=function(){
@@ -68,7 +67,7 @@ function conciencia_start(){
 	<div id="answers"></div><br class="clear" />\
 	<div id="sound">sound icon</div><br /> \
         <button id="help_button" class="minibutton fixed-bottom-left help">?</button> \
-        <button id="go-back" class="minibutton fixed-bottom-right">Volver</button> \
+        <button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
         ';
     document.getElementById("help_button").addEventListener(clickOrTouch,function(){open_js_modal_alert(conciencia_help_title,conciencia_help);});
     document.getElementById("go-back").addEventListener(clickOrTouch,function(){game();});        

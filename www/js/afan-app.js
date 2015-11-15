@@ -221,7 +221,7 @@ function gdisconnect(){
 }
 
 function admin_screen(){
-	header_text.innerHTML=' < '+app_name+' menu';
+	header_text.innerHTML=' &larr; '+app_name+' menu';
 	ajax_request_json(
 		backend_url+'ajaxdb.php?action=get_users', 
 		function(data) {
@@ -230,7 +230,7 @@ function admin_screen(){
 				User:  <select id="users-select"></select> \
 				<br /><button onclick="set_user()" class="button">Acceder</button> \
 			    <br /><button onclick="check_missing_elements()" class="button">Comprobar sonidos/imagenes</button> \
-				<br /><button class="button" onclick="menu_screen()">Volver</button>\
+				<br /><button class="minibutton fixed-bottom-right go-back" onclick="menu_screen()">&larr;</button>\
 				';
 			users_select_elem=document.getElementById('users-select');
 			select_fill_with_json(users,users_select_elem);
@@ -243,7 +243,7 @@ var letter_reader=function(){
     canvas_zone_vcentered.innerHTML=' \
         Sonidos a leer (separados por espacio) <input id="input_sounds" type="text" /> \
         <button id="read-button" onclick="read_input_sounds()" class="button">Leer</button> \
-        <br /><br /><button onclick="menu_screen()" class="button">Volver</button> \
+        <br /><br /><button onclick="menu_screen()" class="minibutton fixed-bottom-right go-back">&larr;</button> \
         ';
 }
 
@@ -317,11 +317,11 @@ function set_subject(){
 }
 
 function show_profile(){
-    header_text.innerHTML=' < '+app_name+' menu';
+    header_text.innerHTML=' &larr; '+app_name+' menu';
     canvas_zone_vcentered.innerHTML=' \
         Usuario: '+user_data.email+'  <br />\
         Acceso: '+user_data.access_level+'  <br />\
-        <br /><button class="button" onclick="menu_screen()">Volver</button>\
+        <br /><button class="minibutton fixed-bottom-right go-back" onclick="menu_screen()">&larr;</button>\
         ';
 }
 
@@ -413,11 +413,11 @@ var prepare_menu_when_subjects_loaded=function(){
 
 var manage_subjects=function(){
 	preventBackExit();
-	header_text.innerHTML=' < '+app_name+' menu';
+	header_text.innerHTML=' &larr; '+app_name+' menu';
 	canvas_zone_vcentered.innerHTML=' \
     <button id="add-subject" class="button" onclick="add_subject()">Añadir</button>\
 	<div id="results-div">cargando participantes...</div> \
-	<br /><button id="go-back" onclick="menu_screen()">Volver</button> \
+	<br /><button id="go-back" class="minibutton fixed-bottom-right go-back" onclick="menu_screen()">&larr;</button> \
 	';
 	var user_subjects_data=[];
 	for(var key in cache_user_subjects){
@@ -539,10 +539,10 @@ var edit_subject=function(sid){
 
 var explore_results=function(){
 	preventBackExit();
-	header_text.innerHTML=' < '+app_name+' menu';
+	header_text.innerHTML=' &larr; '+app_name+' menu';
 	canvas_zone_vcentered.innerHTML=' \
 	<div id="results-div">cargando resultados...</div> \
-	<br /><button id="go-back" class="button" onclick="menu_screen()">Volver</button> \
+	<br /><button id="go-back" class="minibutton fixed-bottom-right go-back" onclick="menu_screen()">&larr;</button> \
 	';
     if(!cache_user_subject_results.hasOwnProperty(session_data.subject)){
         ajax_request_json(
@@ -598,7 +598,7 @@ var explore_result_detail=function(session_id){
 	preventBackExit();
 	canvas_zone_vcentered.innerHTML=' \
 	<div id="results-div">cargando detalle resultado '+session_id+'...</div> \
-	<br /><button id="go-back" onclick="explore_results()">Volver</button> \
+	<br /><button id="go-back" class="minibutton fixed-bottom-right go-back" onclick="explore_results()">&larr;</button> \
 	';
 	if(!cache_user_subject_result_detail.hasOwnProperty(session_id)){
 		ajax_request_json(
@@ -673,8 +673,8 @@ var game=function(){
     //-----------------------------
 	var extra_options="";
 	if(!game_mode){
-        extra_options='<br /><button id="go_back_button" class="button">Volver</button>';
-        header_text.innerHTML=' < '+app_name+' menu';
+        extra_options='<br /><button id="go_back_button" class="minibutton fixed-bottom-right go-back">&larr;</button>';
+        header_text.innerHTML=' &larr; '+app_name+' menu';
     }
     canvas_zone_vcentered.innerHTML=' \
     <br /><button id="conciencia" class="button">Conciencia</button> \
@@ -717,7 +717,7 @@ var memoria=function(){
 	canvas_zone_vcentered.innerHTML=' \
 	<br /><button class="button" id="memoria_visual">Memoria Visual</button> \
 	<br /><button class="button" id="memoria_auditiva">Memoria Auditiva</button> \
-	<br /><button class="button" id="go_back_button">Volver</button>\
+	<br /><button class="button" id="go_back_button" class="minibutton fixed-bottom-right go-back">&larr;</button>\
 	';
     document.getElementById("memoria_visual").addEventListener(clickOrTouch,function(){memoria_visual();});
     document.getElementById("memoria_auditiva").addEventListener(clickOrTouch,function(){memoria_auditiva();});
@@ -754,7 +754,7 @@ function send_session_data(){
             cache_user_subject_results[session_data.subject].elements.push(result_obj);
             canvas_zone_vcentered.innerHTML='<br />Resultados guardados temporalmente para\
                 usuario "invitado"<br /><br />\
-            <br /><button id="go-back" onclick="menu_screen()">Volver</button>';
+            <br /><button id="go-back" class="minibutton fixed-bottom-right go-back" onclick="menu_screen()">&larr;</button>';
         }else{
             if(debug) console.log(JSON.stringify(session_data));
             var xhr = new XMLHttpRequest();
@@ -766,7 +766,7 @@ function send_session_data(){
             xhr.onload = function () {
                 var data=JSON.parse(this.responseText);
                 canvas_zone_vcentered.innerHTML='<br />Fin del Test<br />Datos guardados en el servidor.<br /><br />\
-                <br /><button id="go-back" onclick="menu_screen()">Volver</button>';
+                <br /><button id="go-back" class="minibutton fixed-bottom-right go-back" onclick="menu_screen()">&larr;</button>';
                 delete cache_user_subject_results[session_data.subject];
                 if(debug) console.log('Storing data. Server message: '+data.msg);
             };

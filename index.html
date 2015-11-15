@@ -1,0 +1,41 @@
+<!DOCTYPE html> 
+<html>
+
+<head>
+  <title>COLE</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" type="text/css" href="www/external-git-ignored/cognitionis-js/css/cognitionis.utils.css">
+  <link rel="stylesheet" href="css/wordimg-sprite.css">
+  <!-- important to make this the last to overwrite the others -->
+  <link rel="stylesheet" href="www/css/index.css"> 
+
+</head>
+
+<body>
+<div id="page">
+	<div id="header"><h1>cole</h1></div>
+	<div id="zone_canvas" class="canvas-with-header">
+		<div class="text-center vertical-center-container">
+			<div id="zone_canvas_vcentered" class="text-center vertical-center-content">
+			OPTIONALLY IF WE USE THE OPTION OF GOOGLEPLAY OR APPLESTORE...
+			DEVICE INFO:<br />
+			...
+			if PC browser -> just trigger the web app
+			if iOS        -> make a select to download the app or go to the web
+			if Android    -> select to ...
+			<br />
+			<span id="userAgent"></span>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	document.getElementById("userAgent").innerHTML=navigator.userAgent;
+</script>
+
+</body>
+
+</html>

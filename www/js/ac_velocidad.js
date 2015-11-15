@@ -18,9 +18,7 @@ TODO: see kanban
 
 var velocidad_help_title='Velocidad Lectora';
 var velocidad_help='\
-    en construcción en construcción <br />en construcción <br />en construcción <br />\
-    en construcción <br />en construcción en construcción <br />en construcción <br />\
-';
+    Lee y recuerda. Posteriormente tendrás que escribir la palabra que falta.';
 
 
 var velocidad=function(){
@@ -79,10 +77,13 @@ var velocidad_show_pattern=function(){
         <div class="text-center montessori-div">\
         <p class="montessori">Pulsa play para ver la frase</p>\
         </div>\
-		  <button id="playb" class="button" onclick="velocidad_uncover()">PLAY</button>\
-          <button class="minibutton fixed-bottom-left help" onclick="open_js_modal_alert(velocidad_help_title,velocidad_help)">?</button> \
-          <button id="go-back" class="minibutton fixed-bottom-right" onclick="game()">Volver</button> \
+		  <button id="playb" class="button">PLAY</button>\
+          <button id="help_button" class="minibutton fixed-bottom-left help">?</button> \
+          <button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
 	';
+    document.getElementById("playb").addEventListener(clickOrTouch,function(){velocidad_uncover();});
+    document.getElementById("help_button").addEventListener(clickOrTouch,function(){open_js_modal_alert(velocidad_help_title,velocidad_help);});
+    document.getElementById("go-back").addEventListener(clickOrTouch,function(){game();}); 
 }
 
 
@@ -102,9 +103,11 @@ var velocidad_find_word=function(){
 	<p class="montessori">'+hide_word(current_activity_sentence,current_activity_word)+'</p>\
 	</div>\
 	<input id="velocidad_answer" class="montessori" type="text" value="" />\
-	<br /><button onclick="check_velocidad()">OK</button>\
-    <button id="go-back" class="minibutton fixed-bottom-right" onclick="game()">Volver</button> \
+	<br /><button id="check_vel_button" >OK</button>\
+    <button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
 	';
+    document.getElementById("check_vel_button").addEventListener(clickOrTouch,function(){check_velocidad();});
+    document.getElementById("go-back").addEventListener(clickOrTouch,function(){game();}); 
 }
 
 function hide_word(sentence,word){

@@ -2,8 +2,7 @@
 
 var memoria_visual_help_title='Memoria Visual';
 var memoria_visual_help='\
-    en construcción en construcción <br />en construcción <br />en construcción <br />\
-    en construcción <br />en construcción en construcción <br />en construcción <br />\
+    Intenta memorizar estas imágenes. Después tendrás que localizarlas respetando el orden en que fueron presentadas.\
 ';
 
 var memoria_visual=function(){
@@ -70,7 +69,7 @@ var memoria_visual_show_pattern=function(){
 			</div>\
 		  <button id="playb" class="button">PLAY</button>\
         <button id="help_button" class="minibutton fixed-bottom-left help">?</button> \
-        <button id="go-back" class="minibutton fixed-bottom-right">Volver</button> \
+        <button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
 	';
     document.getElementById("playb").addEventListener(clickOrTouch,function(){memoria_visual_uncover_next();});
     document.getElementById("help_button").addEventListener(clickOrTouch,function(){open_js_modal_alert(memoria_visual_help_title,memoria_visual_help);});
