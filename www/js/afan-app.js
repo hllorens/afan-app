@@ -681,6 +681,7 @@ var game=function(){
     <br /><button id="memoria" class="button">Memoria</button> \
     <br /><button id="ritmo" class="button">Ritmo</button> \
     <br /><button id="velocidad" class="button">Velocidad</button> \
+    <br /><button id="discr_visual" class="button">Discr. Visual</button> \
     '+extra_options+'\
     ';
     
@@ -688,6 +689,7 @@ var game=function(){
     document.getElementById("memoria").addEventListener(clickOrTouch,function(){memoria();});
     document.getElementById("ritmo").addEventListener(clickOrTouch,function(){ritmo();});
     document.getElementById("velocidad").addEventListener(clickOrTouch,function(){velocidad();});
+    document.getElementById("discr_visual").addEventListener(clickOrTouch,function(){discr_visual();});
     if(!game_mode){
         document.getElementById("go_back_button").addEventListener(clickOrTouch,function(){menu_screen();});
     }
