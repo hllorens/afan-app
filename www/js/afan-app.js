@@ -181,13 +181,15 @@ function signInCallback(authResult) {
 			backend_url+'ajaxdb.php?action=gconnect&state='+session_state+'&code='+authResult['code'],
 			function(result) {
 				if (result) {
-					if(debug){
+                    if(result.hasOwnProperty('error') && result.error!=""){alert("LOGIN ERROR: "+result.error); return;}
+                    if(debug){
                         console.log(result);
                         console.log("logged! "+result.email+" level:"+result.access_level);
                         alert("logged! "+result.email+" level:"+result.access_level);
                     }
-                    if(result.hasOwnProperty('error') && result.error!=""){alert("LOGIN ERROR: "+result.error); return;}
                     user_data.display_name=result.display_name;
+                    user_data.user_id=result.user_id;
+                    user_data.picture=result.picture;
                     user_data.email=result.email;
 					user_data.access_level=result.access_level;
 					session_data.user=result.email;
