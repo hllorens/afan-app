@@ -1,8 +1,9 @@
 "use strict";
 
+var current_activity_speed_played_times=0;
 var current_activity_speed_level_passed_times=0;
 var current_activity_speed_level=1;
-var MAX_SPEED_LEVELS=5;
+var MAX_SPEED_LEVELS=3;
 var current_activity_sentence;
 var current_activity_word;
 
@@ -10,7 +11,7 @@ var sentence_ref=[
 	'En el castillo había una princesa',
 	'Me olvidé el paraguas',
 	'Mañana voy a ir al teatro'
-]
+];
 
 /*
 TODO: see kanban
@@ -26,13 +27,24 @@ var velocidad=function(){
     preventBackExit();
 	remove_modal();
 	session_data.type="velocidad";
+    if(JsonLazy.data.hasOwnProperty('velocidad_data')){
+        setTimeout(function(){velocidad_start();}, 1000);
+    }else{
+        JsonLazy.load("../data/ac_velocidad_data.json", "velocidad_data", velocidad_start);
+    }        
+}
+
+
+var velocidad_start=function(){
+	remove_modal();
+	// TODO this will never fire... there is no subject select here...
 	if(subjects_select_elem.options[subjects_select_elem.selectedIndex]!=undefined)
 		session_data.subject=subjects_select_elem.options[subjects_select_elem.selectedIndex].value;
 
-	if(current_activity_speed_level_passed_times==0 && current_activity_memory_level==1){
+	if(current_activity_speed_level_passed_times==0 && current_activity_speed_level==1){
         activity_timer.reset();
 		session_data.num_correct=0;
-		session_data.num_answered=MAX_SPEED_LEVELS; // *2
+		session_data.num_answered=MAX_SPEED_LEVELS*2;
 		session_data.duration=0;
 		session_data.details=[];
 		var timestamp=new Date();
@@ -41,13 +53,15 @@ var velocidad=function(){
 			 pad_string(timestamp.getHours(),2,"0") + ":"  + pad_string(timestamp.getMinutes(),2,"0");
 	}
     
-
-	var sentences=sentence_ref;
+	if(!JsonLazy.data.velocidad_data.hasOwnProperty(current_activity_speed_level) || 
+       current_activity_speed_level>MAX_SPEED_LEVELS)
+		current_activity_speed_level=MAX_SPEED_LEVELS;
+	var sentences=JsonLazy.data.velocidad_data[current_activity_speed_level];
 	current_activity_sentence = random_array(sentences,1)[0];
 	console.log(current_activity_sentence);
 
-	// chose one word of more than 3 letters
-	current_activity_word = random_word_longer_than(current_activity_sentence.split(" "), 3);
+	// chose one word of more than X letters (depending on the level [only useful for levels >2])
+	current_activity_word = random_word_longer_than(current_activity_sentence.split(" "), current_activity_speed_level);
 	console.log(current_activity_word);
 
 
@@ -115,23 +129,61 @@ function hide_word(sentence,word){
 }
 
 function check_velocidad(){
-    var the_content='...';
+    var the_content='siguiente actividad';
+    activity_timer.stop();
+    session_data.duration+=activity_timer.seconds;
+    activity_timer.reset();    
+	current_activity_speed_played_times++;
 	var answer=Asciify.asciify(document.getElementById("velocidad_answer").value.toLowerCase());
 	if(answer==Asciify.asciify(current_activity_word.toLowerCase())){
             if(session_data.mode!="test"){
                 audio_sprite.playSpriteRange("zfx_correct");
                 the_content='<div class="js-modal-img"><img src="'+media_objects.images['correct.png'].src+'"/></div>';
             }
-            open_js_modal_content(the_content);
+			current_activity_speed_level_passed_times++;
             session_data.num_correct++;
+
+			
+			if(current_activity_speed_level_passed_times>=2){
+                current_activity_speed_level_passed_times=0;
+                current_activity_speed_level++;
+                current_activity_speed_played_times=0;
+			}
+            if(current_activity_speed_level>=MAX_MEMORY_LEVELS){
+                the_content='Has superado el juego!';
+                current_activity_speed_level=1;
+                current_activity_speed_played_times=0;
+                current_activity_speed_level_passed_times=0;
+                if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
+	            open_js_modal_content(the_content);
+                if(session_data.mode=="test" && !game_mode) setTimeout(function(){send_session_data();}, 2000);
+                else setTimeout(function(){game();}, 2000);
+			}else{
+	            open_js_modal_content(the_content);
+			    setTimeout(function(){velocidad_start();}, 2000);
+			}
     }else{
         if(session_data.mode!="test"){
             audio_sprite.playSpriteRange("zfx_wrong");
             the_content='<div class="js-modal-img"><img src="'+media_objects.images['wrong.png'].src+'"/></div>';
         }
-        open_js_modal_content(the_content);
+	    if(session_data.mode=="test" || current_activity_speed_played_times>=10){
+                the_content='Fin del juego';
+                current_activity_speed_level=1;
+                current_activity_speed_played_times=0;
+                current_activity_speed_level_passed_times=0;
+                if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
+	            open_js_modal_content(the_content);
+                if(session_data.mode=="test") setTimeout(function(){send_session_data();}, 2000);
+                else setTimeout(function(){game();}, 2000);
+		}else{
+		    open_js_modal_content(the_content);
+			setTimeout(function(){velocidad_start();}, 2000);
+		}
     }
-    setTimeout(function(){velocidad();}, 2000);
 }
+
+
+
 
 

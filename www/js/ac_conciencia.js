@@ -19,13 +19,13 @@ var conciencia=function(){
         if(JsonLazy.data.hasOwnProperty('conciencia_train')){
             setTimeout(function(){conciencia_start();}, 1000);
         }else{
-            JsonLazy.load("../data/train2.json", "conciencia_train", conciencia_start);
+            JsonLazy.load("../data/ac_conciencia_train.json", "conciencia_train", conciencia_start);
         }
     }else{
         if(JsonLazy.data.hasOwnProperty('conciencia_test')){
             setTimeout(function(){conciencia_start();}, 1000);
         }else{
-            JsonLazy.load("../data/test1.tsv.json", "conciencia_test", conciencia_start);
+            JsonLazy.load("../data/ac_conciencia_test.json", "conciencia_test", conciencia_start);
         }        
     }
     

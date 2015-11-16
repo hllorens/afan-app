@@ -1,8 +1,0 @@
-[
-{"type":"sounds","sounds":["s","o","l"],"level":"1","answers":["sol","col","sal","pez","tren"]},
-{"type":"sounds","sounds":["p","e","z"],"level":"1","answers":["pez","tren","sol","sal","col"]},
-{"type":"sounds","sounds":["s","a","l"],"level":"1","answers":["sal","sol","col","pez","tren"]},
-{"type":"sounds","sounds":["k","o","l"],"level":"1","answers":["col","sol","sal","pez","tren"]},
-{"type":"sounds","sounds":["t","r","e","n"],"level":"1","answers":["tren","pez","sol","sal","col"]}
-]
-

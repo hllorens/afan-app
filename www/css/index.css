@@ -324,7 +324,8 @@ a.boxclose{
 	#header{height:48px;}
 	.canvas-with-header{top:48px;}
 	#results-table{font-size: 16px;}
-    button.minibutton{font-size:12px;border:1px solid #733;min-height:40px; min-width:40px;padding:0px;}
+    button.minibutton{font-size:18px;border-width:1px;min-height:40px; min-width:40px;padding:0px;}
+    button.go-back{font-size: 28px;}
     .fixed-bottom-right{bottom:8px; right:8px;}
     .fixed-bottom-left{bottom:8px; left:8px;}
     .js-modal-dialog{margin: 10px auto;	width:95%;font-size:16px;}
@@ -340,7 +341,8 @@ a.boxclose{
 	#answers{width:60%;}
 	body{font-size:16px;}
 	#menu-logo-div{display:none;height:0;margin:0;padding:0;}
-    button.minibutton{font-size:12px;border:1px solid #733;min-height:40px; min-width:40px;padding:0px;}
+    button.minibutton{font-size:18px;border-width:1px;min-height:40px; min-width:40px;padding:0px;}
+    button.go-back{font-size: 28px;}
     .fixed-bottom-right{bottom:8px; right:8px;}
     .fixed-bottom-left{bottom:8px; left:8px;}
     .js-modal-dialog{margin: 10px auto;	width:95%;font-size:12px;}
