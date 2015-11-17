@@ -117,7 +117,7 @@ div.button{
 
 button.button{
 	/*font-size:30px;*/
-	border:2px solid #733;
+	border:2px solid #111;
 	background-color: #eee;
 	min-width:48px;min-height:48px;
 	margin:2px;
@@ -132,7 +132,7 @@ button.button{
 button.minibutton{
 	margin:0px;
 	background-color: #eee;
-	border:2px solid #733;
+	border:2px solid #111;
     font-size: 18px;
     min-height: 48px; min-width: 48px;
     padding: 10px 16px;
@@ -243,7 +243,7 @@ button.backgroundRed{
 }
 
 .bsprite {
-	border:2px solid #733;
+	border:2px solid #111;
     background-color: #eee;
     width: 30%;
     padding: 30% 0 0;
@@ -285,7 +285,7 @@ button.backgroundRed{
 
 .js-modal-dialog {
 	background: #fff;
-	border-radius: 15px 50px 30px 5px;
+	border-radius: 15px 30px 30px 5px;
     border: 2px solid #6a6;
 }
 

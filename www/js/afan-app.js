@@ -182,11 +182,17 @@ function signInCallback(authResult) {
 			function(result) {
 				if (result) {
                     if(result.hasOwnProperty('error') && result.error!=""){alert("LOGIN ERROR: "+result.error); return;}
+                    if(result.hasOwnProperty('info') && result.info=="new user"){
+                        open_js_modal_content_accept('<p>Usuario creado para: '+result.emial+' sus datos serán validados y \
+                        recibirá un email en breve confirmando que tiene acceso completo a la aplicación.\
+                        De momento podrá probarla pero no guardar los datos.</p>');
+                    }
                     if(debug){
                         console.log(result);
                         console.log("logged! "+result.email+" level:"+result.access_level);
                         alert("logged! "+result.email+" level:"+result.access_level);
                     }
+                    user_data.info=result.info;
                     user_data.display_name=result.display_name;
                     user_data.user_id=result.user_id;
                     user_data.picture=result.picture;
