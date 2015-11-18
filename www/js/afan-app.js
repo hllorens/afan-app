@@ -18,7 +18,9 @@ var sounds = [
 	// it can be dropbox https://dl.dropboxusercontent.com/u/188219/
 	//or absolute http://www.centroafan.com/afan-app-media/audio/...m4a"
 	// relative is the best to reuse it in the cordova app
-	"../../afan-app-media/audio/letters128kbps.m4a"
+	"../../afan-app-media/audio/letters128kbps.m4a",
+	"../../afan-app-media/audio/ta35.m4a",
+	"../../afan-app-media/audio/ta150.m4a"
 ];
 
 

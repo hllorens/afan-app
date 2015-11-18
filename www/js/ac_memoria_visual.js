@@ -40,11 +40,11 @@ var memoria_visual=function(){
 
 	var sprite_images=wordimage_image_ref; //['pato','gato','sol','pez','tren','sal','col','reja','oreja','koala','bala','ala'];
 	current_activity_memory_options = random_array(sprite_images,9);
-	console.log(current_activity_memory_options);
+	if(debug) console.log(current_activity_memory_options);
 
 	// elegir n imagenes segun el nivel alcanzado (sin repetidos)
 	current_activity_memory_pattern = random_array(current_activity_memory_options,current_activity_memory_level);
-	console.log(current_activity_memory_pattern);
+	if(debug) console.log(current_activity_memory_pattern);
 
 
 
@@ -172,7 +172,6 @@ var memoria_visual_check_click=function (element){
             open_js_modal_content(the_content);
             current_activity_played_times++;
             if( (session_data.mode=="test" && !game_mode && current_activity_played_times>=MAX_PLAYS)  || ( (session_data.mode!="test" || game_mode) && current_activity_played_times>=10)){
-                console.log('incorrect memory...');
                 current_activity_memory_level=1;
                 current_activity_played_times=0;
                 current_activity_memory_level_passed_times=0;

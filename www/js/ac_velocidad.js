@@ -142,8 +142,6 @@ function check_velocidad(){
             }
 			current_activity_speed_level_passed_times++;
             session_data.num_correct++;
-
-			
 			if(current_activity_speed_level_passed_times>=2){
                 current_activity_speed_level_passed_times=0;
                 current_activity_speed_level++;
