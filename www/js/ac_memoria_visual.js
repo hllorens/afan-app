@@ -124,7 +124,7 @@ var memoria_visual_find_pattern=function(){
 
 
 var memoria_visual_check_click=function (element){
-	if(element.className.indexOf('covered')!=-1){ alert("covered"); return;} // already covered
+	if(element.className.indexOf('covered')!=-1){ return;} // already covered
     activity_timer.stop();
     session_data.duration+=activity_timer.seconds;
     activity_timer.reset();    

@@ -2,8 +2,10 @@
 
 // this can be better encapsulated as a big object with a start() method...
 
-var dv_obj=new Activity('Discr. Visual','discr_visual')
+var dv_obj=new Activity('Discr. Visual','discr_visual','show_matrix');
 dv_obj.help_text='Encuentra la sílaba.';
+dv_obj.MAX_PLAYED_TIMES_TEST=2;
+dv_obj.MAX_PLAYED_TIMES=10;
 
 dv_obj.letters1=['b','c','f','p'];
 dv_obj.letters1_only_r=['d','t','v']
@@ -54,45 +56,180 @@ Test: play 6 times and store the result
 var discr_visual=function(){
     if(!check_if_sounds_loaded(discr_visual)){return;}
 	preventBackExit();
-    remove_modal();
-	session_data.type="discr_visual";
 	canvas_zone_vcentered.innerHTML='\
         <div class="text-center montessori-div">\
-        <p class="montessori">en construcción</p>\
+        <p class="montessori">...cargando...</p>\
         </div>\
         ';
     dv_obj.add_buttons(canvas_zone_vcentered);
 	// ONLY call initialize if something changes, otherwise use precalculated
-	//dv_obj.initialize_syllables();
-	//console.log(dv_obj.syllables_arr);
-	dv_obj.show_matrix();
+	//dv_obj.initialize_syllables();console.log(dv_obj.syllables_arr);
+	dv_obj.start();
 }
 
 
 dv_obj.show_matrix=function(){
-	dv_obj.current_matrix=[];
-	var syllable=random_item(dv_obj.syllables_arr);
-	var dyslexic=syllable;
-	var temp = dyslexic[1];
-	var temp2 = dyslexic[2];
-	//dyslexic[1] = dyslexic[2];
-	//dyslexic[2] = temp;
-	dyslexic = dyslexic.replace(temp, "_").replace(temp2, temp).replace("_", temp2);
+    remove_modal();
+	if(session_data.mode=='test' && dv_obj.played_times>=dv_obj.MAX_PLAYED_TIMES_TEST){
+		send_session_data();
+	}else if(session_data.mode!='test' && (dv_obj.played_times>dv_obj.MAX_PLAYED_TIMES || dv_obj.failed_times>dv_obj.MAX_FAILURES)){
+		game();
+	}else{
+		activity_timer.start();
+		dv_obj.current_corrections={};
+		dv_obj.current_matrix=[];
+		dv_obj.syllable=random_item(dv_obj.syllables_arr);
+		dv_obj.dyslexic=dv_obj.syllable;
+		var temp = dv_obj.dyslexic[1];
+		var temp2 = dv_obj.dyslexic[2];
+		dv_obj.dyslexic = dv_obj.dyslexic.replace(temp, "_").replace(temp2, temp).replace("_", temp2);
 
-	var repetition=Math.floor((Math.random()*5)+2); // 2 and 6
-	for(var i=0;i<repetition;i++){
-		dv_obj.current_matrix.push(syllable);
-		dv_obj.current_matrix.push(dyslexic);
-	}
-	while(dv_obj.current_matrix.length!=16){
-		var other=random_item(dv_obj.syllables_arr,syllable);
-		if(other!=syllable && other!=dyslexic){
-			dv_obj.current_matrix.push(other);
+		dv_obj.syllable_repetition=4;
+		if(session_data.mode!="test"){
+			dv_obj.syllable_repetition=Math.floor((Math.random()*4)+3); // 3 and 6
+		}
+		for(var i=0;i<dv_obj.syllable_repetition;i++){
+			dv_obj.current_matrix.push(dv_obj.syllable);
+			dv_obj.current_matrix.push(dv_obj.dyslexic);
+		}
+		while(dv_obj.current_matrix.length!=16){
+			var other=random_item(dv_obj.syllables_arr,dv_obj.syllable);
+			if(other!=dv_obj.syllable && other!=dv_obj.dyslexic){
+				dv_obj.current_matrix.push(other);
+			}
+		}
+		if(debug) console.log(dv_obj.syllable+ "  "+dv_obj.current_matrix+"  "+dv_obj.syllable_repetition);
+		shuffle_array(dv_obj.current_matrix);
+		
+		canvas_zone_vcentered.innerHTML='\
+	    <div class="text-center montessori-40">'+dv_obj.syllable+'</div>\
+	    <table id="discr_visual_table" class="noselect">\
+	        <tr>\
+	            <td>'+dv_obj.current_matrix[0]+'</td>\
+	            <td>'+dv_obj.current_matrix[1]+'</td>\
+	            <td>'+dv_obj.current_matrix[2]+'</td>\
+	            <td>'+dv_obj.current_matrix[3]+'</td>\
+	        </tr>\
+	        <tr>\
+	            <td>'+dv_obj.current_matrix[4]+'</td>\
+	            <td>'+dv_obj.current_matrix[5]+'</td>\
+	            <td>'+dv_obj.current_matrix[6]+'</td>\
+	            <td>'+dv_obj.current_matrix[7]+'</td>\
+	        </tr>\
+	        <tr>\
+	            <td>'+dv_obj.current_matrix[8]+'</td>\
+	            <td>'+dv_obj.current_matrix[9]+'</td>\
+	            <td>'+dv_obj.current_matrix[10]+'</td>\
+	            <td>'+dv_obj.current_matrix[11]+'</td>\
+	        </tr>\
+	        <tr>\
+	            <td>'+dv_obj.current_matrix[12]+'</td>\
+	            <td>'+dv_obj.current_matrix[13]+'</td>\
+	            <td>'+dv_obj.current_matrix[14]+'</td>\
+	            <td>'+dv_obj.current_matrix[15]+'</td>\
+	        </tr>\
+	     </table>\
+	     <button id="dv_check" class="button" style="width:300px;margin:0 50px;">Hecho!</button>\
+	    ';
+		dv_obj.add_buttons(canvas_zone_vcentered);
+		document.getElementById("dv_check").addEventListener(clickOrTouch,function(){dv_obj.check();});
+		dv_obj.table = document.getElementById("discr_visual_table");
+		for (var i = 0;i<dv_obj.table.rows.length; i++) {
+		   for (var j = 0;j<dv_obj.table.rows[i].cells.length; j++) {
+		        dv_obj.table.rows[i].cells[j].addEventListener(clickOrTouch,function(){
+		            dv_obj.click_action(this);
+		        });
+		   }  
 		}
 	}
-	if(debug) console.log(syllable+ "  "+dv_obj.current_matrix+"  "+repetition);
-	shuffle_array(dv_obj.current_matrix);
-	alert(dv_obj.current_matrix);
 }
 
+
+dv_obj.click_action=function(elem){
+	if(elem.className.indexOf('covered')!=-1){ // already covered
+		elem.classList.remove('covered');
+		if(dv_obj.current_corrections.hasOwnProperty(elem.innerHTML)){
+			dv_obj.current_corrections[elem.innerHTML]++;
+		}else{
+			dv_obj.current_corrections[elem.innerHTML]=1;
+		}
+	} 
+    else{elem.classList.add('covered');}
+}
+
+
+dv_obj.check=function(){
+    /*
+        num_correct... num correct syllables through all the session or test
+        num_answered counts the covered plus the missing
+        Use details:
+        activity: syllable          pro4  (syllable + repetition)
+        choice: covered syllables:  pro3 por2 ...  (por2 bla1)
+        result:                     correct/incorrect
+    */
+	dv_obj.details={};
+	dv_obj.details.subject=session_data.subject;
+	dv_obj.details.type=session_data.type;
+	dv_obj.details.mode=session_data.mode;
+	dv_obj.details.level=session_data.level;
+	dv_obj.details.activity=dv_obj.syllable+dv_obj.syllable_repetition;
+	var current_correct=0;
+	var current_answered=0;
+	var choice_counts={};
+    session_data.num_answered+=dv_obj.syllable_repetition;
+    current_answered+=dv_obj.syllable_repetition;
+    for (var i = 0;i<dv_obj.table.rows.length; i++) {
+       for (var j = 0;j<dv_obj.table.rows[i].cells.length; j++) {
+            var elem=dv_obj.table.rows[i].cells[j];
+            if(elem.className.indexOf('covered')!=-1){
+				if(choice_counts.hasOwnProperty(elem.innerHTML)){
+					choice_counts[elem.innerHTML]++;
+				}else{
+					choice_counts[elem.innerHTML]=1;
+				}
+                if(elem.innerHTML==dv_obj.syllable){
+                    session_data.num_correct++;
+					current_correct++;
+                }else if(elem.innerHTML==dv_obj.dyslexic){
+                    session_data.num_answered++;
+                    current_answered++;
+                }else{
+                    session_data.num_answered++;
+					current_answered++;
+                }
+            }
+       }  
+    }
+	//alert("correct="+session_data.num_correct+" incorrect/missing="+(session_data.num_answered-session_data.num_correct));
+	dv_obj.played_times++;
+
+	// build activity details ----------------------------------
+	dv_obj.details.choice="";
+	var keys=objectProperties(choice_counts);
+	keys.sort(); // alphabetically
+	for(var i=0;i<keys.length;i++){
+		dv_obj.details.choice+=keys[i]+choice_counts[keys[i]]+" ";
+	}
+	keys=objectProperties(dv_obj.current_corrections);
+	keys.sort(); // alphabetically
+	dv_obj.details.choice+="(";
+	for(var i=0;i<keys.length;i++){
+		dv_obj.details.choice+=keys[i]+dv_obj.current_corrections[keys[i]]+" ";
+	}	
+	dv_obj.details.choice=dv_obj.details.choice.trim()+")";
+	// ---------------------------------------------------------
+
+
+
+
+	if(current_correct==dv_obj.syllable_repetition &&
+       current_correct==current_answered ){
+		dv_obj.details.result="correct";
+	}else{
+		dv_obj.details.result="incorrect";
+		dv_obj.failed_times++;
+	}
+	dv_obj.end(dv_obj.details.result);
+
+}
 

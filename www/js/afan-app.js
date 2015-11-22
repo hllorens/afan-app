@@ -616,10 +616,10 @@ var explore_result_detail=function(session_id){
 			function(data) {
 				cache_user_subject_result_detail[session_id]=data; //cache (never changes)
                 if(!cache_user_subject_result_detail[session_id].hasOwnProperty('elements') || cache_user_subject_result_detail[session_id].elements.length==0){
-                    document.getElementById("results-div").innerHTML="session: "+cache_user_subject_result_detail[session_id].general.session+"<br />No hay detalles";
+                    document.getElementById("results-div").innerHTML="Sesión: "+cache_user_subject_result_detail[session_id].general.session+"<br />No hay detalles";
                     return;
                 }
-				document.getElementById("results-div").innerHTML="session: "+cache_user_subject_result_detail[session_id].general.session+" - subject: "+cache_user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
+				document.getElementById("results-div").innerHTML="Sesión: "+cache_user_subject_result_detail[session_id].general.session+" - Sujeto: "+cache_user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
 				var results_table=document.getElementById("results-table");
 				DataTableSimple.call(results_table, {
 					data: cache_user_subject_result_detail[session_id].elements,
@@ -636,9 +636,9 @@ var explore_result_detail=function(session_id){
 			});
 	}else{
         if(!cache_user_subject_result_detail[session_id].hasOwnProperty('elements') || cache_user_subject_result_detail[session_id].elements.length==0){
-            document.getElementById("results-div").innerHTML="session: "+cache_user_subject_result_detail[session_id].general.session+"<br />No hay detalles";
+            document.getElementById("results-div").innerHTML="Sesión: "+cache_user_subject_result_detail[session_id].general.session+"<br />No hay detalles";
         }else{
-            document.getElementById("results-div").innerHTML="session: "+cache_user_subject_result_detail[session_id].general.session+" - subject: "+cache_user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
+            document.getElementById("results-div").innerHTML="Sesión: "+cache_user_subject_result_detail[session_id].general.session+" - subject: "+cache_user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
             var results_table=document.getElementById("results-table");
             DataTableSimple.call(results_table, {
                 data: cache_user_subject_result_detail[session_id].elements,
@@ -712,7 +712,7 @@ var check_if_sounds_loaded=function(callback){
 	canvas_zone_vcentered.innerHTML='...pre-cargando sonidos...'; // for the user to notice
 	if(ResourceLoader.check_if_lazy_sounds_loaded(callback)){
 		if(typeof(audio_sprite)==='undefined'){// load audio in the object 
-			var audio_sprite_object=media_objects.sounds[audio_sprite_name]; // soundsSpriteABR56.30kbps.141k.m4a, soundsSpriteVBR30-19kbps-100k.m4a
+			var audio_sprite_object=media_objects.sounds[audio_sprite_name];
 			audio_sprite=new AudioSprite(audio_sprite_object,audio_object_sprite_ref,debug);
 			audio_sprite.playSpriteRange('zsilence_start',callback);
             return false;
@@ -750,25 +750,31 @@ function send_session_data(){
     remove_modal();
 	if(game_mode){game();}
     else{
+		if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
+        if(debug) console.log(JSON.stringify(session_data));
         if(user_data.access_level=='invitee'){
             var result_obj={
                     id:""+cache_user_subject_results[session_data.subject].elements.length+1,
+					subject: session_data.subject,
                     type:session_data.type,
                     mode:session_data.mode,
-                    age:session_data.age,
+                    age:'-',
                     num_answered:session_data.num_answered,
                     num_correct:session_data.num_correct,
                     result:session_data.result,
                     level:session_data.level,
                     duration:session_data.duration,
-                    timestamp:session_data.timestamp
+                    timestamp:session_data.timestamp,
+					details: session_data.details
                 };
             cache_user_subject_results[session_data.subject].elements.push(result_obj);
-            canvas_zone_vcentered.innerHTML='<br />Resultados guardados temporalmente para\
-                usuario "invitado"<br /><br />\
+            cache_user_subject_result_detail[result_obj.id]={general: {
+																session: result_obj.id
+															} ,
+															 elements: result_obj.details};
+            canvas_zone_vcentered.innerHTML='<br />Resultados guardados  "invitado"<br /><br />\
             <br /><button id="go-back" class="minibutton fixed-bottom-right go-back" onclick="menu_screen()">&larr;</button>';
         }else{
-            if(debug) console.log(JSON.stringify(session_data));
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "http://www.centroafan.com/afan-app/www/"+backend_url+'ajaxdb.php',true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');

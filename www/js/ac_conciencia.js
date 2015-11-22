@@ -165,19 +165,20 @@ function conciencia_check_correct(clicked_answer,correct_answer){
 		open_js_modal_content_timeout('<h1>Haz click en "play" antes que en el dibujo</h1>',2000);
 		return;
 	} 
-	var activity_results={};
+
 	var timestamp=new Date();
 	var timestamp_str=timestamp.getFullYear()+"-"+
 		pad_string((timestamp.getMonth()+1),2,"0") + "-" + pad_string(timestamp.getDate(),2,"0") + " " +
 		 pad_string(timestamp.getHours(),2,"0") + ":"  + pad_string(timestamp.getMinutes(),2,"0") + 
 			":"  + pad_string(timestamp.getSeconds(),2,"0");
 	activity_timer.stop();
-	activity_results.type=session_data.type;
-	activity_results.mode=session_data.mode;
-	activity_results.level=session_data.level;
-	activity_results.activity=correct_answer;
-	activity_results.timestamp=timestamp_str;
-	activity_results.duration=activity_timer.seconds;
+	var activity_details={};
+	activity_details.type=session_data.type;
+	activity_details.mode=session_data.mode;
+	activity_details.level=session_data.level;
+	activity_details.activity=correct_answer;
+	activity_details.timestamp=timestamp_str;
+	activity_details.duration=activity_timer.seconds;
 	session_data.duration+=activity_timer.seconds;
 	if(typeof clicked_answer == "string"){ // it is not a sprite but an image
 		image_src_start_exists=clicked_answer.lastIndexOf("/")
@@ -191,25 +192,25 @@ function conciencia_check_correct(clicked_answer,correct_answer){
 	}
 
 
-	activity_results.choice=clicked_answer;
+	activity_details.choice=clicked_answer;
     var the_content='<h1>...siguiente actividad...</h1>';
 	if (clicked_answer==correct_answer){
 		session_data.num_correct++;
-		activity_results.result="correct";
+		activity_details.result="correct";
 		if(session_data.mode!="test"){
 			audio_sprite.playSpriteRange("zfx_correct");
 			dom_score_correct.innerHTML=session_data.num_correct;
 			the_content='<div class="js-modal-img"><img src="'+media_objects.images['correct.png'].src+'"/></div>';
 		}
 	}else{
-		activity_results.result="incorrect";
+		activity_details.result="incorrect";
 		if(session_data.mode!="test"){
-			audio_sprite.playSpriteRange("zfx_wrong"); // add a callback to move forward after the sound plays...
+			audio_sprite.playSpriteRange("zfx_wrong");
 			the_content='<div class="js-modal-img"><img src="'+media_objects.images['wrong.png'].src+'"/></div>';
 		}
 	}
     open_js_modal_content(the_content);
-	session_data.details.push(activity_results);
+	session_data.details.push(activity_details);
 	session_data.num_answered++;
 	dom_score_answered.innerHTML=session_data.num_answered;
 	var waiting_time=1000;
@@ -222,7 +223,6 @@ function conciencia_next_activity(){
 	remove_modal();
 	if(remaining_rand_activities.length==0){
 		canvas_zone_vcentered.innerHTML='NO HAY MAS ACTIVIDADES. FIN, sending...';
-		if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
 		send_session_data();
 	}else{
 		if(remaining_rand_activities.length==1 || session_data.mode=="test"){

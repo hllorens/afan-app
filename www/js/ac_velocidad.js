@@ -28,7 +28,7 @@ var velocidad=function(){
 	remove_modal();
 	session_data.type="velocidad";
     if(JsonLazy.data.hasOwnProperty('velocidad_data')){
-        setTimeout(function(){velocidad_start();}, 1000);
+        velocidad_start();
     }else{
         JsonLazy.load("../data/ac_velocidad_data.json", "velocidad_data", velocidad_start);
     }        

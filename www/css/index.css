@@ -11,6 +11,7 @@ green: #6a6   pastel: #aea
 yellow: #fa1  pastel: #fc5   extra pastel #ffe4a3
 granate: #400;pastel: #faa
 white: #eee
+http://paletton.com/#uid=7121S0kllw0bwOigYEzpJtst4nX
 
 */
 
@@ -200,6 +201,37 @@ button.backgroundRed{
 	background:#ffe4a3;
 }
 
+#discr_visual_table{
+    display:inline-block;
+    font-family: myMontessori; 
+    font-size: 40px;
+    margin:0 160px;
+}
+
+#discr_visual_table td{
+    border:2px solid #111;
+    text-align:center;
+    padding: 10px 20px;
+    background-color: #eee;
+}
+
+#discr_visual_table td:hover{
+    cursor:pointer;
+}
+
+#discr_visual_table td.covered{
+	background:#ffe4a3;
+}
+
+.noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 .membox{
 	width:16%; max-width:150px;
  	text-align:center;
@@ -263,11 +295,15 @@ button.backgroundRed{
 .montessori-div{
 	background:#fff;
 	color:#000;
+    font-size:52px;
+	/*font-weight:bold; shows double in iOS*/
 }
 .montessori{
 	font-family: myMontessori; 
-	font-size:52px;
-	font-weight:bold;
+}
+.montessori-40{
+	font-family: myMontessori;
+    font-size:40px;
 }
 
 
