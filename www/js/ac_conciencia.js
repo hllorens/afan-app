@@ -36,10 +36,7 @@ function conciencia_start(){
 	session_data.num_correct=0;
 	session_data.num_answered=0;
 	session_data.details=[];
-	var timestamp=new Date();
-	session_data.timestamp=timestamp.getFullYear()+"-"+
-		pad_string((timestamp.getMonth()+1),2,"0") + "-" + pad_string(timestamp.getDate(),2,"0") + " " +
-		 pad_string(timestamp.getHours(),2,"0") + ":"  + pad_string(timestamp.getMinutes(),2,"0");
+	session_data.timestamp=get_timestamp_str();
 
 	var training_extra_fields='';
 	if(session_data.mode=="training"){

@@ -54,13 +54,13 @@ Activity.prototype.reset=function(){
 Activity.prototype.start=function(){
 	remove_modal();
 	this.reset();
-	session_data.timestamp=Activity.get_timestamp();
+	session_data.timestamp=get_timestamp_str();
 	this[this.callback_name]();
 }
 Activity.prototype.next_activity=function(){
 	remove_modal();
 	activity_timer.stop();
-	this.details.timestamp=Activity.get_timestamp();
+	this.details.timestamp=get_timestamp_str();
 	this.details.duration=activity_timer.seconds;
 	session_data.details.push(this.details);
 	session_data.duration+=activity_timer.seconds;
@@ -87,14 +87,6 @@ Activity.prototype.end=function(res){
 
 }
 
-Activity.get_timestamp=function(){
-	var timestamp=new Date();
-	var timestamp_str=timestamp.getFullYear()+"-"+
-		pad_string((timestamp.getMonth()+1),2,"0") + "-" + pad_string(timestamp.getDate(),2,"0") + " " +
-		 pad_string(timestamp.getHours(),2,"0") + ":"  + pad_string(timestamp.getMinutes(),2,"0") + 
-			":"  + pad_string(timestamp.getSeconds(),2,"0");
-	return timestamp_str;
-}
 
 
 // find common patterns and abstract here

@@ -116,8 +116,8 @@ var velocidad_find_word=function(){
 	<div class="text-center montessori-div">\
 	<p class="montessori">'+hide_word(current_activity_sentence,current_activity_word)+'</p>\
 	</div>\
-	<input id="velocidad_answer" class="montessori" type="text" value="" />\
-	<br /><button id="check_vel_button" >OK</button>\
+	<input id="velocidad_answer" class="montessori-40" type="text" value="" />\
+	<br /><button id="check_vel_button" class="button">OK</button>\
     <button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
 	';
     document.getElementById("check_vel_button").addEventListener(clickOrTouch,function(){check_velocidad();});

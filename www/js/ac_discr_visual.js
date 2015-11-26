@@ -6,6 +6,7 @@ var dv_obj=new Activity('Discr. Visual','discr_visual','show_matrix');
 dv_obj.help_text='Encuentra la sílaba.';
 dv_obj.MAX_PLAYED_TIMES_TEST=2;
 dv_obj.MAX_PLAYED_TIMES=10;
+dv_obj.MAX_FAILURES=5;
 
 dv_obj.letters1=['b','c','f','p'];
 dv_obj.letters1_only_r=['d','t','v']
