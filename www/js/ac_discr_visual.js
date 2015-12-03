@@ -71,10 +71,9 @@ var discr_visual=function(){
 
 dv_obj.show_matrix=function(){
     remove_modal();
-	if(session_data.mode=='test' && dv_obj.played_times>=dv_obj.MAX_PLAYED_TIMES_TEST){
-		send_session_data();
-	}else if(session_data.mode!='test' && (dv_obj.played_times>dv_obj.MAX_PLAYED_TIMES || dv_obj.failed_times>dv_obj.MAX_FAILURES)){
-		game();
+	if((session_data.mode=='test' && dv_obj.played_times>=dv_obj.MAX_PLAYED_TIMES_TEST) ||
+        (session_data.mode!='test' && (dv_obj.played_times>dv_obj.MAX_PLAYED_TIMES || dv_obj.failed_times>dv_obj.MAX_FAILURES))){
+		dv_obj.finish();
 	}else{
 		activity_timer.start();
 		dv_obj.current_corrections={};

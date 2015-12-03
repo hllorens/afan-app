@@ -8,7 +8,8 @@ var app_name='CoLE';
 
 // MEDIA
 var images = [
-"../../afan-app-media/img/spacer158.png",
+//"../../afan-app-media/img/spacer158.png",
+"../../afan-app-media/img/happy.png",
 "../../afan-app-media/img/wordimg-sprite.png",
 "../../afan-app-media/img/correct.png",
 "../../afan-app-media/img/wrong.png"

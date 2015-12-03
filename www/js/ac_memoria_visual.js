@@ -1,13 +1,12 @@
 "use strict";
 
-var memoria_visual_help_title='Memoria Visual';
-var memoria_visual_help='\
+
+var memvis_obj=new Activity('Memoria Visual','memoria_visual','start_activity');
+memvis_obj.help_text='\
     Intenta memorizar estas imágenes. Después tendrás que localizarlas respetando el orden en que fueron presentadas.\
 ';
 
 var memoria_visual=function(){
-	remove_modal();
-	session_data.type="memoria_visual";
 	/** Se presentan imágenes al usuario que se van abriendo y tapando como cartas
 	 ** Luego desaparecen, y salen 9 opciones a ordenar
 	 ** Se inicia con una carta y se va incrementando hasta 7
@@ -24,63 +23,52 @@ var memoria_visual=function(){
 	// elegir 9 imagenes de forma aleatoria (sin repetidos)
 	// TODO donde saco el wordlist? del sprite del css?
 
-	if(current_activity_memory_level_passed_times==0 && current_activity_memory_level==1){
-        activity_timer.reset();
-		session_data.num_correct=0;
-		session_data.num_answered=MAX_MEMORY_LEVELS; // *2
-		session_data.duration=0;
-		session_data.details=[];
-		var timestamp=new Date();
-		session_data.timestamp=timestamp.getFullYear()+"-"+
-			pad_string((timestamp.getMonth()+1),2,"0") + "-" + pad_string(timestamp.getDate(),2,"0") + " " +
-			 pad_string(timestamp.getHours(),2,"0") + ":"  + pad_string(timestamp.getMinutes(),2,"0");
-	}
-    
-	current_activity_memory_uncovered=0;
-
-	var sprite_images=wordimage_image_ref; //['pato','gato','sol','pez','tren','sal','col','reja','oreja','koala','bala','ala'];
-	current_activity_memory_options = random_array(sprite_images,9);
-	if(debug) console.log(current_activity_memory_options);
-
-	// elegir n imagenes segun el nivel alcanzado (sin repetidos)
-	current_activity_memory_pattern = random_array(current_activity_memory_options,current_activity_memory_level);
-	if(debug) console.log(current_activity_memory_pattern);
 
 
 
+    session_data.num_answered=MAX_MEMORY_LEVELS; // *2
 	// mostrar tapadas e ir abriendo en intervalos de 2 segundos
-	memoria_visual_show_pattern();
+	memvis_obj.start();
 
 }
 
-var memoria_visual_show_pattern=function(){
+
+memvis_obj.start_activity=function(){
 	// TODO instead of passing global varialbes create objects for each game
 	//      and then use this and .bind(this) for timeouts...
     //      a better encapsulation
-	
-	// TODO with a for loop create the divs...
-	var pattern_representation="";
-	for(var i=0;i<current_activity_memory_pattern.length;i++){
-		pattern_representation+='<div class="membox"><div class="wordimage wordimage-'+current_activity_memory_pattern[i]+' covered"></div></div>';
-	}
-	canvas_zone_vcentered.innerHTML='\
-			<div id="xx">\
-			'+pattern_representation+'\
-			</div>\
-		  <button id="playb" class="button">PLAY</button>\
-        <button id="help_button" class="minibutton fixed-bottom-left help">?</button> \
-        <button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
-	';
-    document.getElementById("playb").addEventListener(clickOrTouch,function(){memoria_visual_uncover_next();});
-    document.getElementById("help_button").addEventListener(clickOrTouch,function(){open_js_modal_alert(memoria_visual_help_title,memoria_visual_help);});
-    document.getElementById("go-back").addEventListener(clickOrTouch,function(){game();});
+    if(current_activity_memory_level>MAX_MEMORY_LEVELS || (session_data.mode=="test" && !game_mode && current_activity_played_times>=MAX_PLAYS)  || ( (session_data.mode!="test" || game_mode) && current_activity_played_times>=10)){
+		memvis_obj.finish();
+    }else{
+        current_activity_memory_uncovered=0;
+        var sprite_images=wordimage_image_ref; //['pato','gato','sol','pez','tren','sal','col','reja','oreja','koala','bala','ala'];
+        current_activity_memory_options = random_array(sprite_images,9);
+        if(debug) console.log(current_activity_memory_options);
+
+        // elegir n imagenes segun el nivel alcanzado (sin repetidos)
+        current_activity_memory_pattern = random_array(current_activity_memory_options,current_activity_memory_level);
+        if(debug) console.log(current_activity_memory_pattern);
+        
+        var pattern_representation="";
+        for(var i=0;i<current_activity_memory_pattern.length;i++){
+            pattern_representation+='<div class="membox"><div class="wordimage wordimage-'+current_activity_memory_pattern[i]+' covered"></div></div>';
+        }
+        canvas_zone_vcentered.innerHTML='\
+                <div id="xx">\
+                '+pattern_representation+'\
+                </div>\
+              <button id="playb" class="button">PLAY</button>\
+        ';
+        memvis_obj.add_buttons(canvas_zone_vcentered);
+        document.getElementById("playb").addEventListener(clickOrTouch,function(){memoria_visual_uncover_next();});
+    }
 }
 
 var memoria_visual_uncover_next=function(){
 	// don't worry about recursion, all functions will end there
 	document.getElementById('playb').disabled=true;
 	if(current_activity_memory_uncovered==current_activity_memory_pattern.length){
-		current_activity_memory_uncovered=0;		
+		current_activity_memory_uncovered=0;
 		setTimeout(function(){memoria_visual_find_pattern();}, 4000);
 	}else{	//uncover...
 		var covered_div=document.getElementById('xx').children[current_activity_memory_uncovered].children[0];
@@ -109,11 +97,8 @@ var memoria_visual_find_pattern=function(){
                 <div class="membox"><div class="wordimage wordimage-'+current_activity_memory_options[7]+'"></div></div>\
                 <div class="membox"><div class="wordimage wordimage-'+current_activity_memory_options[8]+'"></div></div>\
             </div>\
-        <button id="help_button" class="minibutton fixed-bottom-left help">?</button> \
-        <button id="go-back" class="minibutton fixed-bottom-right">Volver</button> \
     ';
-    document.getElementById("help_button").addEventListener(clickOrTouch,function(){open_js_modal_alert(memoria_visual_help_title,memoria_visual_help);});
-    document.getElementById("go-back").addEventListener(clickOrTouch,function(){game();});
+    memvis_obj.add_buttons(canvas_zone_vcentered);
     var boxes=document.getElementsByClassName("wordimage");
     for(var i=0;i<boxes.length;i++){
         boxes[i].addEventListener(clickOrTouch,function(){
@@ -137,51 +122,21 @@ var memoria_visual_check_click=function (element){
     element.classList.add('covered');
     
     if(current_activity_memory_uncovered==current_activity_memory_pattern.length){
-        var the_content='<h1>...siguiente actividad...</h1>';
+        memvis_obj.details={};
         if(current_activity_memory_already_incorrect==false){
-            if(session_data.mode!="test"){
-                audio_sprite.playSpriteRange("zfx_correct");
-                the_content='<div class="js-modal-img"><img src="'+media_objects.images['correct.png'].src+'"/></div>';
-            }
-            open_js_modal_content(the_content);
+            memvis_obj.details.result="correct";
             session_data.num_correct++;
-            if(current_activity_memory_level>=MAX_MEMORY_LEVELS){
-                console.log('Has superado el juego!'); // debe ser un modal
-                current_activity_memory_level=1;
-                current_activity_played_times=0;
+            current_activity_memory_level_passed_times++;
+            //if((session_data.mode=="test" && !game_mode && current_activity_memory_level_passed_times>=2) || (session_data.mode!="test" || game_mode) ){
+                console.log('siguiente nivel...'); // debe ser un modal
                 current_activity_memory_level_passed_times=0;
-                if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
-                if(session_data.mode=="test" && !game_mode) setTimeout(function(){send_session_data();}, 2000);
-                else setTimeout(function(){game();}, 2000);
-            }else{
-                current_activity_memory_level_passed_times++;
-                //if((session_data.mode=="test" && !game_mode && current_activity_memory_level_passed_times>=2) || (session_data.mode!="test" || game_mode) ){
-                    console.log('siguiente nivel...'); // debe ser un modal
-                    current_activity_memory_level_passed_times=0;
-                    current_activity_memory_level++;
-                //}
-                current_activity_played_times=0;
-                setTimeout(function(){memoria_visual();}, 2000);
-            }
+                current_activity_memory_level++;
+            //}
         }else{
+            memvis_obj.details.result="incorrect";
             current_activity_memory_already_incorrect=false;
-            if(session_data.mode!="test"){
-                audio_sprite.playSpriteRange("zfx_wrong"); // add a callback to move forward after the sound plays...
-                the_content='<div class="js-modal-img"><img src="'+media_objects.images['wrong.png'].src+'"/></div>';
-            }
-            open_js_modal_content(the_content);
             current_activity_played_times++;
-            if( (session_data.mode=="test" && !game_mode && current_activity_played_times>=MAX_PLAYS)  || ( (session_data.mode!="test" || game_mode) && current_activity_played_times>=10)){
-                current_activity_memory_level=1;
-                current_activity_played_times=0;
-                current_activity_memory_level_passed_times=0;
-                console.log('Ooooh! :( Has fallado dos veces. Fin del juego.'); // should be a modal
-                if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
-                if(session_data.mode=="test" && !game_mode) setTimeout(function(){send_session_data();}, 2000);
-                else setTimeout(function(){game();}, 2000);
-            }else{
-                setTimeout(function(){memoria_visual();}, 2000);
-            }
         }
+        memvis_obj.end(memvis_obj.details.result);
     }
 }

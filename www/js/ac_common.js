@@ -67,24 +67,44 @@ Activity.prototype.next_activity=function(){
 	activity_timer.reset();
 	this[this.callback_name]();
 }
-Activity.prototype.end=function(res){
+Activity.prototype.end=function(){
 	var waiting_time=300;
     var the_content='<h1>...siguiente actividad...</h1>';
     if(session_data.mode!="test"){
 		waiting_time=1000; // >soundLength (could be on_sound_end but too short for image show)
-		if(res=="correct"){
+		if(this.details.result=="correct"){
 		    audio_sprite.playSpriteRange("zfx_correct"); 
 		    the_content='<div class="js-modal-img"><img src="'+media_objects.images['correct.png'].src+'"/></div>';
-		}else if(res="incorrect"){
+		}else if(this.details.result="incorrect"){
 			audio_sprite.playSpriteRange("zfx_wrong"); // add a callback to move forward after the sound plays...
 			the_content='<div class="js-modal-img"><img src="'+media_objects.images['wrong.png'].src+'"/></div>';
 		}else{
-			throw new Error('ac_check_actions: res is not "correct" or "incorrect"');
+			throw new Error('ac_check_actions: details.result is not "correct" or "incorrect"');
 		}
     }
     open_js_modal_content(the_content);
 	setTimeout(function(){this.next_activity();}.bind(this), waiting_time);
+}
 
+Activity.prototype.finish=function(){
+	var the_content='<h1>...fin del juego...</h1>';
+    if(session_data.mode!="test" && !game_mode){
+		var waiting_time=2000; // >soundLength (could be on_sound_end but too short for image show)
+		if(this.details.result=="correct"){
+		    audio_sprite.playSpriteRange("zfx_correct"); // TODO play another sound!!
+		    the_content='<div class="js-modal-img"><img src="'+media_objects.images['happy.png'].src+'"/></div>';
+			open_js_modal_content(the_content);
+		}else if(this.details.result="incorrect"){
+			waiting_time=100;
+			/*audio_sprite.playSpriteRange("zfx_wrong"); // add a callback to move forward after the sound plays...
+			the_content='<div class="js-modal-img"><img src="'+media_objects.images['wrong.png'].src+'"/></div>';*/
+		}else{
+			throw new Error('finish: details.result is not "correct" or "incorrect"');
+		}
+		setTimeout(function(){game();}, waiting_time);
+    }else{
+		send_session_data();
+	}
 }
 
 

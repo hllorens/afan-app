@@ -1,5 +1,6 @@
 "use strict";
 
+
 var ritmo_obj=new Activity('Ritmo','ritmo','ritmo_main');
 ritmo_obj.help_text='Escucha la secuencia. Después tendrás que reproducirla.';
 
@@ -107,7 +108,7 @@ ritmo_obj.check=function(){
 		ritmo_obj.details.result="incorrect";
 		ritmo_obj.failed_times++;
 	}
-	ritmo_obj.end(dv_obj.details.result);
+	ritmo_obj.end(ritmo_obj.details.result);
 
 }
 

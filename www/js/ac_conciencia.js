@@ -1,139 +1,123 @@
 "use strict";
 
-var conciencia_help_title='Conciencia Auditiva';
-var conciencia_help='\
+var conciencia_obj=new Activity('Conciencia Auditiva','conciencia','start_activity');
+conciencia_obj.help_text='\
     Intenta unir mentalmente los sonidos que vas escuchando. ¿Qué palabra se forma? \
 ';
+conciencia_obj.remaining_rand_activities=null;
+conciencia_obj.MAX_TRAINING_ACTIVITIES=10;
 
 var conciencia=function(){
     if(!check_if_sounds_loaded(conciencia)){return;}
-    preventBackExit();
-    session_data.type="conciencia";
-    // TODO CREATE A FUNCTION SHOW LEVEL----------------
-    open_js_modal_content('<h1>Nivel 1: '+session_data.mode+'</h1>');
-    // ----------------------------------------------
-    
-    
-    // Load activities if needed
-    if(session_data.mode=="training"){
-        if(JsonLazy.data.hasOwnProperty('conciencia_train')){
-            setTimeout(function(){conciencia_start();}, 1000);
-        }else{
-            JsonLazy.load("../data/ac_conciencia_train.json", "conciencia_train", conciencia_start);
-        }
+
+    // Load activities if needed (TODO, to standardize this could be done at the pure beginning as json files)
+    if(session_data.mode=="training" && !JsonLazy.data.hasOwnProperty('conciencia_train')){
+        JsonLazy.load("../data/ac_conciencia_train.json", "conciencia_train", conciencia);
+    }else if(!JsonLazy.data.hasOwnProperty('conciencia_test')){
+            JsonLazy.load("../data/ac_conciencia_test.json", "conciencia_test", conciencia);
     }else{
-        if(JsonLazy.data.hasOwnProperty('conciencia_test')){
-            setTimeout(function(){conciencia_start();}, 1000);
-        }else{
-            JsonLazy.load("../data/ac_conciencia_test.json", "conciencia_test", conciencia_start);
-        }        
-    }
-    
-}
-
-function conciencia_start(){
-	remove_modal();
-	session_data.num_correct=0;
-	session_data.num_answered=0;
-	session_data.details=[];
-	session_data.timestamp=get_timestamp_str();
-
-	var training_extra_fields='';
-	if(session_data.mode=="training"){
-		training_extra_fields='<div id="current_score">\
-		Correctas : <span id="current_score_num">0</span>\
-		</div>';
-	}
-	canvas_zone_vcentered.innerHTML=' \
-		<div id="zone_score" class="cf">\
-		  <div class="col_left">\
-		    <div id="activity_timer_div">\
-		      Tiempo : <span id="activity_timer_span">00:00:00</span>\
-		    </div>\
-			'+training_extra_fields+'\
-		  </div>\
-		  <div class="col_right">\
-		    <div id="remaining_activities">\
-		      Actividades restantes: <span id="remaining_activities_num">0</span>\
-		    </div>\
-		    <div id="current_answered">\
-		      Actividades finalizadas : <span id="current_answered_num">0</span>\
-		    </div>\
-		  </div>\
-		</div> <!-- /#zone_score -->\
-	<div id="answers"></div><br class="clear" />\
-	<div id="sound">sound icon</div><br /> \
-        <button id="help_button" class="minibutton fixed-bottom-left help">?</button> \
-        <button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
-        ';
-    document.getElementById("help_button").addEventListener(clickOrTouch,function(){open_js_modal_alert(conciencia_help_title,conciencia_help);});
-    document.getElementById("go-back").addEventListener(clickOrTouch,function(){game();});        
-	//get elements
-	dom_score_correct=document.getElementById('current_score_num');
-	dom_score_answered=document.getElementById('current_answered_num');
-	activity_timer.anchor_to_dom(document.getElementById('activity_timer_span'));
-	dom_score_answered.innerHTML=session_data.num_answered;
-	if(session_data.mode=="training"){ 
-		var start=Math.floor(Math.random()*(JsonLazy.data.conciencia_train.length-(MAX_TRAINING_ACTIVITIES+1)));
-		remaining_rand_activities=JsonLazy.data.conciencia_train.slice(start,start+MAX_TRAINING_ACTIVITIES);
-	}else{
-		remaining_rand_activities=JsonLazy.data.conciencia_test.slice(); // copy by value
-	}
-	document.getElementById('remaining_activities_num').innerHTML=""+(remaining_rand_activities.length-1);
-	if(session_data.mode=="training"){
-		conciencia_show_activity(Math.floor(Math.random()*remaining_rand_activities.length));
-	}else{
-		conciencia_show_activity(0);
-	}
-}
-
-function conciencia_show_activity(i){
-    document.getElementById('remaining_activities_num').innerHTML=""+(remaining_rand_activities.length-1);
-
-    activity_timer.reset();
-    current_activity_index=i;
-    current_activity_played_times=0;
-    if(debug) console.log(i+"--"+remaining_rand_activities);
-    current_activity_data=remaining_rand_activities[i]; 
-    correct_answer=current_activity_data['answers'][0];
-
-    var answers_div=document.getElementById('answers');
-    answers_div.innerHTML="";
-    var used_answers=[];
-    var used_answers_text=[];
-    for(var i=0; i<USE_ANSWERS ; ++i) {
-        var use=Math.floor(Math.random() * USE_ANSWERS)
-        while(used_answers.indexOf(use) != -1) use=Math.floor(Math.random() * USE_ANSWERS);
-
-        var answer_i=current_activity_data['answers'][use];
-        answers_div.innerHTML+='<div id="answer'+i+'" class="hover_red_border"  ></div>';
-        if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+current_activity_data['answers'][use])){
-            alert("ERROR: .wordimage-"+current_activity_data['answers'][use]+" not found in wordimg-sprite.css.");
-            document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
-        }else if(used_answers_text.hasOwnProperty(current_activity_data['answers'][use])){
-            alert("ERROR: "+current_activity_data['answers'][use]+" is already used contact the ADMIN.");
-            document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
-        }else{
-            document.getElementById("answer"+i).innerHTML += '<div class="wordimage wordimage-'+current_activity_data['answers'][use]+'"></div>';
+        preventBackExit();
+        var training_extra_fields='';
+        if(session_data.mode=="training"){
+            training_extra_fields='<div id="current_score">\
+            Correctas : <span id="current_score_num">0</span>\
+            </div>';
         }
-        
-        used_answers[used_answers.length]=use;
-        used_answers_text[used_answers_text.length]=current_activity_data['answers'][use];
-    }
+        canvas_zone_vcentered.innerHTML=' \
+            <div id="zone_score" class="cf">\
+              <div class="col_left">\
+                <div id="activity_timer_div">\
+                  Tiempo : <span id="activity_timer_span">00:00:00</span>\
+                </div>\
+                '+training_extra_fields+'\
+              </div>\
+              <div class="col_right">\
+                <div id="remaining_activities">\
+                  Actividades restantes: <span id="remaining_activities_num">0</span>\
+                </div>\
+                <div id="current_answered">\
+                  Actividades finalizadas : <span id="current_answered_num">0</span>\
+                </div>\
+              </div>\
+            </div> <!-- /#zone_score -->\
+        <div id="answers"></div><br class="clear" />\
+        <div id="sound">sound icon</div><br /> \
+            ';
 
-    zone_sound=document.getElementById('sound');
-    zone_sound.innerHTML='<button id="playb" class="button">PLAY</button> ';
-    var playb=document.getElementById('playb');
-    toggleClassBlink(playb,'backgroundRed',250,4);
-    
-    playb.addEventListener(clickOrTouch,function(){conciencia_play_sound();});
-    var boxes=document.getElementsByClassName("hover_red_border");
-    for(var i=0;i<boxes.length;i++){
-        boxes[i].addEventListener(clickOrTouch,function(){
-            conciencia_check_correct(this.firstChild,correct_answer);
-            });
+        if(session_data.mode=="training"){ 
+            var start=Math.floor(Math.random()*(JsonLazy.data.conciencia_train.length-(conciencia_obj.MAX_TRAINING_ACTIVITIES+1)));
+            conciencia_obj.remaining_rand_activities=JsonLazy.data.conciencia_train.slice(start,start+conciencia_obj.MAX_TRAINING_ACTIVITIES);
+			shuffle_array(conciencia_obj.remaining_rand_activities);
+        }else{
+            conciencia_obj.remaining_rand_activities=JsonLazy.data.conciencia_test.slice(); // copy by value
+        }
+        //get elements
+        dom_score_correct=document.getElementById('current_score_num');
+        dom_score_answered=document.getElementById('current_answered_num');
+        activity_timer.anchor_to_dom(document.getElementById('activity_timer_span'));
+        dom_score_answered.innerHTML=session_data.num_answered;
+        document.getElementById('remaining_activities_num').innerHTML=""+(conciencia_obj.remaining_rand_activities.length-1);  
+        conciencia_obj.add_buttons(canvas_zone_vcentered);
+
+        conciencia_obj.start();        
     }
 }
+
+
+
+conciencia_obj.start_activity=function(){
+    if(conciencia_obj.remaining_rand_activities.length==0){
+		conciencia_obj.finish();
+    }else{
+        document.getElementById('remaining_activities_num').innerHTML=""+(conciencia_obj.remaining_rand_activities.length-1);
+
+        activity_timer.reset();
+        current_activity_index=0;
+        current_activity_played_times=0;
+        if(debug) console.log(0+"--"+conciencia_obj.remaining_rand_activities);
+        current_activity_data=conciencia_obj.remaining_rand_activities[0]; 
+        correct_answer=current_activity_data['answers'][0];
+
+        var answers_div=document.getElementById('answers');
+        answers_div.innerHTML="";
+        var used_answers=[];
+        var used_answers_text=[];
+        for(var i=0; i<USE_ANSWERS ; ++i) {
+            var use=Math.floor(Math.random() * USE_ANSWERS)
+            while(used_answers.indexOf(use) != -1) use=Math.floor(Math.random() * USE_ANSWERS);
+
+            var answer_i=current_activity_data['answers'][use];
+            answers_div.innerHTML+='<div id="answer'+i+'" class="hover_red_border"  ></div>';
+            if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+current_activity_data['answers'][use])){
+                alert("ERROR: .wordimage-"+current_activity_data['answers'][use]+" not found in wordimg-sprite.css.");
+                document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
+            }else if(used_answers_text.hasOwnProperty(current_activity_data['answers'][use])){
+                alert("ERROR: "+current_activity_data['answers'][use]+" is already used contact the ADMIN.");
+                document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
+            }else{
+                document.getElementById("answer"+i).innerHTML += '<div class="wordimage wordimage-'+current_activity_data['answers'][use]+'"></div>';
+            }
+            
+            used_answers[used_answers.length]=use;
+            used_answers_text[used_answers_text.length]=current_activity_data['answers'][use];
+        }
+
+        zone_sound=document.getElementById('sound');
+        zone_sound.innerHTML='<button id="playb" class="button">PLAY</button> ';
+        var playb=document.getElementById('playb');
+        toggleClassBlink(playb,'backgroundRed',250,4);
+
+        playb.addEventListener(clickOrTouch,function(){conciencia_play_sound();});
+        var boxes=document.getElementsByClassName("hover_red_border");
+        for(var i=0;i<boxes.length;i++){
+            boxes[i].addEventListener(clickOrTouch,function(){
+                conciencia_check_correct(this.firstChild,correct_answer);
+                });
+        }
+
+    }
+}
+
 
 var conciencia_play_sound_finished=function(){
 	activity_timer.start();
@@ -162,21 +146,11 @@ function conciencia_check_correct(clicked_answer,correct_answer){
 		open_js_modal_content_timeout('<h1>Haz click en "play" antes que en el dibujo</h1>',2000);
 		return;
 	} 
-
-	var timestamp=new Date();
-	var timestamp_str=timestamp.getFullYear()+"-"+
-		pad_string((timestamp.getMonth()+1),2,"0") + "-" + pad_string(timestamp.getDate(),2,"0") + " " +
-		 pad_string(timestamp.getHours(),2,"0") + ":"  + pad_string(timestamp.getMinutes(),2,"0") + 
-			":"  + pad_string(timestamp.getSeconds(),2,"0");
-	activity_timer.stop();
-	var activity_details={};
-	activity_details.type=session_data.type;
-	activity_details.mode=session_data.mode;
-	activity_details.level=session_data.level;
-	activity_details.activity=correct_answer;
-	activity_details.timestamp=timestamp_str;
-	activity_details.duration=activity_timer.seconds;
-	session_data.duration+=activity_timer.seconds;
+	conciencia_obj.details={};
+	conciencia_obj.details.type=session_data.type;
+	conciencia_obj.details.mode=session_data.mode;
+	conciencia_obj.details.level=session_data.level;
+	conciencia_obj.details.activity=correct_answer;
 	if(typeof clicked_answer == "string"){ // it is not a sprite but an image
 		image_src_start_exists=clicked_answer.lastIndexOf("/")
 		if(image_src_start_exists==-1) image_src_start_exists=clicked_answer.indexOf("src=\"")
@@ -188,44 +162,19 @@ function conciencia_check_correct(clicked_answer,correct_answer){
 		clicked_answer=(clicked_answer.className.replace("wordimage wordimage-","")).trim();
 	}
 
-
-	activity_details.choice=clicked_answer;
+    conciencia_obj.remaining_rand_activities.splice(current_activity_index,1); // remove current activity
+    session_data.num_answered++;
+    dom_score_answered.innerHTML=session_data.num_answered;
+    
+    conciencia_obj.details.choice=clicked_answer;
     var the_content='<h1>...siguiente actividad...</h1>';
-	if (clicked_answer==correct_answer){
-		session_data.num_correct++;
-		activity_details.result="correct";
-		if(session_data.mode!="test"){
-			audio_sprite.playSpriteRange("zfx_correct");
-			dom_score_correct.innerHTML=session_data.num_correct;
-			the_content='<div class="js-modal-img"><img src="'+media_objects.images['correct.png'].src+'"/></div>';
-		}
-	}else{
-		activity_details.result="incorrect";
-		if(session_data.mode!="test"){
-			audio_sprite.playSpriteRange("zfx_wrong");
-			the_content='<div class="js-modal-img"><img src="'+media_objects.images['wrong.png'].src+'"/></div>';
-		}
-	}
-    open_js_modal_content(the_content);
-	session_data.details.push(activity_details);
-	session_data.num_answered++;
-	dom_score_answered.innerHTML=session_data.num_answered;
-	var waiting_time=1000;
-	if(session_data.mode!="test") waiting_time=2000; // fire next activity after 2 seconds (time for displaying img and playing the sound)
-	setTimeout(function(){conciencia_next_activity()}, waiting_time);
+    if (clicked_answer==correct_answer){
+        session_data.num_correct++;
+        conciencia_obj.details.result="correct";
+    }else{
+        conciencia_obj.details.result="incorrect";
+    }
+    conciencia_obj.end()
 }
 
-function conciencia_next_activity(){
-	remaining_rand_activities.splice(current_activity_index,1); // remove current conciencia_show_activity
-	remove_modal();
-	if(remaining_rand_activities.length==0){
-		canvas_zone_vcentered.innerHTML='NO HAY MAS ACTIVIDADES. FIN, sending...';
-		send_session_data();
-	}else{
-		if(remaining_rand_activities.length==1 || session_data.mode=="test"){
-			conciencia_show_activity(0);
-		}else{
-			conciencia_show_activity(Math.floor(Math.random()*remaining_rand_activities.length));
-		}
-	}
-}
+
