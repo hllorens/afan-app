@@ -87,21 +87,7 @@ for(var i=0;i<wordimage_image_ref.length;i++){
 
 
 
-//optional??
-var zone_sound=null;
-var dom_score_correct;
-var dom_score_answered;
-
-// TODO: each game vars... to be encapsulated in objects
-var correct_answer='undefined';
-var current_activity_type='undefined'; // to avoid loading all the html
 var activity_timer=new ActivityTimer();
-var current_activity_data={};
-var current_activity_memory_pattern=undefined;
-var current_activity_memory_options=undefined;
-var current_activity_memory_uncovered=0;
-var current_activity_memory_already_incorrect=false;
-
 
 var user_data={};
 var session_data={
@@ -364,7 +350,7 @@ function menu_screen(){
 		<br /><button id="manage-subjects" disabled="true" class="button" onclick="manage_subjects()">Participantes</button> \
 		';
 		if(user_data.access_level!='admin') admin_opts="";
-		if(user_data.access_level=='invitee'){ normal_opts=""; cache_user_subjects={'invitado':'invitado'}}
+		if(user_data.access_level=='invitee'){ normal_opts=""; cache_user_subjects={'invitado':{"id": "invitado", "alias":"invitado", "name":"invitado", "birthdate":"2010-01-01", "comments":"", "user":"afan"}};}
 		canvas_zone_vcentered.innerHTML=' \
 		<div id="menu-logo-div"></div> \
 		Participante:  <select id="subjects-select" onchange="set_subject()"></select> \

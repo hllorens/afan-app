@@ -162,6 +162,7 @@ button.backgroundRed{
     background-color: #faa;
 }
 
+button.button-long{width:300px;margin:0 50px;}
 
 #sound{/*height:40%;*/
 	width:100%;text-align:center;margin:0;padding:1px;
@@ -371,6 +372,9 @@ a.boxclose{
     .fixed-bottom-right{bottom:8px; right:8px;}
     .fixed-bottom-left{bottom:8px; left:8px;}
     .js-modal-dialog{margin: 10px auto;	width:95%;font-size:16px;}
+    #discr_visual_table{font-size: 35px; margin:0 0;}
+    #discr_visual_table td{padding: 10px 20px;}
+    button.button-long{width:250px;margin:0 15px;}
 }
 
 /* Small Landscape (e.g., Galaxy S4)*/
@@ -388,6 +392,9 @@ a.boxclose{
     .fixed-bottom-right{bottom:8px; right:8px;}
     .fixed-bottom-left{bottom:8px; left:8px;}
     .js-modal-dialog{margin: 10px auto;	width:95%;font-size:12px;}
+    #discr_visual_table{font-size: 35px; margin:0 0;}
+    #discr_visual_table td{padding: 10px 20px;}
+    button.button-long{width:250px;margin:0 15px;}
 }
 
 

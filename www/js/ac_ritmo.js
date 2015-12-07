@@ -39,19 +39,26 @@ ritmo_obj.start_activity=function(){
         || ( (session_data.mode!="test" || game_mode) && ritmo_obj.played_times>=ritmo_obj.MAX_PLAYED_TIMES)){
 		ritmo_obj.finish();
     }else{
+        ritmo_obj.current_key_answer=ritmo_obj.generate_pattern(ritmo_obj.level);
         canvas_zone_vcentered.innerHTML='\
+            <div id="sound"><button id="playb" class="button">PLAY</button></div> \
+            <div class="text-center montessori-div">\
+            <p id="montessori-p-text" class="montessori">Pulsa play para escuchar</p>\
+            </div>\
             <button id="pta" class="button" disabled="disabled" onclick="ritmo_obj.play_ta()">.</button>\
             <button id="ptaa" class="button" disabled="disabled" onclick="ritmo_obj.play_taa()">___</button>\
-            <div class="text-center montessori-div">\
-            <p class="montessori">¿qué has escuchado?</p>\
-            </div>\
-            ';
+            ';//+ritmo_obj.current_key_answer;
         ritmo_obj.add_buttons(canvas_zone_vcentered);
-        ritmo_obj.current_key_answer=ritmo_obj.generate_pattern(ritmo_obj.level);
-        AudioLib.play_sound_arr(ritmo_obj.current_key_answer,ritmo_obj.play_pattern_ended);
+        ritmo_obj.playb=document.getElementById('playb');
+        ritmo_obj.montessori_p_text=document.getElementById('montessori-p-text');
+        ritmo_obj.playb.addEventListener(clickOrTouch,function(){ritmo_obj.play_pattern();});
     }
 }
 
+ritmo_obj.play_pattern=function(){
+    ritmo_obj.playb.disabled=true;
+    AudioLib.play_sound_arr(ritmo_obj.current_key_answer,ritmo_obj.play_pattern_ended);
+}
 
 ritmo_obj.generate_pattern=function(length){
 	var pat=[];
@@ -66,6 +73,7 @@ ritmo_obj.play_pattern_ended=function(){
 	ritmo_obj.current_usr_answer=[];
 	document.getElementById("pta").disabled=false;
 	document.getElementById("ptaa").disabled=false;
+    ritmo_obj.montessori_p_text.innerHTML='¿qué has escuchado?';
     activity_timer.reset();
     activity_timer.start();
 }
@@ -79,6 +87,8 @@ ritmo_obj.play_taa=function(){
 }
 
 ritmo_obj.play_sound=function(s){
+    document.getElementById("pta").disabled=true;
+	document.getElementById("ptaa").disabled=true;
 	ritmo_obj.current_usr_answer.push(s);
 	AudioLib.play_sound_single(s,ritmo_obj.play_sound_end);
 }
@@ -86,7 +96,10 @@ ritmo_obj.play_sound=function(s){
 ritmo_obj.play_sound_end=function(){
 	if(ritmo_obj.current_usr_answer.length>=ritmo_obj.current_key_answer.length){
 		ritmo_obj.check();
-	}
+	}else{
+        document.getElementById("pta").disabled=false;
+        document.getElementById("ptaa").disabled=false;
+    }
 }
 
 ritmo_obj.check=function(){

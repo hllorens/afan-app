@@ -11,7 +11,6 @@ conciencia_obj.USE_ANSWERS=3;
 
 var conciencia=function(){
     if(!check_if_sounds_loaded(conciencia)){return;}
-
     // Load activities if needed (TODO, to standardize this could be done at the pure beginning as json files)
     if(session_data.mode=="training" && !JsonLazy.data.hasOwnProperty('conciencia_train')){
         JsonLazy.load("../data/ac_conciencia_train.json", "conciencia_train", conciencia);
@@ -19,33 +18,10 @@ var conciencia=function(){
             JsonLazy.load("../data/ac_conciencia_test.json", "conciencia_test", conciencia);
     }else{
         preventBackExit();
-        var training_extra_fields='';
-        if(session_data.mode=="training"){
-            training_extra_fields='<div id="current_score">\
-            Correctas : <span id="current_score_num">0</span>\
-            </div>';
-        }
         canvas_zone_vcentered.innerHTML=' \
-            <div id="zone_score" class="cf">\
-              <div class="col_left">\
-                <div id="activity_timer_div">\
-                  Tiempo : <span id="activity_timer_span">00:00:00</span>\
-                </div>\
-                '+training_extra_fields+'\
-              </div>\
-              <div class="col_right">\
-                <div id="remaining_activities">\
-                  Actividades restantes: <span id="remaining_activities_num">0</span>\
-                </div>\
-                <div id="current_answered">\
-                  Actividades finalizadas : <span id="current_answered_num">0</span>\
-                </div>\
-              </div>\
-            </div> <!-- /#zone_score -->\
-        <div id="answers"></div><br class="clear" />\
-        <div id="sound">sound icon</div><br /> \
+            <div id="answers"></div><br class="clear" />\
+            <div id="sound"><button id="playb" class="button">PLAY</button></div><br /> \
             ';
-
         if(session_data.mode=="training"){ 
             var start=Math.floor(Math.random()*(JsonLazy.data.conciencia_train.length-(conciencia_obj.MAX_TRAINING_ACTIVITIES+1)));
             conciencia_obj.remaining_rand_activities=JsonLazy.data.conciencia_train.slice(start,start+conciencia_obj.MAX_TRAINING_ACTIVITIES);
@@ -54,13 +30,10 @@ var conciencia=function(){
             conciencia_obj.remaining_rand_activities=JsonLazy.data.conciencia_test.slice(); // copy by value
         }
         //get elements
-        dom_score_correct=document.getElementById('current_score_num');
-        dom_score_answered=document.getElementById('current_answered_num');
-        activity_timer.anchor_to_dom(document.getElementById('activity_timer_span'));
-        dom_score_answered.innerHTML=session_data.num_answered;
-        document.getElementById('remaining_activities_num').innerHTML=""+(conciencia_obj.remaining_rand_activities.length-1);  
         conciencia_obj.add_buttons(canvas_zone_vcentered);
-
+        conciencia_obj.playb=document.getElementById('playb');
+        conciencia_obj.playb.addEventListener(clickOrTouch,function(){conciencia_play_sound();});
+        
         conciencia_obj.start();        
     }
 }
@@ -71,14 +44,14 @@ conciencia_obj.start_activity=function(){
     if(conciencia_obj.remaining_rand_activities.length==0){
 		conciencia_obj.finish();
     }else{
-        document.getElementById('remaining_activities_num').innerHTML=""+(conciencia_obj.remaining_rand_activities.length-1);
-
+        conciencia_obj.playb.innerHTML='PLAY';
+        conciencia_obj.playb.disabled=false;
         activity_timer.reset();
         conciencia_obj.current_index=0;
         conciencia_obj.played_times=0;
         if(debug) console.log(0+"--"+conciencia_obj.remaining_rand_activities);
-        current_activity_data=conciencia_obj.remaining_rand_activities[0]; 
-        correct_answer=current_activity_data['answers'][0];
+        conciencia_obj.cur_data=conciencia_obj.remaining_rand_activities[0]; 
+        conciencia_obj.correct_answer=conciencia_obj.cur_data['answers'][0];
 
         var answers_div=document.getElementById('answers');
         answers_div.innerHTML="";
@@ -88,32 +61,27 @@ conciencia_obj.start_activity=function(){
             var use=Math.floor(Math.random() * conciencia_obj.USE_ANSWERS)
             while(used_answers.indexOf(use) != -1) use=Math.floor(Math.random() * conciencia_obj.USE_ANSWERS);
 
-            var answer_i=current_activity_data['answers'][use];
+            var answer_i=conciencia_obj.cur_data['answers'][use];
             answers_div.innerHTML+='<div id="answer'+i+'" class="hover_red_border"  ></div>';
-            if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+current_activity_data['answers'][use])){
-                alert("ERROR: .wordimage-"+current_activity_data['answers'][use]+" not found in wordimg-sprite.css.");
+            if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+conciencia_obj.cur_data['answers'][use])){
+                alert("ERROR: .wordimage-"+conciencia_obj.cur_data['answers'][use]+" not found in wordimg-sprite.css.");
                 document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
-            }else if(used_answers_text.hasOwnProperty(current_activity_data['answers'][use])){
-                alert("ERROR: "+current_activity_data['answers'][use]+" is already used contact the ADMIN.");
+            }else if(used_answers_text.hasOwnProperty(conciencia_obj.cur_data['answers'][use])){
+                alert("ERROR: "+conciencia_obj.cur_data['answers'][use]+" is already used contact the ADMIN.");
                 document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
             }else{
-                document.getElementById("answer"+i).innerHTML += '<div class="wordimage wordimage-'+current_activity_data['answers'][use]+'"></div>';
+                document.getElementById("answer"+i).innerHTML += '<div class="wordimage wordimage-'+conciencia_obj.cur_data['answers'][use]+'"></div>';
             }
             
             used_answers[used_answers.length]=use;
-            used_answers_text[used_answers_text.length]=current_activity_data['answers'][use];
+            used_answers_text[used_answers_text.length]=conciencia_obj.cur_data['answers'][use];
         }
 
-        zone_sound=document.getElementById('sound');
-        zone_sound.innerHTML='<button id="playb" class="button">PLAY</button> ';
-        var playb=document.getElementById('playb');
-        toggleClassBlink(playb,'backgroundRed',250,4);
-
-        playb.addEventListener(clickOrTouch,function(){conciencia_play_sound();});
+        toggleClassBlink(conciencia_obj.playb,'backgroundRed',250,4);
         var boxes=document.getElementsByClassName("hover_red_border");
         for(var i=0;i<boxes.length;i++){
             boxes[i].addEventListener(clickOrTouch,function(){
-                conciencia_check_correct(this.firstChild,correct_answer);
+                conciencia_check_correct(this.firstChild);
                 });
         }
 
@@ -124,25 +92,25 @@ conciencia_obj.start_activity=function(){
 var conciencia_play_sound_finished=function(){
 	activity_timer.start();
 	conciencia_obj.played_times++;
-	var playb=document.getElementById('playb');
+	
 	if(conciencia_obj.played_times < conciencia_obj.MAX_PLAYS){
-		playb.innerHTML="RE-PLAY"; // use icons (fixed % size) &#11208; &#11118; &#10704;
-		playb.disabled=false;
+		conciencia_obj.playb.innerHTML="RE-PLAY"; // use icons (fixed % size) &#11208; &#11118; &#10704;
+		conciencia_obj.playb.disabled=false;
 	}else{
 		activity_timer.seconds+=2;
-		playb.innerHTML="haz click en un dibujo"; // use empty icon (to keep size)
+		conciencia_obj.playb.innerHTML="haz click en un dibujo"; // use empty icon (to keep size)
 	}
 };
 
 
 var conciencia_play_sound=function(){
-	document.getElementById('playb').disabled=true;
+	conciencia_obj.playb.disabled=true;
 	activity_timer.stop();
-	SoundChain.play_sound_arr(current_activity_data['sounds'],audio_sprite,conciencia_play_sound_finished);
+	SoundChain.play_sound_arr(conciencia_obj.cur_data['sounds'],audio_sprite,conciencia_play_sound_finished);
 };
 
 
-function conciencia_check_correct(clicked_answer,correct_answer){
+function conciencia_check_correct(clicked_answer){
 	// do not allow cliking before or while uttering
 	if(conciencia_obj.played_times==0 || SoundChain.audio_chain_waiting){
 		open_js_modal_content_timeout('<h1>Haz click en "play" antes que en el dibujo</h1>',2000);
@@ -162,13 +130,12 @@ function conciencia_check_correct(clicked_answer,correct_answer){
 
     conciencia_obj.remaining_rand_activities.splice(conciencia_obj.current_index,1); // remove current activity
     session_data.num_answered++;
-    dom_score_answered.innerHTML=session_data.num_answered;
     
     conciencia_obj.details={};
-    conciencia_obj.details.activity=correct_answer;    
+    conciencia_obj.details.activity=conciencia_obj.correct_answer;    
     conciencia_obj.details.choice=clicked_answer;
     var the_content='<h1>...siguiente actividad...</h1>';
-    if (clicked_answer==correct_answer){
+    if (clicked_answer==conciencia_obj.correct_answer){
         session_data.num_correct++;
         conciencia_obj.details.result="correct";
     }else{

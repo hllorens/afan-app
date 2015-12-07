@@ -133,7 +133,7 @@ dv_obj.start_activity=function(){
 	            <td>'+dv_obj.current_matrix[15]+'</td>\
 	        </tr>\
 	     </table>\
-	     <button id="dv_check" class="button" style="width:300px;margin:0 50px;">Hecho!</button>\
+	     <button id="dv_check" class="button button-long" >Hecho!</button>\
 	    ';
 		dv_obj.add_buttons(canvas_zone_vcentered);
 		document.getElementById("dv_check").addEventListener(clickOrTouch,function(){dv_obj.check();});
@@ -171,6 +171,8 @@ dv_obj.check=function(){
         choice: covered syllables:  pro3 por2 ...  (por2 bla1)
         result:                     correct/incorrect
     */
+    var elem_to_remove=document.getElementById("js-modal-window-alert");
+    if(elem_to_remove!=undefined) elem_to_remove.parentNode.removeChild(elem_to_remove);
 
 	var current_correct=0;
 	var current_answered=0;
@@ -225,7 +227,7 @@ dv_obj.check=function(){
 	}else{
         if(session_data.mode!='test' && dv_obj.train_feedback==0){
             dv_obj.train_feedback++;
-            open_js_modal_alert('Ayuda','¿Estás seguro?');
+            open_js_modal_alert('¿Estás seguro?','¿Estás seguro que la respuesta es correcta?',dv_obj.check,dv_obj.i_am_not_sure,'Sí','No');
             return;
         }
 		dv_obj.details.result="incorrect";
@@ -235,6 +237,11 @@ dv_obj.check=function(){
 	dv_obj.played_times++;
 	dv_obj.end(dv_obj.details.result);
 
+}
+
+dv_obj.i_am_not_sure=function(){
+    var elem_to_remove=document.getElementById("js-modal-window-alert");
+    elem_to_remove.parentNode.removeChild(elem_to_remove);
 }
 
 

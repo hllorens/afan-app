@@ -107,6 +107,38 @@ Activity.prototype.finish=function(){
 	}
 }
 
+/*
+            <div id="zone_score" class="cf">\
+              <div class="col_left">\
+                <div id="activity_timer_div">\
+                  Tiempo : <span id="activity_timer_span">00:00:00</span>\
+                </div>\
+                '+training_extra_fields+'\
+              </div>\
+              <div class="col_right">\
+                <div id="remaining_activities">\
+                  Actividades restantes: <span id="remaining_activities_num">0</span>\
+                </div>\
+                <div id="current_answered">\
+                  Actividades finalizadas : <span id="current_answered_num">0</span>\
+                </div>\
+              </div>\
+            </div> <!-- /#zone_score -->\
+        var training_extra_fields='';
+        if(session_data.mode=="training"){
+            training_extra_fields='<div id="current_score">\
+            Correctas : <span id="current_score_num">0</span>\
+            </div>';
+        }
+                document.getElementById('remaining_activities_num').innerHTML=""+(conciencia_obj.remaining_rand_activities.length-1);
+        dom_score_correct=document.getElementById('current_score_num');
+        dom_score_answered=document.getElementById('current_answered_num');
+        activity_timer.anchor_to_dom(document.getElementById('activity_timer_span'));
+        dom_score_answered.innerHTML=session_data.num_answered;
+        document.getElementById('remaining_activities_num').innerHTML=""+(conciencia_obj.remaining_rand_activities.length-1);  
+
+
+*/
 
 
 // find common patterns and abstract here

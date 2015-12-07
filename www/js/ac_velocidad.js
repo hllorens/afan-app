@@ -6,6 +6,12 @@ vel_obj.help_text='\
 ';
 vel_obj.MAX_LEVELS=3;
 vel_obj.MAX_PLAYED_TIMES=10;
+vel_obj.sec_init=1;
+vel_obj.sec_pal=[
+    {"min_age":0,"max_age":8,"sec_pal":2},
+    {"min_age":8,"max_age":12,"sec_pal":1},
+    {"min_age":12,"max_age":99,"sec_pal":0.5}
+];
 
 var velocidad=function(){
     if(!check_if_sounds_loaded(velocidad)){return;}
@@ -84,7 +90,15 @@ var velocidad_uncover=function(){
 	<p class="montessori">'+vel_obj.sentence+'</p>\
 	</div>\
 	';
-	setTimeout(function(){velocidad_find_word();}, 5000);
+    var pal_wait_time=1;
+    for(var i=0;i<vel_obj.sec_pal.length;i++){
+        if(vel_obj.sec_pal[i].min_age<=session_data.age && vel_obj.sec_pal[i].max_age>session_data.age){
+            pal_wait_time=vel_obj.sec_pal[i].sec_pal*1000*vel_obj.sentence.split(" ").length;
+            break;
+        }
+    }
+    pal_wait_time+=vel_obj.sec_init*1000;
+	setTimeout(function(){velocidad_find_word();}, pal_wait_time);
 }
 
 var velocidad_find_word=function(){

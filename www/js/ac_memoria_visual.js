@@ -41,6 +41,7 @@ memvis_obj.start_activity=function(){
 
         // elegir n imagenes segun el nivel alcanzado (sin repetidos)
         memvis_obj.current_key_answer = random_array(memvis_obj.options,memvis_obj.level);
+        memvis_obj.uncovered=0;
         if(debug) console.log(memvis_obj.current_key_answer);
         
         var pattern_representation="";
@@ -65,8 +66,7 @@ var memoria_visual_uncover_next=function(){
 		memvis_obj.uncovered=0;
 		setTimeout(function(){memoria_visual_find_pattern();}, 4000);
 	}else{	//uncover...
-		var covered_div=document.getElementById('xx').children[memvis_obj.uncovered].children[0];
-		covered_div.classList.remove('covered');
+		document.getElementById('xx').children[memvis_obj.uncovered].children[0].classList.remove('covered');
 		memvis_obj.uncovered++;
 		setTimeout(function(){memoria_visual_uncover_next()}, 2000);
 	}
