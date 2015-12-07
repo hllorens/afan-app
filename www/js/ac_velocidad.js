@@ -1,26 +1,11 @@
 "use strict";
 
-var current_activity_speed_played_times=0;
-var current_activity_speed_level_passed_times=0;
-var current_activity_speed_level=1;
-var MAX_SPEED_LEVELS=3;
-var current_activity_sentence;
-var current_activity_word;
-
-var sentence_ref=[
-	'En el castillo había una princesa',
-	'Me olvidé el paraguas',
-	'Mañana voy a ir al teatro'
-];
-
-/*
-TODO: see kanban
-*/
-
 var vel_obj=new Activity('Velocidad Lectora','velocidad','start_activity');
-memvis_obj.help_text='\
+vel_obj.help_text='\
     Lee y recuerda. Posteriormente tendrás que escribir la palabra que falta.\
 ';
+vel_obj.MAX_LEVELS=3;
+vel_obj.MAX_PLAYED_TIMES=10;
 
 var velocidad=function(){
     if(!check_if_sounds_loaded(velocidad)){return;}
@@ -28,33 +13,36 @@ var velocidad=function(){
         JsonLazy.load("../data/ac_velocidad_data.json", "velocidad_data", velocidad);
     }else{
         preventBackExit();
-		session_data.num_answered=MAX_SPEED_LEVELS*2;
+		session_data.num_answered=vel_obj.MAX_LEVELS*2;
+        vel_obj.played_times=0;
+        vel_obj.level_played_times=0;
+        vel_obj.level_passed_times=0;
+        vel_obj.level=1;
 		vel_obj.start(); 
 	}
 }
 
 
 vel_obj.start_activity=function(){
-	if(current_activity_speed_level_passed_times>=2){
-        current_activity_speed_level_passed_times=0;
-        current_activity_speed_level++;
-        current_activity_speed_played_times=0;
+	if((session_data.mode!="test" && vel_obj.level_passed_times>=2) || (session_data.mode=="test" && vel_obj.level_played_times>=2)){
+        vel_obj.level_passed_times=0;
+        vel_obj.level_played_times=0;
+        vel_obj.level++;
+        vel_obj.played_times=0;
 	}
-    if(current_activity_speed_level>=MAX_MEMORY_LEVELS || (session_data.mode!="test" && current_activity_speed_played_times>=10)){
+    
+    if((session_data.mode=="test" && vel_obj.level>vel_obj.MAX_LEVELS) || 
+          (session_data.mode!="test" && vel_obj.played_times>=vel_obj.MAX_PLAYED_TIMES)){
 		vel_obj.finish();
 	}else{
-		if(!JsonLazy.data.velocidad_data.hasOwnProperty(current_activity_speed_level) || 
-		   current_activity_speed_level>MAX_SPEED_LEVELS)
-			current_activity_speed_level=MAX_SPEED_LEVELS;
-		var sentences=JsonLazy.data.velocidad_data[current_activity_speed_level];
-		current_activity_sentence = random_array(sentences,1)[0];
-		console.log(current_activity_sentence);
-
+		if(!JsonLazy.data.velocidad_data.hasOwnProperty(vel_obj.level) || 
+		   vel_obj.level>vel_obj.MAX_LEVELS)
+			vel_obj.level=vel_obj.MAX_LEVELS;
+		var sentences=JsonLazy.data.velocidad_data[vel_obj.level];
+		vel_obj.sentence = random_array(sentences,1)[0];
 		// chose one word of more than X letters (depending on the level [only useful for levels >2])
-		current_activity_word = random_word_longer_than(current_activity_sentence.split(" "), current_activity_speed_level);
-		console.log(current_activity_word);
-
-		// show sentence and then hide word
+		vel_obj.word = random_word_longer_than(vel_obj.sentence.split(" "), vel_obj.level);
+		if(debug) console.log("sentence: "+vel_obj.sentence+" word: "+vel_obj.word);
 		velocidad_show_pattern();
 	}
 }
@@ -77,7 +65,7 @@ var velocidad_show_pattern=function(){
 	var pattern_representation="";
 	canvas_zone_vcentered.innerHTML='\
         <div class="text-center montessori-div">\
-        <p class="montessori">Pulsa play para ver la frase</p>\
+        <p class="montessori">Pulsa play y memoriza la frase</p>\
         </div>\
 		  <button id="playb" class="button">PLAY</button>\
           <button id="help_button" class="minibutton fixed-bottom-left help">?</button> \
@@ -93,22 +81,24 @@ var velocidad_show_pattern=function(){
 var velocidad_uncover=function(){
 	canvas_zone_vcentered.innerHTML=' \
 	<div class="text-center montessori-div">\
-	<p class="montessori">'+current_activity_sentence+'</p>\
+	<p class="montessori">'+vel_obj.sentence+'</p>\
 	</div>\
 	';
 	setTimeout(function(){velocidad_find_word();}, 5000);
 }
 
 var velocidad_find_word=function(){
+    activity_timer.reset();
+    activity_timer.start();
 	canvas_zone_vcentered.innerHTML=' \
 	<div class="text-center montessori-div">\
-	<p class="montessori">'+hide_word(current_activity_sentence,current_activity_word)+'</p>\
+	<p class="montessori">'+hide_word(vel_obj.sentence,vel_obj.word)+'</p>\
 	</div>\
 	<input id="velocidad_answer" class="montessori-40" type="text" value="" />\
 	<br /><button id="check_vel_button" class="button">OK</button>\
     <button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
 	';
-    document.getElementById("check_vel_button").addEventListener(clickOrTouch,function(){check_velocidad();});
+    document.getElementById("check_vel_button").addEventListener(clickOrTouch,function(){vel_obj.check();});
     document.getElementById("go-back").addEventListener(clickOrTouch,function(){game();}); 
 }
 
@@ -116,22 +106,21 @@ function hide_word(sentence,word){
 	return sentence.replace(word,'¿_?');
 }
 
-function check_velocidad(){
-	var correct_answer=Asciify.asciify(current_activity_word.toLowerCase());
-	vel_obj.details={};
-	vel_obj.details.type=session_data.type;
-	vel_obj.details.mode=session_data.mode;
-	vel_obj.details.level=session_data.level;
-	vel_obj.details.activity=correct_answer;	
-	current_activity_speed_played_times++;
+vel_obj.check=function(){
+	var correct_answer=Asciify.asciify(vel_obj.word.toLowerCase());
 	var answer=Asciify.asciify(document.getElementById("velocidad_answer").value.toLowerCase());
+	vel_obj.details={};
+	vel_obj.details.activity=correct_answer;
+	vel_obj.details.choice=answer;
 	if(answer==correct_answer){
         vel_obj.details.result="correct";
-		current_activity_speed_level_passed_times++;
+		vel_obj.level_passed_times++;
         session_data.num_correct++;
     }else{
 	    vel_obj.details.result="incorrect";
     }
+	vel_obj.played_times++;
+	vel_obj.level_played_times++;
 	vel_obj.end()
 }
 

@@ -2,7 +2,7 @@
 
 // this can be better encapsulated as a big object with a start() method...
 
-var dv_obj=new Activity('Discr. Visual','discr_visual','show_matrix');
+var dv_obj=new Activity('Discr. Visual','discr_visual','start_activity');
 dv_obj.help_text='Encuentra la sílaba.';
 dv_obj.MAX_PLAYED_TIMES_TEST=2;
 dv_obj.MAX_PLAYED_TIMES=10;
@@ -14,7 +14,7 @@ dv_obj.letters2=['a','e','i','o','u']
 dv_obj.letters3=['l','r']
 dv_obj.syllables_arr=["bal", "bla", "bar", "bra", "bel", "ble", "ber", "bre", "bil", "bli", "bir", "bri", "bol", "blo", "bor", "bro", "bul", "blu", "bur", "bru", "cal", "cla", "car", "cra", "cel", "cle", "cer", "cre", "cil", "cli", "cir", "cri", "col", "clo", "cor", "cro", "cul", "clu", "cur", "cru", "fal", "fla", "far", "fra", "fel", "fle", "fer", "fre", "fil", "fli", "fir", "fri", "fol", "flo", "for", "fro", "ful", "flu", "fur", "fru", "pal", "pla", "par", "pra", "pel", "ple", "per", "pre", "pil", "pli", "pir", "pri", "pol", "plo", "por", "pro", "pul", "plu", "pur", "pru"];
 
-dv_obj.current_matrix=[];
+
 
 dv_obj.initialize_syllables=function(){
 	for(var i=0;i<dv_obj.letters1.length;i++){
@@ -63,19 +63,23 @@ var discr_visual=function(){
         </div>\
         ';
     dv_obj.add_buttons(canvas_zone_vcentered);
-	// ONLY call initialize if something changes, otherwise use precalculated
-	//dv_obj.initialize_syllables();console.log(dv_obj.syllables_arr);
-	dv_obj.start();
+        
+    // ONLY call initialize if something changes, otherwise use precalculated
+    //dv_obj.initialize_syllables();console.log(dv_obj.syllables_arr);
+    dv_obj.current_matrix=[];
+    dv_obj.train_feedback=0;
+    dv_obj.start();
 }
 
 
-dv_obj.show_matrix=function(){
+dv_obj.start_activity=function(){
     remove_modal();
 	if((session_data.mode=='test' && dv_obj.played_times>=dv_obj.MAX_PLAYED_TIMES_TEST) ||
         (session_data.mode!='test' && (dv_obj.played_times>dv_obj.MAX_PLAYED_TIMES || dv_obj.failed_times>dv_obj.MAX_FAILURES))){
 		dv_obj.finish();
 	}else{
-		activity_timer.start();
+        activity_timer.reset();
+        activity_timer.start();
 		dv_obj.current_corrections={};
 		dv_obj.current_matrix=[];
 		dv_obj.syllable=random_item(dv_obj.syllables_arr);
@@ -167,12 +171,7 @@ dv_obj.check=function(){
         choice: covered syllables:  pro3 por2 ...  (por2 bla1)
         result:                     correct/incorrect
     */
-	dv_obj.details={};
-	dv_obj.details.subject=session_data.subject;
-	dv_obj.details.type=session_data.type;
-	dv_obj.details.mode=session_data.mode;
-	dv_obj.details.level=session_data.level;
-	dv_obj.details.activity=dv_obj.syllable+dv_obj.syllable_repetition;
+
 	var current_correct=0;
 	var current_answered=0;
 	var choice_counts={};
@@ -201,9 +200,10 @@ dv_obj.check=function(){
        }  
     }
 	//alert("correct="+session_data.num_correct+" incorrect/missing="+(session_data.num_answered-session_data.num_correct));
-	dv_obj.played_times++;
 
 	// build activity details ----------------------------------
+	dv_obj.details={};
+	dv_obj.details.activity=dv_obj.syllable+dv_obj.syllable_repetition;
 	dv_obj.details.choice="";
 	var keys=objectProperties(choice_counts);
 	keys.sort(); // alphabetically
@@ -219,17 +219,23 @@ dv_obj.check=function(){
 	dv_obj.details.choice=dv_obj.details.choice.trim()+")";
 	// ---------------------------------------------------------
 
-
-
-
 	if(current_correct==dv_obj.syllable_repetition &&
        current_correct==current_answered ){
 		dv_obj.details.result="correct";
 	}else{
+        if(session_data.mode!='test' && dv_obj.train_feedback==0){
+            dv_obj.train_feedback++;
+            open_js_modal_alert('Ayuda','¿Estás seguro?');
+            return;
+        }
 		dv_obj.details.result="incorrect";
 		dv_obj.failed_times++;
 	}
+    dv_obj.train_feedback=0;
+	dv_obj.played_times++;
 	dv_obj.end(dv_obj.details.result);
 
 }
+
+
 

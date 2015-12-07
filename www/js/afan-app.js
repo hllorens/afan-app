@@ -85,12 +85,7 @@ for(var i=0;i<wordimage_image_ref.length;i++){
 }
 
 
-// constants
-// TODO: Move this to each activity object...
-var USE_ANSWERS = 3;
-var MAX_PLAYS=2;
-var MAX_TRAINING_ACTIVITIES=20;
-var MAX_MEMORY_LEVELS=6;
+
 
 //optional??
 var zone_sound=null;
@@ -98,15 +93,10 @@ var dom_score_correct;
 var dom_score_answered;
 
 // TODO: each game vars... to be encapsulated in objects
-var remaining_rand_activities=[];
 var correct_answer='undefined';
 var current_activity_type='undefined'; // to avoid loading all the html
 var activity_timer=new ActivityTimer();
 var current_activity_data={};
-var current_activity_index=0;
-var current_activity_played_times=0;
-var current_activity_memory_level=1;
-var current_activity_memory_level_passed_times=0;
 var current_activity_memory_pattern=undefined;
 var current_activity_memory_options=undefined;
 var current_activity_memory_uncovered=0;
@@ -677,9 +667,6 @@ var game=function(){
 	session_data.num_answered=0;
 	session_data.duration=0;
     session_data.details=[];
-    current_activity_memory_level=1;
-    current_activity_played_times=0;
-    current_activity_memory_level_passed_times=0;
     activity_timer.reset();
     //-----------------------------
 	var extra_options="";

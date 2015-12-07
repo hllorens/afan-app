@@ -6,6 +6,8 @@ conciencia_obj.help_text='\
 ';
 conciencia_obj.remaining_rand_activities=null;
 conciencia_obj.MAX_TRAINING_ACTIVITIES=10;
+conciencia_obj.MAX_PLAYS=2;
+conciencia_obj.USE_ANSWERS=3;
 
 var conciencia=function(){
     if(!check_if_sounds_loaded(conciencia)){return;}
@@ -72,8 +74,8 @@ conciencia_obj.start_activity=function(){
         document.getElementById('remaining_activities_num').innerHTML=""+(conciencia_obj.remaining_rand_activities.length-1);
 
         activity_timer.reset();
-        current_activity_index=0;
-        current_activity_played_times=0;
+        conciencia_obj.current_index=0;
+        conciencia_obj.played_times=0;
         if(debug) console.log(0+"--"+conciencia_obj.remaining_rand_activities);
         current_activity_data=conciencia_obj.remaining_rand_activities[0]; 
         correct_answer=current_activity_data['answers'][0];
@@ -82,9 +84,9 @@ conciencia_obj.start_activity=function(){
         answers_div.innerHTML="";
         var used_answers=[];
         var used_answers_text=[];
-        for(var i=0; i<USE_ANSWERS ; ++i) {
-            var use=Math.floor(Math.random() * USE_ANSWERS)
-            while(used_answers.indexOf(use) != -1) use=Math.floor(Math.random() * USE_ANSWERS);
+        for(var i=0; i<conciencia_obj.USE_ANSWERS ; ++i) {
+            var use=Math.floor(Math.random() * conciencia_obj.USE_ANSWERS)
+            while(used_answers.indexOf(use) != -1) use=Math.floor(Math.random() * conciencia_obj.USE_ANSWERS);
 
             var answer_i=current_activity_data['answers'][use];
             answers_div.innerHTML+='<div id="answer'+i+'" class="hover_red_border"  ></div>';
@@ -121,9 +123,9 @@ conciencia_obj.start_activity=function(){
 
 var conciencia_play_sound_finished=function(){
 	activity_timer.start();
-	current_activity_played_times++;
+	conciencia_obj.played_times++;
 	var playb=document.getElementById('playb');
-	if(current_activity_played_times < MAX_PLAYS){
+	if(conciencia_obj.played_times < conciencia_obj.MAX_PLAYS){
 		playb.innerHTML="RE-PLAY"; // use icons (fixed % size) &#11208; &#11118; &#10704;
 		playb.disabled=false;
 	}else{
@@ -142,15 +144,11 @@ var conciencia_play_sound=function(){
 
 function conciencia_check_correct(clicked_answer,correct_answer){
 	// do not allow cliking before or while uttering
-	if(current_activity_played_times==0 || SoundChain.audio_chain_waiting){
+	if(conciencia_obj.played_times==0 || SoundChain.audio_chain_waiting){
 		open_js_modal_content_timeout('<h1>Haz click en "play" antes que en el dibujo</h1>',2000);
 		return;
 	} 
-	conciencia_obj.details={};
-	conciencia_obj.details.type=session_data.type;
-	conciencia_obj.details.mode=session_data.mode;
-	conciencia_obj.details.level=session_data.level;
-	conciencia_obj.details.activity=correct_answer;
+
 	if(typeof clicked_answer == "string"){ // it is not a sprite but an image
 		image_src_start_exists=clicked_answer.lastIndexOf("/")
 		if(image_src_start_exists==-1) image_src_start_exists=clicked_answer.indexOf("src=\"")
@@ -162,10 +160,12 @@ function conciencia_check_correct(clicked_answer,correct_answer){
 		clicked_answer=(clicked_answer.className.replace("wordimage wordimage-","")).trim();
 	}
 
-    conciencia_obj.remaining_rand_activities.splice(current_activity_index,1); // remove current activity
+    conciencia_obj.remaining_rand_activities.splice(conciencia_obj.current_index,1); // remove current activity
     session_data.num_answered++;
     dom_score_answered.innerHTML=session_data.num_answered;
     
+    conciencia_obj.details={};
+    conciencia_obj.details.activity=correct_answer;    
     conciencia_obj.details.choice=clicked_answer;
     var the_content='<h1>...siguiente actividad...</h1>';
     if (clicked_answer==correct_answer){
