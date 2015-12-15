@@ -8,10 +8,10 @@ memvis_obj.help_text='\
 
 memvis_obj.MAX_LEVELS=6;
 memvis_obj.MAX_PLAYED_TIMES=10;
-memvis_obj.MAX_PLAYED_TIMES_TEST=2;
+memvis_obj.MAX_FAILED_TIMES_TEST=2;
 
 
-var memoria_visual=function(){
+var memoria_visual=function(finish_callback){
 	/** 
 	 ** NO SE ADMITE REPETIDOS de manera q cuando hace click en una imágen esta
 	 ** Se queda marcada y no se puede hacer click (no superponer numeros pq puede distraer, solo ensombrecer)
@@ -21,17 +21,19 @@ var memoria_visual=function(){
 	 ** SI FALLA 2 VECES SEGUIDAS EN EL MISMO NIVEL (FIN DEL JUEGO)
      ** LA INFORMACIÓN QUE SE GUARDA ES LA CANTIDAD DE ELEMENTOS QUE HA PODIDO RECORDAR
 	*/
+    if(typeof(finish_callback)=='undefined') finish_callback=game;
+    memvis_obj.finish_callback=finish_callback;
     memvis_obj.played_times=0;
     memvis_obj.failed_times=0;
     memvis_obj.level=1;
-    session_data.num_answered=memvis_obj.MAX_LEVELS;
 	memvis_obj.start();
 }
 
 
 memvis_obj.start_activity=function(){
-    if(memvis_obj.level>memvis_obj.MAX_LEVELS || (session_data.mode=="test" && !game_mode && memvis_obj.played_times>=memvis_obj.MAX_PLAYED_TIMES_TEST)  
+    if(memvis_obj.level>memvis_obj.MAX_LEVELS || (session_data.mode=="test" && !game_mode && memvis_obj.failed_times>=memvis_obj.MAX_FAILED_TIMES_TEST)  
         || ( (session_data.mode!="test" || game_mode) && memvis_obj.played_times>=memvis_obj.MAX_PLAYED_TIMES)){
+	    session_data.num_answered=memvis_obj.MAX_LEVELS;
 		memvis_obj.finish();
     }else{
         memvis_obj.current_usr_answer=[];
@@ -112,6 +114,7 @@ var memoria_visual_check_click=function (element){
         memvis_obj.details={};
         memvis_obj.details.activity=memvis_obj.current_key_answer.toString();
         memvis_obj.details.choice=memvis_obj.current_usr_answer.toString();
+        memvis_obj.level_played_times++; // must be before check
         if(memvis_obj.details.activity==memvis_obj.details.choice){
             memvis_obj.details.result="correct";
             session_data.num_correct++;
@@ -123,7 +126,6 @@ var memoria_visual_check_click=function (element){
             memvis_obj.details.result="incorrect";
             memvis_obj.failed_times++;
         }
-        memvis_obj.level_played_times++;
         memvis_obj.played_times++;
         memvis_obj.end(memvis_obj.details.result);
     }

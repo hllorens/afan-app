@@ -101,9 +101,9 @@ Activity.prototype.finish=function(){
 		}else{
 			throw new Error('finish: details.result is not "correct" or "incorrect"');
 		}
-		setTimeout(function(){game();}, waiting_time);
+		setTimeout(function(){this.finish_callback();}, waiting_time);
     }else{
-		send_session_data();
+		send_session_data(this.finish_callback);
 	}
 }
 

@@ -54,10 +54,12 @@ Train: play until the user fails 10 times or has played 20 times
 Test: play 6 times and store the result
 
 */
-var discr_visual=function(){
-    if(!check_if_sounds_loaded(discr_visual)){return;}
+var discr_visual=function(finish_callback){
+    if(!check_if_sounds_loaded(function(){discr_visual(finish_callback);})){return;}
 	preventBackExit();
-	canvas_zone_vcentered.innerHTML='\
+    if(typeof(finish_callback)=='undefined') finish_callback=game;
+    dv_obj.finish_callback=finish_callback;
+    canvas_zone_vcentered.innerHTML='\
         <div class="text-center montessori-div">\
         <p class="montessori">...cargando...</p>\
         </div>\

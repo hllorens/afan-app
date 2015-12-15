@@ -13,13 +13,14 @@ vel_obj.sec_pal=[
     {"min_age":12,"max_age":99,"sec_pal":0.5}
 ];
 
-var velocidad=function(){
-    if(!check_if_sounds_loaded(velocidad)){return;}
+var velocidad=function(finish_callback){
+    if(!check_if_sounds_loaded(function(){velocidad(finish_callback);})){return;}
     if(!JsonLazy.data.hasOwnProperty('velocidad_data')){
         JsonLazy.load("../data/ac_velocidad_data.json", "velocidad_data", velocidad);
     }else{
         preventBackExit();
-		session_data.num_answered=vel_obj.MAX_LEVELS*2;
+        if(typeof(finish_callback)=='undefined') finish_callback=game;
+        vel_obj.finish_callback=finish_callback;
         vel_obj.played_times=0;
         vel_obj.level_played_times=0;
         vel_obj.level_passed_times=0;
@@ -39,6 +40,7 @@ vel_obj.start_activity=function(){
     
     if((session_data.mode=="test" && vel_obj.level>vel_obj.MAX_LEVELS) || 
           (session_data.mode!="test" && vel_obj.played_times>=vel_obj.MAX_PLAYED_TIMES)){
+		session_data.num_answered=vel_obj.MAX_LEVELS*2;
 		vel_obj.finish();
 	}else{
 		if(!JsonLazy.data.velocidad_data.hasOwnProperty(vel_obj.level) || 

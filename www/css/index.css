@@ -120,6 +120,7 @@ button.button{
 	/*font-size:30px;*/
 	border:2px solid #111;
 	background-color: #eee;
+	color:#111;
 	min-width:48px;min-height:48px;
 	margin:2px;
 	-webkit-transition: background 0.2s ease-in-out;

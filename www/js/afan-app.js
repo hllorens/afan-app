@@ -142,9 +142,10 @@ function invitee_access(){
 	user_data.email='invitee';
 	user_data.display_name='invitado';
 	user_data.access_level='invitee';
-    cache_user_subject_results[session_data.subject]={}
-    cache_user_subject_results[session_data.subject].general={'user':'invitado','subject':'invitado'}
-    cache_user_subject_results[session_data.subject].elements=[]
+    cache_user_subjects={'invitado':{"id": "invitado", "alias":"invitado", "name":"invitado", "birthdate":"2010-01-01", "comments":"", "user":"afan"}};
+    cache_user_subject_results[session_data.subject]={};
+    cache_user_subject_results[session_data.subject].general={'user':'invitado','subject':'invitado'};
+    cache_user_subject_results[session_data.subject].elements=[];
     // cache_user_subject_result_detail is created lively in case of results
     menu_screen();
 }
@@ -327,7 +328,11 @@ function menu_screen(){
 	
 	/*if(is_app){session_data.user='montsedeayala@gmail.com'; // will find a way to set the usr, by google account}*/
 	
-	if(user_data.email==null && !game_mode){
+	if(debug) console.log('user.email: '+user_data.email);
+	if(session_state=="unset"){
+        canvas_zone_vcentered.innerHTML='...waiting for session state...';
+        setTimeout(function() {menu_screen()}, 2000); // add a counter and if it reaches something fail gracefully
+	}else if(user_data.email==null && !game_mode){
 		login_screen();
 	}else if(!game_mode){
 		var sign='<li><a href="#" onclick="hamburger_close();show_profile()">perfil</a></li>\
@@ -347,10 +352,9 @@ function menu_screen(){
 		var admin_opts='<br /><button id="sel-usr" onclick="admin_screen()" class="button">Administrar</button>';
 		var normal_opts='\
 	    <br /><button id="read-letters" disabled="true" class="button" onclick="letter_reader()">Lector de sonidos</button> \
-		<br /><button id="manage-subjects" disabled="true" class="button" onclick="manage_subjects()">Participantes</button> \
 		';
 		if(user_data.access_level!='admin') admin_opts="";
-		if(user_data.access_level=='invitee'){ normal_opts=""; cache_user_subjects={'invitado':{"id": "invitado", "alias":"invitado", "name":"invitado", "birthdate":"2010-01-01", "comments":"", "user":"afan"}};}
+		if(user_data.access_level=='invitee'){ normal_opts="";}
 		canvas_zone_vcentered.innerHTML=' \
 		<div id="menu-logo-div"></div> \
 		Participante:  <select id="subjects-select" onchange="set_subject()"></select> \
@@ -359,6 +363,7 @@ function menu_screen(){
 		<br /><button id="start-button" class="button" disabled="true">Jugar</button> \
         <button id="start-test-button" class="button" disabled="true">Test</button> \
 		'+normal_opts+'\
+		<br /><button id="manage-subjects" disabled="true" class="button" onclick="manage_subjects()">Participantes</button> \
         <br /><button id="results" disabled="true" class="button">Resultados</button>\
 		<br /><button id="exit_app" class="button exit" onclick="exit_app()">Salir</button> \
 		</nav>\
@@ -391,9 +396,9 @@ var prepare_menu_when_subjects_loaded=function(){
     document.getElementById("start-button").disabled=false;
     document.getElementById("start-test-button").disabled=false;    
     document.getElementById("results").disabled=false;
+    document.getElementById("manage-subjects").disabled=false;
     if(user_data.access_level!='invitee'){
         document.getElementById("read-letters").disabled=false;
-        document.getElementById("manage-subjects").disabled=false;
     }
 }
 
@@ -401,8 +406,10 @@ var prepare_menu_when_subjects_loaded=function(){
 var manage_subjects=function(){
 	preventBackExit();
 	header_text.innerHTML=' &larr; '+app_name+' menu';
+    var normal_opts='<button id="add-subject" class="button" onclick="add_subject()">Añadir</button>';
+    if(user_data.access_level=='invitee'){ normal_opts="";}
 	canvas_zone_vcentered.innerHTML=' \
-    <button id="add-subject" class="button" onclick="add_subject()">Añadir</button>\
+    '+normal_opts+'\
 	<div id="results-div">cargando participantes...</div> \
 	<br /><button id="go-back" class="minibutton fixed-bottom-right go-back" onclick="menu_screen()">&larr;</button> \
 	';
@@ -448,19 +455,19 @@ var add_subject=function(){
 			myformsubmit.click(); // won't submit (invalid), but show errors
 		}else{
 			open_js_modal_content('<h1>Añadiendo... '+document.getElementById('new-alias').value+'</h1>');
-			ajax_request_json(
-			backend_url+'ajaxdb.php?action=add_subject&user='+user_data.email+'&alias='+document.getElementById('new-alias').value+'&name='+document.getElementById('new-name').value+'&birthdate='+document.getElementById('new-birthdate').value+'&comments='+document.getElementById('new-comments').value, 
-			function(data) {
-				if(data['success']!='undefined'){
-					cache_user_subjects[data['success']]=data['data'];
-					remove_modal();
-					remove_modal("js-modal-window-alert");
-					manage_subjects(); // to reload with the new user...
-				}else{
-					alert("ERROR: "+JSON.stringify(data));
-				}
-			}
-			);
+            ajax_request_json(
+            backend_url+'ajaxdb.php?action=add_subject&user='+user_data.email+'&alias='+document.getElementById('new-alias').value+'&name='+document.getElementById('new-name').value+'&birthdate='+document.getElementById('new-birthdate').value+'&comments='+document.getElementById('new-comments').value, 
+            function(data) {
+                if(data['success']!='undefined'){
+                    cache_user_subjects[data['success']]=data['data'];
+                    remove_modal();
+                    remove_modal("js-modal-window-alert");
+                    manage_subjects(); // to reload with the new user...
+                }else{
+                    alert("ERROR: "+JSON.stringify(data));
+                }
+            }
+            );
 		}
 	};
 	var cancel_function=function(){ remove_modal("js-modal-window-alert"); };
@@ -489,19 +496,28 @@ var edit_subject=function(sid){
 			myformsubmit.click(); // won't submit (invalid), but show errors
 		}else{
 			open_js_modal_content('<h1>Actualizando... '+document.getElementById('new-alias').value+'</h1>');
-			ajax_request_json(
-			backend_url+'ajaxdb.php?action=update_subject&lid='+sid+'&user='+user_data.email+'&alias='+document.getElementById('new-alias').value+'&name='+document.getElementById('new-name').value+'&birthdate='+document.getElementById('new-birthdate').value+'&comments='+document.getElementById('new-comments').value, 
-			function(data) {
-				if(data['success']!='undefined'){
-					cache_user_subjects[data['success']]=data['data'];
-					remove_modal();
-					remove_modal("js-modal-window-alert");
-					manage_subjects(); // to reload with the new user...
-				}else{
-					alert("ERROR: "+JSON.stringify(data));
-				}
-			}
-			);
+            if(user_data.access_level=='invitee'){
+                cache_user_subjects.invitado.name=document.getElementById('new-name').value;
+                cache_user_subjects.invitado.birthdate=document.getElementById('new-birthdate').value;
+                cache_user_subjects.invitado.comments=document.getElementById('new-comments').value;
+                remove_modal();
+                remove_modal("js-modal-window-alert");
+                manage_subjects(); // to reload with the new user...
+            }else{
+                ajax_request_json(
+                backend_url+'ajaxdb.php?action=update_subject&lid='+sid+'&user='+user_data.email+'&alias='+document.getElementById('new-alias').value+'&name='+document.getElementById('new-name').value+'&birthdate='+document.getElementById('new-birthdate').value+'&comments='+document.getElementById('new-comments').value, 
+                function(data) {
+                    if(data['success']!='undefined'){
+                        cache_user_subjects[data['success']]=data['data'];
+                        remove_modal();
+                        remove_modal("js-modal-window-alert");
+                        manage_subjects(); // to reload with the new user...
+                    }else{
+                        alert("ERROR: "+JSON.stringify(data));
+                    }
+                }
+                );
+            }
 		}
 	};
 	var cancel_function=function(){ remove_modal("js-modal-window-alert"); };
@@ -604,8 +620,8 @@ var explore_result_detail=function(session_id){
 					row_id: 'id',
 					columns: [
 						//{ data: 'id' },
-						{ data: 'activity' },
-						{ data: 'choice' },
+						{ data: 'activity', format: 'first_12' },
+						{ data: 'choice'  , format: 'first_12'},
 						{ data: 'result',  special: 'red_incorrect' },
 						{ data: 'duration',  format: 'time_from_seconds_up_to_mins'}
 					]
@@ -623,8 +639,8 @@ var explore_result_detail=function(session_id){
                 row_id: 'id',
                 columns: [
                     //{ data: 'id' },
-                    { data: 'activity' },
-                    { data: 'choice' },
+					{ data: 'activity', format: 'first_12' },
+					{ data: 'choice'  , format: 'first_12'},
                     { data: 'result',  special: 'red_incorrect' },
                     { data: 'duration',  format: 'time_from_seconds_up_to_mins'}
                 ]
@@ -666,9 +682,11 @@ var game=function(){
     <br /><button id="ritmo" class="button">Ritmo</button> \
     <br /><button id="velocidad" class="button">Velocidad</button> \
     <br /><button id="discr_visual" class="button">Discr. Visual</button> \
+	<br /><button id="completo" class="button">COMPLETO</button>\
     '+extra_options+'\
     ';
     
+    document.getElementById("completo").addEventListener(clickOrTouch,function(){completo();});
     document.getElementById("conciencia").addEventListener(clickOrTouch,function(){conciencia();});
     document.getElementById("memoria").addEventListener(clickOrTouch,function(){memoria();});
     document.getElementById("ritmo").addEventListener(clickOrTouch,function(){ritmo();});
@@ -720,10 +738,15 @@ var memoria=function(){
 
 
 
-function send_session_data(){
+function send_session_data(finish_callback){
     remove_modal();
-	if(game_mode){game();}
-    else{
+	if(game_mode){
+        if(typeof(finish_callback)!='undefined'){
+            finish_callback();
+        }else{
+            game();
+        }
+    }else{
 		if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
         if(debug) console.log(JSON.stringify(session_data));
         if(user_data.access_level=='invitee'){
@@ -732,7 +755,7 @@ function send_session_data(){
 					subject: session_data.subject,
                     type:session_data.type,
                     mode:session_data.mode,
-                    age:'-',
+                    age: session_data.age,
                     num_answered:session_data.num_answered,
                     num_correct:session_data.num_correct,
                     result:session_data.result,
@@ -748,6 +771,7 @@ function send_session_data(){
 															 elements: result_obj.details};
             canvas_zone_vcentered.innerHTML='<br />Resultados guardados  "invitado"<br /><br />\
             <br /><button id="go-back" class="minibutton fixed-bottom-right go-back" onclick="menu_screen()">&larr;</button>';
+            if(typeof(finish_callback)!='undefined'){finish_callback();}
         }else{
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "http://www.centroafan.com/afan-app/www/"+backend_url+'ajaxdb.php',true);
@@ -761,6 +785,7 @@ function send_session_data(){
                 <br /><button id="go-back" class="minibutton fixed-bottom-right go-back" onclick="menu_screen()">&larr;</button>';
                 delete cache_user_subject_results[session_data.subject];
                 if(debug) console.log('Storing data. Server message: '+data.msg);
+                if(typeof(finish_callback)!='undefined'){finish_callback();}
             };
         }
     }

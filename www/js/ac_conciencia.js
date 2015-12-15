@@ -9,15 +9,17 @@ conciencia_obj.MAX_TRAINING_ACTIVITIES=10;
 conciencia_obj.MAX_PLAYS=2;
 conciencia_obj.USE_ANSWERS=3;
 
-var conciencia=function(){
-    if(!check_if_sounds_loaded(conciencia)){return;}
+var conciencia=function(finish_callback){
+    if(!check_if_sounds_loaded(function(){conciencia(finish_callback);})){return;}
     // Load activities if needed (TODO, to standardize this could be done at the pure beginning as json files)
     if(session_data.mode=="training" && !JsonLazy.data.hasOwnProperty('conciencia_train')){
-        JsonLazy.load("../data/ac_conciencia_train.json", "conciencia_train", conciencia);
+        JsonLazy.load("../data/ac_conciencia_train.json", "conciencia_train", function(){conciencia(finish_callback);});
     }else if(!JsonLazy.data.hasOwnProperty('conciencia_test')){
-            JsonLazy.load("../data/ac_conciencia_test.json", "conciencia_test", conciencia);
+            JsonLazy.load("../data/ac_conciencia_test.json", "conciencia_test", function(){conciencia(finish_callback);});
     }else{
         preventBackExit();
+        if(typeof(finish_callback)=='undefined') finish_callback=game;
+        conciencia_obj.finish_callback=finish_callback;
         canvas_zone_vcentered.innerHTML=' \
             <div id="answers"></div><br class="clear" />\
             <div id="sound"><button id="playb" class="button">PLAY</button></div><br /> \
