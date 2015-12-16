@@ -72,7 +72,7 @@ conciencia_obj.start_activity=function(){
                 alert("ERROR: "+conciencia_obj.cur_data['answers'][use]+" is already used contact the ADMIN.");
                 document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
             }else{
-                document.getElementById("answer"+i).innerHTML += '<div class="wordimage wordimage-'+conciencia_obj.cur_data['answers'][use]+'"></div>';
+                document.getElementById("answer"+i).innerHTML += '<div class="wordimage wordimage-'+conciencia_obj.cur_data['answers'][use]+' covered"></div>';
             }
             
             used_answers[used_answers.length]=use;
@@ -94,7 +94,14 @@ conciencia_obj.start_activity=function(){
 var conciencia_play_sound_finished=function(){
 	activity_timer.start();
 	conciencia_obj.played_times++;
+
+    var boxes=document.getElementsByClassName("hover_red_border");
+    for(var i=0;i<boxes.length;i++){
+			console.log(boxes[i]);
+	        boxes[i].firstChild.classList.remove('covered');
+    }
 	
+	conciencia_obj.playb.classList.remove('button-hidden');
 	if(conciencia_obj.played_times < conciencia_obj.MAX_PLAYS){
 		conciencia_obj.playb.innerHTML="RE-PLAY"; // use icons (fixed % size) &#11208; &#11118; &#10704;
 		conciencia_obj.playb.disabled=false;
@@ -107,6 +114,7 @@ var conciencia_play_sound_finished=function(){
 
 var conciencia_play_sound=function(){
 	conciencia_obj.playb.disabled=true;
+	conciencia_obj.playb.classList.add('button-hidden');
 	activity_timer.stop();
 	SoundChain.play_sound_arr(conciencia_obj.cur_data['sounds'],audio_sprite,conciencia_play_sound_finished);
 };
@@ -114,10 +122,12 @@ var conciencia_play_sound=function(){
 
 function conciencia_check_correct(clicked_answer){
 	// do not allow cliking before or while uttering
-	if(conciencia_obj.played_times==0 || SoundChain.audio_chain_waiting){
+	if(conciencia_obj.played_times==0){
 		open_js_modal_content_timeout('<h1>Haz click en "play" antes que en el dibujo</h1>',2000);
 		return;
-	} 
+	}
+	if(SoundChain.audio_chain_waiting){ return;	}
+
 
 	if(typeof clicked_answer == "string"){ // it is not a sprite but an image
 		image_src_start_exists=clicked_answer.lastIndexOf("/")

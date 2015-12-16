@@ -165,6 +165,8 @@ button.backgroundRed{
 
 button.button-long{width:300px;margin:0 50px;}
 
+button.button-hidden{visibility:hidden;}
+
 #sound{/*height:40%;*/
 	width:100%;text-align:center;margin:0;padding:1px;
 }

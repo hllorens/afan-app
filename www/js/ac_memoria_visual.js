@@ -57,13 +57,16 @@ memvis_obj.start_activity=function(){
               <button id="playb" class="button">PLAY</button>\
         ';
         memvis_obj.add_buttons(canvas_zone_vcentered);
-        document.getElementById("playb").addEventListener(clickOrTouch,function(){memoria_visual_uncover_next();});
+        document.getElementById("playb").addEventListener(clickOrTouch,function(){
+			document.getElementById('playb').disabled=true;
+			document.getElementById('playb').classList.add('button-hidden');
+			memoria_visual_uncover_next();
+		});
     }
 }
 
 var memoria_visual_uncover_next=function(){
 	// don't worry about recursion, all functions will end there
-	document.getElementById('playb').disabled=true;
 	if(memvis_obj.uncovered==memvis_obj.current_key_answer.length){
 		memvis_obj.uncovered=0;
 		setTimeout(function(){memoria_visual_find_pattern();}, 4000);
@@ -93,40 +96,45 @@ var memoria_visual_find_pattern=function(){
                 <div class="membox"><div class="wordimage wordimage-'+memvis_obj.options[7]+'"></div></div>\
                 <div class="membox"><div class="wordimage wordimage-'+memvis_obj.options[8]+'"></div></div>\
             </div>\
+	     <button id="ac_check" class="button button-long" >Hecho!</button>\
     ';
     memvis_obj.add_buttons(canvas_zone_vcentered);
     var boxes=document.getElementsByClassName("wordimage");
     for(var i=0;i<boxes.length;i++){
         boxes[i].addEventListener(clickOrTouch,function(){
-            memoria_visual_check_click(this);
+            memvis_obj.box_click(this);
             });
     }
+	document.getElementById("ac_check").addEventListener(clickOrTouch,function(){memvis_obj.check();});
 }
 
+memvis_obj.box_click=function(element){
+	if(element.className.indexOf('covered')!=-1){ element.classList.remove('covered');} // already covered
+	else{element.classList.add('covered');}
+}
 
-var memoria_visual_check_click=function (element){
-	if(element.className.indexOf('covered')!=-1){ return;} // already covered
+memvis_obj.check=function (element){
+    var boxes=document.getElementsByClassName("covered");
+    for(var i=0;i<boxes.length;i++){
+	        memvis_obj.current_usr_answer.push(boxes[i].classList[1].split("-")[1]);
+    }   
     
-    memvis_obj.current_usr_answer.push(element.classList[1].split("-")[1]);
-    element.classList.add('covered');
-    
-    if(memvis_obj.current_usr_answer.length==memvis_obj.current_key_answer.length){
-        memvis_obj.details={};
-        memvis_obj.details.activity=memvis_obj.current_key_answer.toString();
-        memvis_obj.details.choice=memvis_obj.current_usr_answer.toString();
-        memvis_obj.level_played_times++; // must be before check
-        if(memvis_obj.details.activity==memvis_obj.details.choice){
-            memvis_obj.details.result="correct";
-            session_data.num_correct++;
-            //if((session_data.mode=="test" && !game_mode && memvis_obj.level_played_times>=2) || (session_data.mode!="test" || game_mode) ){
-                memvis_obj.level_played_times=0;
-                memvis_obj.level++;
-            //}
-        }else{
-            memvis_obj.details.result="incorrect";
-            memvis_obj.failed_times++;
-        }
-        memvis_obj.played_times++;
-        memvis_obj.end(memvis_obj.details.result);
+    memvis_obj.details={};
+    memvis_obj.details.activity=memvis_obj.current_key_answer.toString();
+    memvis_obj.details.choice=memvis_obj.current_usr_answer.toString();
+    memvis_obj.level_played_times++; // must be before check
+    if(debug) console.log(memvis_obj.details.choice);
+    if(memvis_obj.details.activity==memvis_obj.details.choice){
+        memvis_obj.details.result="correct";
+        session_data.num_correct++;
+        //if((session_data.mode=="test" && !game_mode && memvis_obj.level_played_times>=2) || (session_data.mode!="test" || game_mode) ){
+            memvis_obj.level_played_times=0;
+            memvis_obj.level++;
+        //}
+    }else{
+        memvis_obj.details.result="incorrect";
+        memvis_obj.failed_times++;
     }
+    memvis_obj.played_times++;
+    memvis_obj.end(memvis_obj.details.result);
 }

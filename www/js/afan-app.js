@@ -122,8 +122,8 @@ function login_screen(){
    <span class="icon"></span>\
     <span class="buttonText"></span>\
 	</div>\
-	<br /><button class="button exit" onclick="invitee_access();">Invitado</button> \
-	<br /><button id="exit" class="button exit" onclick="exit_app();">Salir</button> \
+	<br /><button class="button exit" id="invitee_access">Invitado</button> \
+	<br /><button id="exit" class="button exit">Salir</button> \
 		';
 	gapi.signin.render('signinButton', {
 	  'callback': 'signInCallback',
@@ -134,6 +134,8 @@ function login_screen(){
 	  'scope': 'openid email'
 	}); //'redirecturi': 'postmessage', --> avoids reloading the page?
 	// accesstype="offline" --> ?? isn't implicit?
+	document.getElementById("invitee_access").addEventListener(clickOrTouch,function(){invitee_access();});			
+	document.getElementById("exit").addEventListener(clickOrTouch,function(){exit_app();});				
 }
 
 function invitee_access(){
@@ -216,12 +218,15 @@ function admin_screen(){
 			var users=data; // TODO: protect, if return is not good fail...
 			canvas_zone_vcentered.innerHTML=' \
 				User:  <select id="users-select"></select> \
-				<br /><button onclick="set_user()" class="button">Acceder</button> \
-			    <br /><button onclick="check_missing_elements()" class="button">Comprobar sonidos/imagenes</button> \
-				<br /><button class="minibutton fixed-bottom-right go-back" onclick="menu_screen()">&larr;</button>\
+				<br /><button id="set_user" class="button">Acceder</button> \
+			    <br /><button id="check_missing_elements" class="button">Comprobar sonidos/imagenes</button> \
+				<br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>\
 				';
 			users_select_elem=document.getElementById('users-select');
 			select_fill_with_json(users,users_select_elem);
+			document.getElementById("set_user").addEventListener(clickOrTouch,function(){set_user();});
+			document.getElementById("check_missing_elements").addEventListener(clickOrTouch,function(){check_missing_elements();});
+			document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});			
 		}
 	);
 }
@@ -230,9 +235,11 @@ var letter_reader=function(){
     if(!check_if_sounds_loaded(letter_reader)){return;}
     canvas_zone_vcentered.innerHTML=' \
         Sonidos a leer (separados por espacio) <input id="input_sounds" type="text" /> \
-        <button id="read-button" onclick="read_input_sounds()" class="button">Leer</button> \
-        <br /><br /><button onclick="menu_screen()" class="minibutton fixed-bottom-right go-back">&larr;</button> \
+        <button id="read-button" class="button">Leer</button> \
+        <br /><br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
         ';
+	document.getElementById("read-button").addEventListener(clickOrTouch,function(){read_input_sounds();});
+	document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
 }
 
 var read_input_sounds=function(){
@@ -309,8 +316,9 @@ function show_profile(){
     canvas_zone_vcentered.innerHTML=' \
         Usuario: '+user_data.email+'  <br />\
         Acceso: '+user_data.access_level+'  <br />\
-        <br /><button class="minibutton fixed-bottom-right go-back" onclick="menu_screen()">&larr;</button>\
+        <br /><button class="minibutton fixed-bottom-right go-back">&larr;</button>\
         ';
+	document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
 }
 
 
@@ -335,23 +343,23 @@ function menu_screen(){
 	}else if(user_data.email==null && !game_mode){
 		login_screen();
 	}else if(!game_mode){
-		var sign='<li><a href="#" onclick="hamburger_close();show_profile()">perfil</a></li>\
-				  <li><a href="#" onclick="hamburger_close();gdisconnect()">desconectar</a></li>';
+		var sign='<li><a href="#" id="show_profile">perfil</a></li>\
+				  <li><a href="#" id="gdisconnect">desconectar</a></li>';
 		if(user_data.email=='invitee'){
-			sign='<li><a href="#" onclick="hamburger_close();login_screen()">acceder</a></li>';
+			sign='<li><a href="#" id="login_screen">acceder</a></li>';
 		}
 		// TODO if admin administrar... lo de sujetos puede ir aquí tb...
 		hamburger_menu_content.innerHTML=''+get_reduced_display_name(user_data.display_name)+'<ul>\
 		'+sign+'\
-		<li><a href="#" onclick="exit_app()">salir</a></li>\
+		<li><a href="#" id="exit_app_hamburger">salir</a></li>\
 		</ul>';
-		header_zone.innerHTML='<a id="hamburger_icon" onclick="hamburger_toggle(event)"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">\
-		<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"/></svg></a> <span id="header_text" onclick="menu_screen()">'+app_name+'</span>';
+		header_zone.innerHTML='<a id="hamburger_icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">\
+		<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"/></svg></a> <span id="header_text">'+app_name+'</span>';
         header_text=document.getElementById('header_text');
 
-		var admin_opts='<br /><button id="sel-usr" onclick="admin_screen()" class="button">Administrar</button>';
+		var admin_opts='<br /><button id="admin_screen"  class="button">Administrar</button>';
 		var normal_opts='\
-	    <br /><button id="read-letters" disabled="true" class="button" onclick="letter_reader()">Lector de sonidos</button> \
+	    <br /><button id="letter_reader" disabled="true" class="button">Lector de sonidos</button> \
 		';
 		if(user_data.access_level!='admin') admin_opts="";
 		if(user_data.access_level=='invitee'){ normal_opts="";}
@@ -363,13 +371,29 @@ function menu_screen(){
 		<br /><button id="start-button" class="button" disabled="true">Jugar</button> \
         <button id="start-test-button" class="button" disabled="true">Test</button> \
 		'+normal_opts+'\
-		<br /><button id="manage-subjects" disabled="true" class="button" onclick="manage_subjects()">Participantes</button> \
+		<br /><button id="manage-subjects" disabled="true" class="button">Participantes</button> \
         <br /><button id="results" disabled="true" class="button">Resultados</button>\
-		<br /><button id="exit_app" class="button exit" onclick="exit_app()">Salir</button> \
+		<br /><button id="exit_app" class="button exit">Salir</button> \
 		</nav>\
 		';
+		if(user_data.access_level=='admin'){
+			document.getElementById("admin_screen").addEventListener(clickOrTouch,function(){admin_screen();});
+		}
+		if(user_data.access_level!='invitee'){
+			document.getElementById("letter_reader").addEventListener(clickOrTouch,function(){letter_reader();});
+			document.getElementById("show_profile").addEventListener(clickOrTouch,function(){hamburger_close();show_profile();});
+			document.getElementById("gdisconnect").addEventListener(clickOrTouch,function(){hamburger_close();gdisconnect();});			
+		}else{
+			document.getElementById("login_screen").addEventListener(clickOrTouch,function(){hamburger_close();login_screen();});
+		}
+
+		document.getElementById("hamburger_icon").addEventListener(clickOrTouch,function(){hamburger_toggle(event);});
+		document.getElementById("header_text").addEventListener(clickOrTouch,function(){menu_screen();});
+		document.getElementById("manage-subjects").addEventListener(clickOrTouch,function(){manage_subjects();});
         document.getElementById("results").addEventListener(clickOrTouch,function(){explore_results();});
         document.getElementById("exit_app").addEventListener(clickOrTouch,function(){exit_app();});
+        document.getElementById("exit_app_hamburger").addEventListener(clickOrTouch,function(){exit_app();});
+
 		if(cache_user_subjects==null){
 			ajax_request_json(
 				backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user, 
@@ -398,7 +422,7 @@ var prepare_menu_when_subjects_loaded=function(){
     document.getElementById("results").disabled=false;
     document.getElementById("manage-subjects").disabled=false;
     if(user_data.access_level!='invitee'){
-        document.getElementById("read-letters").disabled=false;
+        document.getElementById("letter_reader").disabled=false;
     }
 }
 
@@ -406,13 +430,15 @@ var prepare_menu_when_subjects_loaded=function(){
 var manage_subjects=function(){
 	preventBackExit();
 	header_text.innerHTML=' &larr; '+app_name+' menu';
-    var normal_opts='<button id="add-subject" class="button" onclick="add_subject()">Añadir</button>';
+    var normal_opts='<button id="add-subject" class="button">Añadir</button>';
     if(user_data.access_level=='invitee'){ normal_opts="";}
 	canvas_zone_vcentered.innerHTML=' \
     '+normal_opts+'\
 	<div id="results-div">cargando participantes...</div> \
-	<br /><button id="go-back" class="minibutton fixed-bottom-right go-back" onclick="menu_screen()">&larr;</button> \
+	<br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
 	';
+	if(user_data.access_level!='invitee') {document.getElementById("add-subject").addEventListener(clickOrTouch,function(){add_subject();});}
+	document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
 	var user_subjects_data=[];
 	for(var key in cache_user_subjects){
 		if (cache_user_subjects.hasOwnProperty(key)) {
@@ -545,8 +571,9 @@ var explore_results=function(){
 	header_text.innerHTML=' &larr; '+app_name+' menu';
 	canvas_zone_vcentered.innerHTML=' \
 	<div id="results-div">cargando resultados...</div> \
-	<br /><button id="go-back" class="minibutton fixed-bottom-right go-back" onclick="menu_screen()">&larr;</button> \
+	<br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
 	';
+	document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
     if(!cache_user_subject_results.hasOwnProperty(session_data.subject)){
         ajax_request_json(
             backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject, 
@@ -601,8 +628,9 @@ var explore_result_detail=function(session_id){
 	preventBackExit();
 	canvas_zone_vcentered.innerHTML=' \
 	<div id="results-div">cargando detalle resultado '+session_id+'...</div> \
-	<br /><button id="go-back" class="minibutton fixed-bottom-right go-back" onclick="explore_results()">&larr;</button> \
+	<br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
 	';
+	document.getElementById("go-back").addEventListener(clickOrTouch,function(){explore_results();});
 	if(!cache_user_subject_result_detail.hasOwnProperty(session_id)){
 		ajax_request_json(
 			backend_url+'ajaxdb.php?action=get_result_detail&session='+session_id+'&user='+session_data.user, 
@@ -770,7 +798,9 @@ function send_session_data(finish_callback){
 															} ,
 															 elements: result_obj.details};
             canvas_zone_vcentered.innerHTML='<br />Resultados guardados  "invitado"<br /><br />\
-            <br /><button id="go-back" class="minibutton fixed-bottom-right go-back" onclick="menu_screen()">&larr;</button>';
+            <br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>';
+			document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
+
             if(typeof(finish_callback)!='undefined'){finish_callback();}
         }else{
             var xhr = new XMLHttpRequest();
@@ -782,7 +812,8 @@ function send_session_data(finish_callback){
             xhr.onload = function () {
                 var data=JSON.parse(this.responseText);
                 canvas_zone_vcentered.innerHTML='<br />Fin del Test<br />Datos guardados en el servidor.<br /><br />\
-                <br /><button id="go-back" class="minibutton fixed-bottom-right go-back" onclick="menu_screen()">&larr;</button>';
+                <br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>';
+				document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
                 delete cache_user_subject_results[session_data.subject];
                 if(debug) console.log('Storing data. Server message: '+data.msg);
                 if(typeof(finish_callback)!='undefined'){finish_callback();}

@@ -135,10 +135,10 @@ dv_obj.start_activity=function(){
 	            <td>'+dv_obj.current_matrix[15]+'</td>\
 	        </tr>\
 	     </table>\
-	     <button id="dv_check" class="button button-long" >Hecho!</button>\
+	     <button id="ac_check" class="button button-long" >Hecho!</button>\
 	    ';
 		dv_obj.add_buttons(canvas_zone_vcentered);
-		document.getElementById("dv_check").addEventListener(clickOrTouch,function(){dv_obj.check();});
+		document.getElementById("ac_check").addEventListener(clickOrTouch,function(){dv_obj.check();});
 		dv_obj.table = document.getElementById("discr_visual_table");
 		for (var i = 0;i<dv_obj.table.rows.length; i++) {
 		   for (var j = 0;j<dv_obj.table.rows[i].cells.length; j++) {

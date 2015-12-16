@@ -16,7 +16,7 @@ vel_obj.sec_pal=[
 var velocidad=function(finish_callback){
     if(!check_if_sounds_loaded(function(){velocidad(finish_callback);})){return;}
     if(!JsonLazy.data.hasOwnProperty('velocidad_data')){
-        JsonLazy.load("../data/ac_velocidad_data.json", "velocidad_data", velocidad);
+        JsonLazy.load("../data/ac_velocidad_data.json", "velocidad_data", function(){velocidad(finish_callback);});
     }else{
         preventBackExit();
         if(typeof(finish_callback)=='undefined') finish_callback=game;
