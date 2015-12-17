@@ -32,6 +32,7 @@ var header_zone=document.getElementById('header');
 var header_text=undefined;
 var canvas_zone=document.getElementById('zone_canvas');
 var canvas_zone_vcentered=document.getElementById('zone_canvas_vcentered');
+var ac_in_process=false;
 
 if(game_mode){
 	canvas_zone.classList.remove("canvas-with-header");
@@ -382,12 +383,12 @@ function menu_screen(){
 		if(user_data.access_level!='invitee'){
 			document.getElementById("letter_reader").addEventListener(clickOrTouch,function(){letter_reader();});
 			document.getElementById("show_profile").addEventListener(clickOrTouch,function(){hamburger_close();show_profile();});
-			document.getElementById("gdisconnect").addEventListener(clickOrTouch,function(){hamburger_close();gdisconnect();});			
+			document.getElementById("gdisconnect").addEventListener(clickOrTouch,function(){hamburger_close();gdisconnect();});
 		}else{
 			document.getElementById("login_screen").addEventListener(clickOrTouch,function(){hamburger_close();login_screen();});
 		}
 
-		document.getElementById("hamburger_icon").addEventListener(clickOrTouch,function(){hamburger_toggle(event);});
+		document.getElementById("hamburger_icon").addEventListener(clickOrTouch,hamburger_toggle);
 		document.getElementById("header_text").addEventListener(clickOrTouch,function(){menu_screen();});
 		document.getElementById("manage-subjects").addEventListener(clickOrTouch,function(){manage_subjects();});
         document.getElementById("results").addEventListener(clickOrTouch,function(){explore_results();});
@@ -678,26 +679,18 @@ var explore_result_detail=function(session_id){
 };
 
 var game=function(){
+    if(ac_in_process) return;
     remove_modal(); // for safety...
-    if(debug){alert('game-called - game-mode? '+game_mode);}
-    
+    if(debug){console.log('game-called - game-mode? '+game_mode);}   
     // CANNOT be here, in game-mode no clicks yet---------------------------
     //if(!check_if_sounds_loaded(memoria)){return;}
-    // ----------------------------------------------------------------------
-    
-    // logic
-    //random number within activity numbers of level1 (0 for now)
-    //Fisher-Yates random at the beginning and then increment, or
-    // do not rand array but just select a random position of the remaining array
-    // ??
-	// activity selection (if game_mode, remove and restyle header/footer...)
-   
+    // ---------------------------------------------------------------------- 
     //reset game variables --------
 	session_data.num_correct=0;
 	session_data.num_answered=0;
 	session_data.duration=0;
     session_data.details=[];
-    activity_timer.reset();
+    activity_timer.reset(); // also stops the timer
     //-----------------------------
 	var extra_options="";
 	if(!game_mode){

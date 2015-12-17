@@ -37,6 +37,7 @@ memvis_obj.start_activity=function(){
 		memvis_obj.finish();
     }else{
         memvis_obj.current_usr_answer=[];
+        memvis_obj.current_usr_answer_corrected=false;
         var sprite_images=wordimage_image_ref; //['pato','gato','sol','pez','tren','sal','col','reja','oreja','koala','bala','ala'];
         memvis_obj.options = random_array(sprite_images,9);
         if(debug) console.log(memvis_obj.options);
@@ -51,6 +52,7 @@ memvis_obj.start_activity=function(){
             pattern_representation+='<div class="membox"><div class="wordimage wordimage-'+memvis_obj.current_key_answer[i]+' covered"></div></div>';
         }
         canvas_zone_vcentered.innerHTML='\
+                Memoriza los dibujos en orden\
                 <div id="xx">\
                 '+pattern_representation+'\
                 </div>\
@@ -66,6 +68,7 @@ memvis_obj.start_activity=function(){
 }
 
 var memoria_visual_uncover_next=function(){
+    ac_in_process=true;
 	// don't worry about recursion, all functions will end there
 	if(memvis_obj.uncovered==memvis_obj.current_key_answer.length){
 		memvis_obj.uncovered=0;
@@ -78,9 +81,11 @@ var memoria_visual_uncover_next=function(){
 }
 
 var memoria_visual_find_pattern=function(){
+    ac_in_process=false;
     activity_timer.reset();
     activity_timer.start();
     canvas_zone_vcentered.innerHTML='\
+            Pulsa los dibujos en orden\
             <div>\
                 <div class="membox"><div class="wordimage wordimage-'+memvis_obj.options[0]+'"></div></div>\
                 <div class="membox"><div class="wordimage wordimage-'+memvis_obj.options[1]+'"></div></div>\
@@ -109,18 +114,26 @@ var memoria_visual_find_pattern=function(){
 }
 
 memvis_obj.box_click=function(element){
-	if(element.className.indexOf('covered')!=-1){ element.classList.remove('covered');} // already covered
-	else{element.classList.add('covered');}
+	if(element.className.indexOf('covered')!=-1){
+        element.classList.remove('covered');
+        memvis_obj.current_usr_answer_corrected=true;
+        var temp_elem=element.classList[1].split("-")[1];
+        for(var i=0;i<memvis_obj.current_usr_answer.length;i++){
+                if(memvis_obj.current_usr_answer[i]==temp_elem){
+                    memvis_obj.current_usr_answer.splice(i,1);
+                }
+        }
+    }else{
+        element.classList.add('covered');
+        memvis_obj.current_usr_answer.push(element.classList[1].split("-")[1]);
+    }
 }
 
 memvis_obj.check=function (element){
     var boxes=document.getElementsByClassName("covered");
-    for(var i=0;i<boxes.length;i++){
-	        memvis_obj.current_usr_answer.push(boxes[i].classList[1].split("-")[1]);
-    }   
     
     memvis_obj.details={};
-    memvis_obj.details.activity=memvis_obj.current_key_answer.toString();
+    memvis_obj.details.activity=memvis_obj.current_key_answer.toString(); //.sort() removed, order matters
     memvis_obj.details.choice=memvis_obj.current_usr_answer.toString();
     memvis_obj.level_played_times++; // must be before check
     if(debug) console.log(memvis_obj.details.choice);
@@ -135,6 +148,7 @@ memvis_obj.check=function (element){
         memvis_obj.details.result="incorrect";
         memvis_obj.failed_times++;
     }
+    if(memvis_obj.current_usr_answer_corrected) memvis_obj.details.choice+="(corr)";
     memvis_obj.played_times++;
     memvis_obj.end(memvis_obj.details.result);
 }

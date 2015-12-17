@@ -75,23 +75,26 @@ var velocidad_show_pattern=function(){
         <div class="text-center montessori-div">\
         <p class="montessori">Pulsa play y memoriza la frase</p>\
         </div>\
-		  <button id="playb" class="button">PLAY</button>\
-          <button id="help_button" class="minibutton fixed-bottom-left help">?</button> \
-          <button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
+        <input id="velocidad_answer" class="montessori-40 hidden" type="text" value="" />\
+        <br /><button id="playb" class="button">PLAY</button>\
 	';
+    vel_obj.add_buttons(canvas_zone_vcentered);
     document.getElementById("playb").addEventListener(clickOrTouch,function(){velocidad_uncover();});
-    document.getElementById("help_button").addEventListener(clickOrTouch,function(){open_js_modal_alert(velocidad_help_title,velocidad_help);});
-    document.getElementById("go-back").addEventListener(clickOrTouch,function(){game();}); 
+
 }
 
 
 
 var velocidad_uncover=function(){
+    ac_in_process=true;
 	canvas_zone_vcentered.innerHTML=' \
 	<div class="text-center montessori-div">\
 	<p class="montessori">'+vel_obj.sentence+'</p>\
 	</div>\
+    <input id="velocidad_answer" class="montessori-40 hidden" type="text" value="" />\
+	<br /><button id="check_vel_button" class="button button-long button-hidden" disabled="disabled">Hecho!</button>\
 	';
+    vel_obj.add_buttons(canvas_zone_vcentered);
     var pal_wait_time=1;
     for(var i=0;i<vel_obj.sec_pal.length;i++){
         if(vel_obj.sec_pal[i].min_age<=session_data.age && vel_obj.sec_pal[i].max_age>session_data.age){
@@ -104,21 +107,34 @@ var velocidad_uncover=function(){
 }
 
 var velocidad_find_word=function(){
+    ac_in_process=false;
     activity_timer.reset();
     activity_timer.start();
 	canvas_zone_vcentered.innerHTML=' \
 	<div class="text-center montessori-div">\
-	<p class="montessori">'+hide_word(vel_obj.sentence,vel_obj.word)+'</p>\
+	<p class="montessori">'+vel_obj.hide_word(vel_obj.sentence,vel_obj.word)+'</p>\
 	</div>\
-	<input id="velocidad_answer" class="montessori-40" type="text" value="" />\
-	<br /><button id="check_vel_button" class="button">OK</button>\
-    <button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
+	<input id="velocidad_answer" class="montessori-40" onkeyup="vel_obj.check_content(event)" type="text" value="" />\
+	<br /><button id="check_vel_button" class="button button-long button-hidden" disabled="disabled">Hecho!</button>\
 	';
+    vel_obj.add_buttons(canvas_zone_vcentered);
     document.getElementById("check_vel_button").addEventListener(clickOrTouch,function(){vel_obj.check();});
     document.getElementById("go-back").addEventListener(clickOrTouch,function(){game();}); 
 }
 
-function hide_word(sentence,word){
+vel_obj.check_content=function(e){
+    if(document.getElementById('velocidad_answer').value.trim().length>0){
+        document.getElementById("check_vel_button").disabled=false;
+        document.getElementById("check_vel_button").classList.remove('button-hidden');
+        if(e==undefined) e=window.event;
+        if(e.keyCode == 13) vel_obj.check();
+    }else{
+        document.getElementById("check_vel_button").disabled=true;
+        document.getElementById("check_vel_button").classList.add('button-hidden');
+    }
+}
+
+vel_obj.hide_word=function(sentence,word){
 	return sentence.replace(word,'¿_?');
 }
 

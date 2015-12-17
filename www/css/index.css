@@ -163,9 +163,17 @@ button.backgroundRed{
     background-color: #faa;
 }
 
+button.button-flat{
+	border:0px;
+	background-color: #fff;
+}
+
 button.button-long{width:300px;margin:0 50px;}
 
 button.button-hidden{visibility:hidden;}
+
+.hidden{visibility:hidden;}
+
 
 #sound{/*height:40%;*/
 	width:100%;text-align:center;margin:0;padding:1px;
@@ -308,6 +316,9 @@ button.button-hidden{visibility:hidden;}
 .montessori-40{
 	font-family: myMontessori;
     font-size:40px;
+}
+p.montessori{
+    margin:0;
 }
 
 

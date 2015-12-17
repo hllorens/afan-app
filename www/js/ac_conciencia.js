@@ -92,6 +92,7 @@ conciencia_obj.start_activity=function(){
 
 
 var conciencia_play_sound_finished=function(){
+    ac_in_process=false;
 	activity_timer.start();
 	conciencia_obj.played_times++;
 
@@ -113,6 +114,7 @@ var conciencia_play_sound_finished=function(){
 
 
 var conciencia_play_sound=function(){
+    ac_in_process=true;
 	conciencia_obj.playb.disabled=true;
 	conciencia_obj.playb.classList.add('button-hidden');
 	activity_timer.stop();
