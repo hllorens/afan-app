@@ -117,26 +117,30 @@ var cache_user_subject_result_detail={};
 
 function login_screen(){
 	if(debug){alert('login_screen called');}
-	header_zone.innerHTML='<h1>Acceso</h1>';
-	canvas_zone_vcentered.innerHTML='\
-	<div id="signinButton" class="button">Google+\
-   <span class="icon"></span>\
-    <span class="buttonText"></span>\
-	</div>\
-	<br /><button class="button exit" id="invitee_access">Invitado</button> \
-	<br /><button id="exit" class="button exit">Salir</button> \
-		';
-	gapi.signin.render('signinButton', {
-	  'callback': 'signInCallback',
-	  'clientid': '125860785862-s07kh0j5tpb2drjkeqsifldn39krhh60.apps.googleusercontent.com',
-	  'cookiepolicy': 'single_host_origin',
-	  'redirecturi': 'postmessage',
-	  'accesstype': 'offline',
-	  'scope': 'openid email'
-	}); //'redirecturi': 'postmessage', --> avoids reloading the page?
-	// accesstype="offline" --> ?? isn't implicit?
-	document.getElementById("invitee_access").addEventListener(clickOrTouch,function(){invitee_access();});			
-	document.getElementById("exit").addEventListener(clickOrTouch,function(){exit_app();});				
+	if(user_bypass!=undefined){
+		login_bypass();
+	}else{
+		header_zone.innerHTML='<h1>Acceso</h1>';
+		canvas_zone_vcentered.innerHTML='\
+		<div id="signinButton" class="button">Google+\
+	   <span class="icon"></span>\
+		<span class="buttonText"></span>\
+		</div>\
+		<br /><button class="button exit" id="invitee_access">Invitado</button> \
+		<br /><button id="exit" class="button exit">Salir</button> \
+			';
+		gapi.signin.render('signinButton', {
+		  'callback': 'signInCallback',
+		  'clientid': '125860785862-s07kh0j5tpb2drjkeqsifldn39krhh60.apps.googleusercontent.com',
+		  'cookiepolicy': 'single_host_origin',
+		  'redirecturi': 'postmessage',
+		  'accesstype': 'offline',
+		  'scope': 'openid email'
+		}); //'redirecturi': 'postmessage', --> avoids reloading the page?
+		// accesstype="offline" --> ?? isn't implicit?
+		document.getElementById("invitee_access").addEventListener(clickOrTouch,function(){invitee_access();});
+		document.getElementById("exit").addEventListener(clickOrTouch,function(){exit_app();});
+	}
 }
 
 function invitee_access(){
@@ -153,11 +157,52 @@ function invitee_access(){
     menu_screen();
 }
 
+function login_bypass(){
+		ajax_request_json(
+			backend_url+'ajaxdb.php?action=login_bypass&state='+session_state+'&user='+user_bypass,
+			function(result) {
+				if (result) {
+                    if(result.hasOwnProperty('error') && result.error!=""){alert("LOGIN ERROR: "+result.error); return;}
+                    if(debug){
+                        console.log(result);
+                        console.log("logged! "+result.email+" level:"+result.access_level);
+                        alert("logged! "+result.email+" level:"+result.access_level);
+                    }
+                    user_data.info=result.info;
+                    user_data.display_name=result.display_name;
+                    user_data.user_id=result.user_id;
+                    user_data.picture=result.picture;
+                    user_data.email=result.email;
+					user_data.access_level=result.access_level;
+					session_data.user=result.email;
+					session_data.user_access_level=result.access_level;
+					cache_user_subjects=null; cache_user_subject_results={};
+					cache_user_subject_result_detail={};
+					menu_screen();
+				} else {
+					alert('Failed to make a server-side call. Check your configuration and console.</br>Result:'+ result);
+					login_screen();
+				}
+			}
+		);
+
+    user_data.info="bypass";
+    user_data.display_name=user_bypass;
+    user_data.user_id=user_bypass;
+    user_data.picture=undefined;
+    user_data.email=user_bypass;
+	user_data.access_level='normal';
+	session_data.user=user_bypass;
+	session_data.user_access_level='normal';
+	cache_user_subjects=null; cache_user_subject_results={};
+	cache_user_subject_result_detail={};
+	menu_screen();
+}
 
 function signInCallback(authResult) {
 	//console.log(authResult);
 	if (authResult['code']) {
-		document.getElementById('signinButton').innerHTML="Loading...";
+		canvas_zone_vcentered.innerHTML='<div class="loader">Loading...</div>';
 		// Send one-time-code to server, if responds -> success
 		if(debug) console.log(authResult);
 		ajax_request_json(
@@ -166,7 +211,7 @@ function signInCallback(authResult) {
 				if (result) {
                     if(result.hasOwnProperty('error') && result.error!=""){alert("LOGIN ERROR: "+result.error); return;}
                     if(result.hasOwnProperty('info') && result.info=="new user"){
-                        open_js_modal_content_accept('<p>Usuario creado para: '+result.emial+' sus datos serán validados y \
+                        open_js_modal_content_accept('<p>Usuario creado para: '+result.email+' sus datos serán validados y \
                         recibirá un email en breve confirmando que tiene acceso completo a la aplicación.\
                         De momento podrá probarla pero no guardar los datos.</p>');
                     }
@@ -183,11 +228,15 @@ function signInCallback(authResult) {
 					user_data.access_level=result.access_level;
 					session_data.user=result.email;
 					session_data.user_access_level=result.access_level;
+					cache_user_subjects=null; cache_user_subject_results={};
+					cache_user_subject_result_detail={};
 					menu_screen();
 				} else if (authResult['error']) {
 					alert('There was an error: ' + authResult['error']);
+					login_screen();
 				} else {
 					alert('Failed to make a server-side call. Check your configuration and console.</br>Result:'+ result);
+					login_screen();
 				}
 			}
 		);
@@ -235,7 +284,7 @@ function admin_screen(){
 var letter_reader=function(){
     if(!check_if_sounds_loaded(letter_reader)){return;}
     canvas_zone_vcentered.innerHTML=' \
-        Sonidos a leer (separados por espacio) <input id="input_sounds" type="text" /> \
+        Escribe letras a leer (separadas por espacio)<br /><input id="input_sounds" type="text" /> <br />\
         <button id="read-button" class="button">Leer</button> \
         <br /><br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
         ';
@@ -246,47 +295,47 @@ var letter_reader=function(){
 var read_input_sounds=function(){
 	document.getElementById("read-button").disabled=true;
 	var input_sounds=document.getElementById("input_sounds").value.replace(/[ ]+/g, " ").trim().split(" ");
-    if(check_if_sounds_loaded(read_input_sounds)){
-        SoundChain.play_sound_arr(input_sounds, audio_sprite, letter_reader);
-    }
+    SoundChain.play_sound_arr(input_sounds, audio_sprite, letter_reader);
 }
 
 var check_missing_elements=function(){
 	var undefined_sounds={total:0};
 	var undefined_images={total:0};
 	var msg="";
-	for (var i=0;i<json_training.length;i++){
-		var act_sounds=json_training[i].sounds;
-		for (var s=0;s<act_sounds.length;s++){
-			if(act_sounds[s]=="\/") continue;
-			if(!audio_object_sprite_ref.hasOwnProperty(act_sounds[s]) && !undefined_sounds.hasOwnProperty(act_sounds[s])){
-				undefined_sounds[act_sounds[s]]=true;
-				undefined_sounds.total=undefined_sounds.total+1;
-				msg+="\n sound("+act_sounds[s]+") not found in training ("+json_training[i].answers[0]+").";
+	if(JsonLazy.data.hasOwnProperty('conciencia_train')){
+		for (var i=0;i<JsonLazy.data.conciencia_train.length;i++){
+			var act_sounds=JsonLazy.data.conciencia_train[i].sounds;
+			for (var s=0;s<act_sounds.length;s++){
+				if(act_sounds[s]=="\/") continue;
+				if(!audio_object_sprite_ref.hasOwnProperty(act_sounds[s]) && !undefined_sounds.hasOwnProperty(act_sounds[s])){
+					undefined_sounds[act_sounds[s]]=true;
+					undefined_sounds.total=undefined_sounds.total+1;
+					msg+="\n sound("+act_sounds[s]+") not found in training ("+JsonLazy.data.conciencia_train[i].answers[0]+").";
+				}
+			}
+			if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+JsonLazy.data.conciencia_train[i].answers[0]) 
+		        && !undefined_images.hasOwnProperty(JsonLazy.data.conciencia_train[i].answers[0])){
+				undefined_images[JsonLazy.data.conciencia_train[i].answers[0]]=true;
+				undefined_images.total=undefined_images.total+1;
+				msg+="\n image("+JsonLazy.data.conciencia_train[i].answers[0]+") not found in training.";
 			}
 		}
-		if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+json_training[i].answers[0]) 
-            && !undefined_images.hasOwnProperty(json_training[i].answers[0])){
-			undefined_images[json_training[i].answers[0]]=true;
-			undefined_images.total=undefined_images.total+1;
-			msg+="\n image("+json_training[i].answers[0]+") not found in training.";
-		}
-	}
-	for (var i=0;i<json_test.length;i++){
-		var act_sounds=json_test[i].sounds;
-		for (var s=0;s<act_sounds.length;s++){
-			if(act_sounds[s]=="\/") continue;
-			if(!audio_object_sprite_ref.hasOwnProperty(act_sounds[s]) && !undefined_sounds.hasOwnProperty(act_sounds[s])){
-				undefined_sounds[act_sounds[s]]=true;
-				undefined_sounds.total=undefined_sounds.total+1;
-				msg+="\n sound("+act_sounds[s]+") not found in test ("+json_test[i].answers[0]+").";
+		for (var i=0;i<JsonLazy.data.conciencia_test.length;i++){
+			var act_sounds=JsonLazy.data.conciencia_test[i].sounds;
+			for (var s=0;s<act_sounds.length;s++){
+				if(act_sounds[s]=="\/") continue;
+				if(!audio_object_sprite_ref.hasOwnProperty(act_sounds[s]) && !undefined_sounds.hasOwnProperty(act_sounds[s])){
+					undefined_sounds[act_sounds[s]]=true;
+					undefined_sounds.total=undefined_sounds.total+1;
+					msg+="\n sound("+act_sounds[s]+") not found in test ("+JsonLazy.data.conciencia_test[i].answers[0]+").";
+				}
 			}
-		}
-		if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+json_test[i].answers[0]) 
-            && !undefined_images.hasOwnProperty(json_test[i].answers[0])){
-			undefined_images[json_test[i].answers[0]]=true;
-			undefined_images.total=undefined_images.total+1;
-			msg+="\n image("+json_test[i].answers[0]+") not found in test.";
+			if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+JsonLazy.data.conciencia_test[i].answers[0]) 
+		        && !undefined_images.hasOwnProperty(JsonLazy.data.conciencia_test[i].answers[0])){
+				undefined_images[JsonLazy.data.conciencia_test[i].answers[0]]=true;
+				undefined_images.total=undefined_images.total+1;
+				msg+="\n image("+JsonLazy.data.conciencia_test[i].answers[0]+") not found in test.";
+			}
 		}
 	}
 	if(msg==""){
@@ -317,7 +366,7 @@ function show_profile(){
     canvas_zone_vcentered.innerHTML=' \
         Usuario: '+user_data.email+'  <br />\
         Acceso: '+user_data.access_level+'  <br />\
-        <br /><button class="minibutton fixed-bottom-right go-back">&larr;</button>\
+        <br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>\
         ';
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
 }
@@ -358,12 +407,12 @@ function menu_screen(){
 		<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"/></svg></a> <span id="header_text">'+app_name+'</span>';
         header_text=document.getElementById('header_text');
 
-		var admin_opts='<br /><button id="admin_screen"  class="button">Administrar</button>';
+		var admin_opts='<br /><button id="admin_screen"  class="button">Administrar</button>\
+			<br /><button id="letter_reader" disabled="true" class="button">Lector de sonidos</button>';
 		var normal_opts='\
-	    <br /><button id="letter_reader" disabled="true" class="button">Lector de sonidos</button> \
 		';
 		if(user_data.access_level!='admin') admin_opts="";
-		if(user_data.access_level=='invitee'){ normal_opts="";}
+		if(user_data.email=='invitee'){ normal_opts="";}
 		canvas_zone_vcentered.innerHTML=' \
 		<div id="menu-logo-div"></div> \
 		Participante:  <select id="subjects-select" onchange="set_subject()"></select> \
@@ -379,14 +428,14 @@ function menu_screen(){
 		';
 		if(user_data.access_level=='admin'){
 			document.getElementById("admin_screen").addEventListener(clickOrTouch,function(){admin_screen();});
-		}
-		if(user_data.access_level!='invitee'){
 			document.getElementById("letter_reader").addEventListener(clickOrTouch,function(){letter_reader();});
+		}
+		if(user_data.email!='invitee'){
 			document.getElementById("show_profile").addEventListener(clickOrTouch,function(){hamburger_close();show_profile();});
 			document.getElementById("gdisconnect").addEventListener(clickOrTouch,function(){hamburger_close();gdisconnect();});
-		}else{
-			document.getElementById("login_screen").addEventListener(clickOrTouch,function(){hamburger_close();login_screen();});
-		}
+        }else{
+            document.getElementById("login_screen").addEventListener(clickOrTouch,function(){hamburger_close();login_screen();});
+        }
 
 		document.getElementById("hamburger_icon").addEventListener(clickOrTouch,hamburger_toggle);
 		document.getElementById("header_text").addEventListener(clickOrTouch,function(){menu_screen();});
@@ -422,9 +471,9 @@ var prepare_menu_when_subjects_loaded=function(){
     document.getElementById("start-test-button").disabled=false;    
     document.getElementById("results").disabled=false;
     document.getElementById("manage-subjects").disabled=false;
-    if(user_data.access_level!='invitee'){
-        document.getElementById("letter_reader").disabled=false;
-    }
+    //if(user_data.email!='invitee'){}
+    if(user_data.access_level=='admin'){document.getElementById("letter_reader").disabled=false;}
+
 }
 
 
@@ -432,13 +481,13 @@ var manage_subjects=function(){
 	preventBackExit();
 	header_text.innerHTML=' &larr; '+app_name+' menu';
     var normal_opts='<button id="add-subject" class="button">Añadir</button>';
-    if(user_data.access_level=='invitee'){ normal_opts="";}
+    if(user_data.email=='invitee'){ normal_opts="";}
 	canvas_zone_vcentered.innerHTML=' \
     '+normal_opts+'\
 	<div id="results-div">cargando participantes...</div> \
 	<br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
 	';
-	if(user_data.access_level!='invitee') {document.getElementById("add-subject").addEventListener(clickOrTouch,function(){add_subject();});}
+	if(user_data.email!='invitee') {document.getElementById("add-subject").addEventListener(clickOrTouch,function(){add_subject();});}
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
 	var user_subjects_data=[];
 	for(var key in cache_user_subjects){
@@ -500,14 +549,19 @@ var add_subject=function(){
 	var cancel_function=function(){ remove_modal("js-modal-window-alert"); };
 	var form_html='<form id="my-form" action="javascript:void(0);"> \
 			<ul class="errorMessages"></ul>\
-			<label for="new-alias">Alias</label><input id="new-alias" type="text" required="required" /><br /> \
-			<label for="new-name">Nombre</label><input id="new-name" type="text" required="required" /><br /> \
-			<label for="new-birthdate">Fecha Nac.</label><input id="new-birthdate" type="date" placeholder="yyyy-mm-dd" required="required" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"  /><br /> \
-			<label>Comentarios</label><textarea id="new-comments"></textarea><br /> \
+			<label for="new-alias">Alias</label> <input id="new-alias" type="text" required="required" readonly="readonly" /><br /> \
+			<label for="new-name">Nombre</label> <input id="new-name" type="text" required="required" onkeyup="update_alias()" /><br /> \
+			<label for="new-birthdate">Fecha Nac.</label> <input id="new-birthdate" type="date" placeholder="yyyy-mm-dd" required="required" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"  /><br /> \
+			<label>Comentarios</label> <textarea id="new-comments"></textarea><br /> \
 			<input id="my-form-submit" type="submit" style="visibility:hidden;display:none" />\
 			</form>'; //title="Error: yyyy-mm-dd"		
 	open_js_modal_alert("Añadir Participante",form_html,accept_function,cancel_function);
 };
+
+var update_alias=function(){
+	var name=document.getElementById('new-name').value;
+	document.getElementById('new-alias').value=slugify(name);
+}
 
 var edit_subject=function(sid){
 	var accept_function=function(){
@@ -523,7 +577,7 @@ var edit_subject=function(sid){
 			myformsubmit.click(); // won't submit (invalid), but show errors
 		}else{
 			open_js_modal_content('<h1>Actualizando... '+document.getElementById('new-alias').value+'</h1>');
-            if(user_data.access_level=='invitee'){
+            if(user_data.email=='invitee'){
                 cache_user_subjects.invitado.name=document.getElementById('new-name').value;
                 cache_user_subjects.invitado.birthdate=document.getElementById('new-birthdate').value;
                 cache_user_subjects.invitado.comments=document.getElementById('new-comments').value;
@@ -557,10 +611,10 @@ var edit_subject=function(sid){
 	var form_html='<form id="my-form" action="javascript:void(0);"> \
 			<ul class="errorMessages"></ul>\
 			<label>Usuario</label><input type="text" readonly="readonly" value="'+subj2edit.user+'" /><br /> \
-			<label for="new-alias">Alias</label><input id="new-alias" type="text" required="required" readonly="readonly" value="'+subj2edit.alias+'" /><br /> \
-			<label for="new-name">Nombre</label><input id="new-name" type="text" required="required" value="'+subj2edit.name+'" /><br /> \
-			<label for="new-birthdate">Fecha Nac.</label><input id="new-birthdate" type="date" placeholder="yyyy-mm-dd" required="required" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"  value="'+subj2edit.birthdate+'" /><br /> \
-			<label>Comentarios</label><textarea id="new-comments">'+subj2edit.comments+'</textarea><br /> \
+			<label for="new-alias">Alias</label> <input id="new-alias" type="text" required="required" readonly="readonly" value="'+subj2edit.alias+'" /><br /> \
+			<label for="new-name">Nombre</label> <input id="new-name" type="text" required="required" value="'+subj2edit.name+'" /><br /> \
+			<label for="new-birthdate">Fecha Nac.</label> <input id="new-birthdate" type="date" placeholder="yyyy-mm-dd" required="required" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"  value="'+subj2edit.birthdate+'" /><br /> \
+			<label>Comentarios</label> <textarea id="new-comments">'+subj2edit.comments+'</textarea><br /> \
 			<input id="my-form-submit" type="submit" style="visibility:hidden;display:none" />\
 			</form>'; //title="Error: yyyy-mm-dd"		
 	open_js_modal_alert("Editar Participante",form_html,accept_function,cancel_function);
@@ -681,7 +735,11 @@ var explore_result_detail=function(session_id){
 var game=function(){
     if(ac_in_process) return;
     remove_modal(); // for safety...
-    if(debug){console.log('game-called - game-mode? '+game_mode);}   
+    if(debug){console.log('game-called - game-mode? '+game_mode);}
+    if(objectLength(cache_user_subjects)==0){
+        open_js_modal_alert('Info', 'Debes crear al menos un participante.<br/>Participantes -> Añadir');
+        return;
+    }
     // CANNOT be here, in game-mode no clicks yet---------------------------
     //if(!check_if_sounds_loaded(memoria)){return;}
     // ---------------------------------------------------------------------- 
@@ -770,7 +828,7 @@ function send_session_data(finish_callback){
     }else{
 		if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
         if(debug) console.log(JSON.stringify(session_data));
-        if(user_data.access_level=='invitee'){
+        if(user_data.email=='invitee'){
             var result_obj={
                     id:""+cache_user_subject_results[session_data.subject].elements.length+1,
 					subject: session_data.subject,

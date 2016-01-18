@@ -41,7 +41,7 @@ var ritmo=function(finish_callback){
         <div style="min-height:52px;"></div>\
         <button id="pta" class="button" onclick="ritmo_obj.play_ta()">.</button>\
         <button id="ptaa" class="button" onclick="ritmo_obj.play_taa()">__</button>\
-        <br /><button id="ac_check" class="button button-long button-hidden" disabled="disabled">Empezar!</button>\
+        <br /><button id="ac_check" class="button button-long button-hidden" disabled="disabled">¡Empezar!</button>\
         ';//+ritmo_obj.current_key_answer;
     ritmo_obj.add_buttons(canvas_zone_vcentered);
     ritmo_obj.montessori_p_text=document.getElementById('montessori-p-text');
@@ -67,7 +67,7 @@ ritmo_obj.start_activity=function(){
             <div style="border:1px dotted #eee;min-height:52px;"><span id="anspan">&nbsp;</span></div>  \
             <button id="pta" class="button button-hidden" disabled="disabled" onclick="ritmo_obj.play_ta()">.</button>\
             <button id="ptaa" class="button button-hidden" disabled="disabled" onclick="ritmo_obj.play_taa()">__</button>\
-            <br /><button id="ac_check" class="button button-long button-hidden" disabled="disabled">Hecho!</button> <button id="borrarb" class="button backgroundRed button-hidden" style="position:absolute;right:30px;" disabled="disabled">borrar</button>\
+            <br /><br /><button id="ac_check" class="button button-hidden" disabled="disabled">¡Hecho!</button> <button id="borrarb" class="button backgroundRed button-hidden" disabled="disabled">borrar</button>\
          ';//+ritmo_obj.current_key_answer;
         ritmo_obj.add_buttons(canvas_zone_vcentered);
         ritmo_obj.playb=document.getElementById('playb');
@@ -82,9 +82,9 @@ ritmo_obj.start_activity=function(){
 
 ritmo_obj.borrar=function(){
     if(ritmo_obj.current_usr_answer.length==0) return;
-    var item=ritmo_obj.anspan.lastElementChild;
-    ritmo_obj.anspan.removeChild(item);
-    ritmo_obj.current_usr_answer.pop();
+    //var item=ritmo_obj.anspan.lastElementChild;
+    //ritmo_obj.anspan.removeChild(item);
+    ritmo_obj.current_usr_answer=[]; //.pop();
     if(ritmo_obj.current_usr_answer.length==0){
         ritmo_obj.borrarb.classList.add('button-hidden');
         ritmo_obj.borrarb.disabled=true;
@@ -94,8 +94,10 @@ ritmo_obj.borrar=function(){
 
 ritmo_obj.play_pattern=function(){
     ac_in_process=true;
-    ritmo_obj.playb.classList.add('button-hidden');
-    ritmo_obj.playb.disabled=true;
+    if(session_data.mode=="test"){
+        ritmo_obj.playb.classList.add('button-hidden');
+        ritmo_obj.playb.disabled=true;
+    }
     AudioLib.play_sound_arr(ritmo_obj.current_key_answer,ritmo_obj.play_pattern_ended);
 }
 
@@ -111,7 +113,6 @@ ritmo_obj.generate_pattern=function(length){
 ritmo_obj.play_pattern_ended=function(){
     ac_in_process=false;
     ritmo_obj.current_usr_answer=[];
-    ritmo_obj.playb.classList.add('button-hidden');
     document.getElementById("pta").disabled=false;
     document.getElementById("ptaa").disabled=false;
     document.getElementById("ac_check").disabled=false;
@@ -153,9 +154,11 @@ ritmo_obj.play_sound=function(s){
         ritmo_obj.current_usr_answer.push(s);
         var symbol=".";
         if(s=="ta150.m4a") symbol="__";
-        ritmo_obj.anspan.innerHTML+=' <button class="button button-flat">'+symbol+'</div>';
-        ritmo_obj.borrarb.classList.remove('button-hidden');
-        ritmo_obj.borrarb.disabled=false;
+        //ritmo_obj.anspan.innerHTML+=' <button class="button button-flat">'+symbol+'</div>';
+        if(ritmo_obj.current_usr_answer.length>0){
+            ritmo_obj.borrarb.disabled=true;
+            ritmo_obj.borrarb.classList.add('button-hidden');
+        }
     }
 	AudioLib.play_sound_single(s,ritmo_obj.play_sound_end);
 }
@@ -175,6 +178,10 @@ ritmo_obj.play_sound_end=function(){
         document.getElementById("pta").classList.remove('button-hidden');
         document.getElementById("ptaa").classList.remove('button-hidden');
         document.getElementById("ac_check").classList.remove('button-hidden');
+        if(ritmo_obj.current_usr_answer.length>0){
+            ritmo_obj.borrarb.disabled=false;
+            ritmo_obj.borrarb.classList.remove('button-hidden');
+        }
         if(ritmo_obj.current_usr_answer.length>ritmo_obj.MAX_LEVELS) ritmo_obj.check();
     }
 }

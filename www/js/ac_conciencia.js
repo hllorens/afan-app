@@ -114,6 +114,7 @@ var conciencia_play_sound_finished=function(){
 
 
 var conciencia_play_sound=function(){
+    if(conciencia_obj.played_times > conciencia_obj.MAX_PLAYS){alert('haz click en un dibujo');return;}
     ac_in_process=true;
 	conciencia_obj.playb.disabled=true;
 	conciencia_obj.playb.classList.add('button-hidden');

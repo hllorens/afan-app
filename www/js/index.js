@@ -5,7 +5,9 @@ if(typeof sounds === 'undefined'){var sounds = [];}
 // Check for debug mode
 var QueryString=get_query_string();
 var debug=false;
+var user_bypass=undefined;
 if(QueryString.hasOwnProperty('debug') && QueryString.debug=='true') debug=true;
+if(QueryString.hasOwnProperty('user') && QueryString.user!='') user_bypass=QueryString.user;
 
 // responsive tunings
 prevent_scrolling();

@@ -4,7 +4,7 @@ var vel_obj=new Activity('Velocidad Lectora','velocidad','start_activity');
 vel_obj.help_text='\
     Lee y recuerda. Posteriormente tendrás que escribir la palabra que falta.\
 ';
-vel_obj.MAX_LEVELS=3;
+vel_obj.MAX_LEVELS=4; // 3 is the max but 4 will make it play 2 more times
 vel_obj.MAX_PLAYED_TIMES=10;
 vel_obj.sec_init=1;
 vel_obj.sec_pal=[
@@ -46,10 +46,12 @@ vel_obj.start_activity=function(){
 		if(!JsonLazy.data.velocidad_data.hasOwnProperty(vel_obj.level) || 
 		   vel_obj.level>vel_obj.MAX_LEVELS)
 			vel_obj.level=vel_obj.MAX_LEVELS;
-		var sentences=JsonLazy.data.velocidad_data[vel_obj.level];
+        var difficulty=vel_obj.level;
+        if(difficulty==1) difficulty=2;
+		var sentences=JsonLazy.data.velocidad_data[difficulty];
 		vel_obj.sentence = random_array(sentences,1)[0];
 		// chose one word of more than X letters (depending on the level [only useful for levels >2])
-		vel_obj.word = random_word_longer_than(vel_obj.sentence.split(" "), vel_obj.level);
+		vel_obj.word = random_word_longer_than(vel_obj.sentence.split(" "), difficulty);
 		if(debug) console.log("sentence: "+vel_obj.sentence+" word: "+vel_obj.word);
 		velocidad_show_pattern();
 	}
@@ -92,7 +94,7 @@ var velocidad_uncover=function(){
 	<p class="montessori">'+vel_obj.sentence+'</p>\
 	</div>\
     <input id="velocidad_answer" class="montessori-40 hidden" type="text" value="" />\
-	<br /><button id="check_vel_button" class="button button-long button-hidden" disabled="disabled">Hecho!</button>\
+	<br /><button id="check_vel_button" class="button button-long button-hidden" disabled="disabled">¡Hecho!</button>\
 	';
     vel_obj.add_buttons(canvas_zone_vcentered);
     var pal_wait_time=1;
@@ -114,8 +116,8 @@ var velocidad_find_word=function(){
 	<div class="text-center montessori-div">\
 	<p class="montessori">'+vel_obj.hide_word(vel_obj.sentence,vel_obj.word)+'</p>\
 	</div>\
-	<input id="velocidad_answer" class="montessori-40" onkeyup="vel_obj.check_content(event)" type="text" value="" />\
-	<br /><button id="check_vel_button" class="button button-long button-hidden" disabled="disabled">Hecho!</button>\
+	Palabra escondida: <input id="velocidad_answer" class="montessori-40" onkeyup="vel_obj.check_content(event)" type="text" value="" autofocus="autofocus" />\
+	<br /><button id="check_vel_button" class="button button-long backgroundRed">No me acuerdo</button>\
 	';
     vel_obj.add_buttons(canvas_zone_vcentered);
     document.getElementById("check_vel_button").addEventListener(clickOrTouch,function(){vel_obj.check();});
@@ -124,13 +126,15 @@ var velocidad_find_word=function(){
 
 vel_obj.check_content=function(e){
     if(document.getElementById('velocidad_answer').value.trim().length>0){
-        document.getElementById("check_vel_button").disabled=false;
-        document.getElementById("check_vel_button").classList.remove('button-hidden');
+        //document.getElementById("check_vel_button").disabled=false;
+        document.getElementById("check_vel_button").classList.remove('backgroundRed'); // button-hidden
+        document.getElementById("check_vel_button").innerHTML='¡Hecho!';
         if(e==undefined) e=window.event;
         if(e.keyCode == 13) vel_obj.check();
     }else{
-        document.getElementById("check_vel_button").disabled=true;
-        document.getElementById("check_vel_button").classList.add('button-hidden');
+        //document.getElementById("check_vel_button").disabled=true;
+        document.getElementById("check_vel_button").classList.add('backgroundRed'); // button-hidden
+        document.getElementById("check_vel_button").innerHTML='No me acuerdo';
     }
 }
 

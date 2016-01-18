@@ -3,8 +3,8 @@
 
 var memvis_obj=new Activity('Memoria Visual','memoria_visual','start_activity');
 memvis_obj.help_text='\
-    Intenta memorizar estas imágenes. Después tendrás que localizarlas respetando el orden en que fueron presentadas.\
-';
+    Intenta memorizar estas imágenes. Después tendrás que localizarlas.\
+'; // respetando el orden en que fueron presentadas
 
 memvis_obj.MAX_LEVELS=6;
 memvis_obj.MAX_PLAYED_TIMES=10;
@@ -52,12 +52,12 @@ memvis_obj.start_activity=function(){
             pattern_representation+='<div class="membox"><div class="wordimage wordimage-'+memvis_obj.current_key_answer[i]+' covered"></div></div>';
         }
         canvas_zone_vcentered.innerHTML='\
-                Memoriza los dibujos en orden\
+                Memoriza los dibujos \
                 <div id="xx">\
                 '+pattern_representation+'\
                 </div>\
               <button id="playb" class="button">PLAY</button>\
-        ';
+        '; // en orden
         memvis_obj.add_buttons(canvas_zone_vcentered);
         document.getElementById("playb").addEventListener(clickOrTouch,function(){
 			document.getElementById('playb').disabled=true;
@@ -85,7 +85,7 @@ var memoria_visual_find_pattern=function(){
     activity_timer.reset();
     activity_timer.start();
     canvas_zone_vcentered.innerHTML='\
-            Pulsa los dibujos en orden\
+            Pulsa los dibujos\
             <div>\
                 <div class="membox"><div class="wordimage wordimage-'+memvis_obj.options[0]+'"></div></div>\
                 <div class="membox"><div class="wordimage wordimage-'+memvis_obj.options[1]+'"></div></div>\
@@ -101,8 +101,8 @@ var memoria_visual_find_pattern=function(){
                 <div class="membox"><div class="wordimage wordimage-'+memvis_obj.options[7]+'"></div></div>\
                 <div class="membox"><div class="wordimage wordimage-'+memvis_obj.options[8]+'"></div></div>\
             </div>\
-	     <button id="ac_check" class="button button-long" >Hecho!</button>\
-    ';
+            <button id="ac_check" class="button button-long" >¡Hecho!</button>\
+    '; //  en orden
     memvis_obj.add_buttons(canvas_zone_vcentered);
     var boxes=document.getElementsByClassName("wordimage");
     for(var i=0;i<boxes.length;i++){
@@ -133,8 +133,9 @@ memvis_obj.check=function (element){
     var boxes=document.getElementsByClassName("covered");
     
     memvis_obj.details={};
-    memvis_obj.details.activity=memvis_obj.current_key_answer.toString(); //.sort() removed, order matters
-    memvis_obj.details.choice=memvis_obj.current_usr_answer.toString();
+    // Add .sort() if order does not matter or remove if it matters
+    memvis_obj.details.activity=memvis_obj.current_key_answer.sort().toString();
+    memvis_obj.details.choice=memvis_obj.current_usr_answer.sort().toString();
     memvis_obj.level_played_times++; // must be before check
     if(debug) console.log(memvis_obj.details.choice);
     if(memvis_obj.details.activity==memvis_obj.details.choice){

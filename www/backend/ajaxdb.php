@@ -42,6 +42,175 @@ if ($action == "get_users"){
 	}
 	header('Content-type: application/json');
 	echo json_encode( $output );
+}else if ($action == "gen_session_state"){
+	$state = md5(rand());
+	$_SESSION["state"]=$state;
+	echo "$state";
+}else if ($action == "login_bypass"){
+    $output['error']="";
+    $output['info']="";
+    unset($_SESSION['long_lived_access_token']);
+    unset($_SESSION['user_id']);
+    unset($_SESSION['username']);
+    unset($_SESSION['email']);
+    unset($_SESSION['picture']);
+    if ( (get_value("state")) != ($_SESSION["state"]) ) {
+        $output['error']="FAILURE: Forgery attack? Invalid state parameter ".get_value("state");
+    }else{
+        $user = $_REQUEST['user'];
+        $sQuery = "SELECT * FROM users WHERE email='".$user."'";
+        $rResult = mysql_query( $sQuery, $db_connection ) or die(mysql_error());
+        if ( $aRow = mysql_fetch_array( $rResult ) ){ //existing user
+            $_SESSION['access_level'] = $aRow['access_level'];
+			$_SESSION['user_id'] = $user;
+			$_SESSION['display_name'] = $aRow['display_name'];
+			$_SESSION['picture'] = $aRow['picture'];
+			$_SESSION['email'] = $user;
+
+            $sQuery = "UPDATE users  SET last_login='$timestamp_seconds',last_provider='bypass' WHERE email='".$_SESSION['email']."';";
+            $rResult = mysql_query( $sQuery, $db_connection );
+            if(!$rResult){$output['error']="Error: ".mysql_error()." -- ".$sQuery;}
+        }else{
+            $output['error']="Error: empty user? no user info with the token?";
+        }
+    }
+    $output['user_id']=$_SESSION['user_id'];
+    $output['display_name']=$_SESSION['display_name'];
+    $output['picture']=$_SESSION['picture'];
+    $output['email']=$_SESSION['email'];
+    $output['access_level']=$_SESSION['access_level'];
+    $output['toksum']=substr($_SESSION['long_lived_access_token']->access_token,0,5);    
+    header('Content-type: application/json');
+    echo json_encode( $output );
+}else if ($action == "gconnect"){
+    $CLIENT_ID = $gclient_secret->client_id;
+    $CLIENT_SECRET = $gclient_secret->client_secret;
+    $output['error']="";
+    $output['info']="";
+// if gconnect is called automatically with a code request saved in cookies the session access token might have expired already
+// I need to study this better... maybe have a job in the server that renews the token periodically... and in any case always try to use the token before login,
+// if it expired, obtain a new one...
+//    if (empty($_SESSION['long_lived_access_token'])) { 
+        unset($_SESSION['long_lived_access_token']);
+        unset($_SESSION['user_id']);
+        unset($_SESSION['username']);
+        unset($_SESSION['email']);
+        unset($_SESSION['picture']);
+        if ( (get_value("state")) != ($_SESSION["state"]) ) {
+            $output['error']="FAILURE: Forgery attack? Invalid state parameter ".get_value("state"); //." - ".$_SESSION["state"].". "; do not return this... to much information for a thief
+        }else{
+            $code = $_REQUEST['code'];
+            $url = 'https://accounts.google.com/o/oauth2/token';
+            $params = array(
+                "code" => $code,
+                "client_id" => $CLIENT_ID,
+                "client_secret" => $CLIENT_SECRET,
+                "redirect_uri" => "postmessage",
+                "grant_type" => "authorization_code"
+            ); 
+            $curl = curl_init($url);
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $params);
+            curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+            $response = curl_exec($curl);
+            curl_close($curl);
+            $_SESSION['long_lived_access_token'] = json_decode($response);
+            // Verify the token (OPTIONAL)
+            $url = 'https://www.googleapis.com/oauth2/v2/tokeninfo?access_token='.
+                $_SESSION['long_lived_access_token']->access_token;
+            $curl = curl_init();
+            curl_setopt_array($curl, array(
+                CURLOPT_RETURNTRANSFER => 1,
+                CURLOPT_URL => $url
+            ));
+            $response = curl_exec($curl);
+            curl_close($curl);
+            $tokenInfo = json_decode($response);
+            if ($tokenInfo->error) {
+                unset($_SESSION['long_lived_access_token']);
+                $output['error']="ERROR in the token: ".$tokenInfo->error;
+            }else if ($tokenInfo->audience != $CLIENT_ID) {
+                $output['error']="ERROR: Token's client ID does not match app's."; //, 401);
+            }else{
+                // Get user info
+                $url = 'https://www.googleapis.com/oauth2/v2/userinfo?access_token='.
+                    $_SESSION['long_lived_access_token']->access_token.'&alt=json';
+                $curl = curl_init();
+                curl_setopt_array($curl, array(
+                    CURLOPT_RETURNTRANSFER => 1,
+                    CURLOPT_URL => $url
+                ));
+                $response = curl_exec($curl);
+                curl_close($curl); //echo $response;
+                $userInfo = json_decode($response);
+                $_SESSION['user_id'] = $userInfo->id;
+                $_SESSION['display_name'] = $userInfo->name;
+                $_SESSION['picture'] = $userInfo->picture;
+                $_SESSION['email'] = $userInfo->email;
+                $sQuery = "SELECT * FROM users WHERE email='".$userInfo->email."'"; //echo "query: $sQuery ";
+                $rResult = mysql_query( $sQuery, $db_connection ) or die(mysql_error());
+                if ( $aRow = mysql_fetch_array( $rResult ) ){ //existing user
+                    $_SESSION['access_level'] = $aRow['access_level'];
+                    // update the user last_login and last_provider
+                    $sQuery = "UPDATE users  SET last_login='$timestamp_seconds',last_provider='google' WHERE email='".$_SESSION['email']."';";
+                    $rResult = mysql_query( $sQuery, $db_connection );
+                    if(!$rResult){$output['error']="Error: ".mysql_error()." -- ".$sQuery;}
+                }else if(!empty($_SESSION['email'])){ //new user
+                    $_SESSION['access_level'] = 'normal'; //invitee
+                    mail("hectorlm1983@gmail.com","New afan-app user","NEW USER: ".$_SESSION['email'].". Change from 'invitee' to something else or DELETE");
+                    $sQuery = "INSERT INTO users (email, display_name, access_level, picture, last_login, last_provider, creation_timestamp) VALUES ('".$_SESSION['email']."', '".$_SESSION['display_name']."', '".$_SESSION['access_level']."', '".$_SESSION['picture']."', '$timestamp_seconds', 'google', '$timestamp_seconds');";
+                    $rResult = mysql_query( $sQuery, $db_connection );
+                    if(!$rResult){$output['error']="Error: Exists. ".mysql_error()." -- ".$sQuery;}
+                    $output['info']="new user";
+                }else{
+                    $output['error']="Error: empty user? no user info with the token?";
+                }
+            }
+        }
+//    }
+    $output['user_id']=$_SESSION['user_id'];
+    $output['display_name']=$_SESSION['display_name'];
+    $output['picture']=$_SESSION['picture'];
+    $output['email']=$_SESSION['email'];
+    $output['access_level']=$_SESSION['access_level'];
+    $output['toksum']=substr($_SESSION['long_lived_access_token']->access_token,0,5);    
+    header('Content-type: application/json');
+    echo json_encode( $output );
+}else if ($action == "gdisconnect"){
+	if (empty($_SESSION['long_lived_access_token'])){
+           $output['error']="No one is logged";
+	}else{
+		$url = 'https://accounts.google.com/o/oauth2/revoke?token='.
+				$_SESSION['long_lived_access_token']->access_token;
+		$curl = curl_init();
+		curl_setopt_array($curl, array(
+			CURLOPT_RETURNTRANSFER => 1,
+			CURLOPT_URL => $url
+		));
+		$response = curl_exec($curl);
+		$httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+		curl_close($curl);
+
+		if ($httpcode == 200){
+			unset($_SESSION['long_lived_access_token']);
+			unset($_SESSION['user_id']);
+			unset($_SESSION['username']);
+			unset($_SESSION['email']);
+			unset($_SESSION['picture']);
+			$output['success']="Succesfully disconnected";
+		}else{
+            $output['error']="Failed to revoke token for given user ($httpcode - $response - token=".substr($_SESSION['long_lived_access_token']->access_token,0,5)."... user: ".$_SESSION['username'];
+			unset($_SESSION['long_lived_access_token']);
+			unset($_SESSION['user_id']);
+			unset($_SESSION['username']);
+			unset($_SESSION['email']);
+			unset($_SESSION['picture']);
+		}
+	}
+	header('Content-type: application/json');
+	echo json_encode( $output );
 }else if ($action == "get_subjects"){
 	$user=get_value("user");
 	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
@@ -263,139 +432,6 @@ if ($action == "get_users"){
 	header('Content-type: application/json');
 	echo json_encode( $output );
 	//print_r($output);
-}else if ($action == "gen_session_state"){
-	$state = md5(rand());
-	$_SESSION["state"]=$state;
-	echo "$state";
-}else if ($action == "gconnect"){
-    $CLIENT_ID = $gclient_secret->client_id;
-    $CLIENT_SECRET = $gclient_secret->client_secret;
-    $output['error']="";
-    $output['info']="";
-// if gconnect is called automatically with a code request saved in cookies the session access token might have expired already
-// I need to study this better... maybe have a job in the server that renews the token periodically... and in any case always try to use the token before login,
-// if it expired, obtain a new one...
-//    if (empty($_SESSION['long_lived_access_token'])) { 
-        unset($_SESSION['long_lived_access_token']);
-        unset($_SESSION['user_id']);
-        unset($_SESSION['username']);
-        unset($_SESSION['email']);
-        unset($_SESSION['picture']);
-        if ( (get_value("state")) != ($_SESSION["state"]) ) {
-            $output['error']="FAILURE: Forgery attack? Invalid state parameter ".get_value("state"); //." - ".$_SESSION["state"].". "; do not return this... to much information for a thief
-        }else{
-            $code = $_REQUEST['code'];
-            $url = 'https://accounts.google.com/o/oauth2/token';
-            $params = array(
-                "code" => $code,
-                "client_id" => $CLIENT_ID,
-                "client_secret" => $CLIENT_SECRET,
-                "redirect_uri" => "postmessage",
-                "grant_type" => "authorization_code"
-            ); 
-            $curl = curl_init($url);
-            curl_setopt($curl, CURLOPT_POST, true);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $params);
-            curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-            $response = curl_exec($curl);
-            curl_close($curl);
-            $_SESSION['long_lived_access_token'] = json_decode($response);
-            // Verify the token (OPTIONAL)
-            $url = 'https://www.googleapis.com/oauth2/v2/tokeninfo?access_token='.
-                $_SESSION['long_lived_access_token']->access_token;
-            $curl = curl_init();
-            curl_setopt_array($curl, array(
-                CURLOPT_RETURNTRANSFER => 1,
-                CURLOPT_URL => $url
-            ));
-            $response = curl_exec($curl);
-            curl_close($curl);
-            $tokenInfo = json_decode($response);
-            if ($tokenInfo->error) {
-                unset($_SESSION['long_lived_access_token']);
-                $output['error']="ERROR in the token: ".$tokenInfo->error;
-            }else if ($tokenInfo->audience != $CLIENT_ID) {
-                $output['error']="ERROR: Token's client ID does not match app's."; //, 401);
-            }else{
-                // Get user info
-                $url = 'https://www.googleapis.com/oauth2/v2/userinfo?access_token='.
-                    $_SESSION['long_lived_access_token']->access_token.'&alt=json';
-                $curl = curl_init();
-                curl_setopt_array($curl, array(
-                    CURLOPT_RETURNTRANSFER => 1,
-                    CURLOPT_URL => $url
-                ));
-                $response = curl_exec($curl);
-                curl_close($curl); //echo $response;
-                $userInfo = json_decode($response);
-                $_SESSION['user_id'] = $userInfo->id;
-                $_SESSION['display_name'] = $userInfo->name;
-                $_SESSION['picture'] = $userInfo->picture;
-                $_SESSION['email'] = $userInfo->email;
-                $sQuery = "SELECT * FROM users WHERE email='".$userInfo->email."'"; //echo "query: $sQuery ";
-                $rResult = mysql_query( $sQuery, $db_connection ) or die(mysql_error());
-                if ( $aRow = mysql_fetch_array( $rResult ) ){ //existing user
-                    $_SESSION['access_level'] = $aRow['access_level'];
-                    // update the user last_login and last_provider
-                    $sQuery = "UPDATE users  SET last_login='$timestamp_seconds',last_provider='google' WHERE email='".$_SESSION['email']."';";
-                    $rResult = mysql_query( $sQuery, $db_connection );
-                    if(!$rResult){$output['error']="Error: ".mysql_error()." -- ".$sQuery;}
-                }else if(!empty($_SESSION['email'])){ //new user
-                    $_SESSION['access_level'] = 'invitee';
-                    mail("hectorlm1983@gmail.com","New afan-app user","NEW USER: ".$_SESSION['email'].". Change from 'invitee' to something else or DELETE");
-                    $sQuery = "INSERT INTO users (email, display_name, access_level, last_login, last_provider, creation_timestamp) VALUES ('".$_SESSION['email']."', '".$_SESSION['display_name']."', '".$_SESSION['access_level']."', '$timestamp_seconds', 'google', '$timestamp_seconds');";
-                    $rResult = mysql_query( $sQuery, $db_connection );
-                    if(!$rResult){$output['error']="Error: Exists. ".mysql_error()." -- ".$sQuery;}
-                    $output['info']="new user";
-                }else{
-                    $output['error']="Error: empty user? no user info with the token?";
-                }
-            }
-        }
-//    }
-    $output['user_id']=$_SESSION['user_id'];
-    $output['display_name']=$_SESSION['display_name'];
-    $output['picture']=$_SESSION['picture'];
-    $output['email']=$_SESSION['email'];
-    $output['access_level']=$_SESSION['access_level'];
-    $output['toksum']=substr($_SESSION['long_lived_access_token']->access_token,0,5);    
-    header('Content-type: application/json');
-    echo json_encode( $output );
-}else if ($action == "gdisconnect"){
-	if (empty($_SESSION['long_lived_access_token'])){
-           $output['error']="No one is logged";
-	}else{
-		$url = 'https://accounts.google.com/o/oauth2/revoke?token='.
-				$_SESSION['long_lived_access_token']->access_token;
-		$curl = curl_init();
-		curl_setopt_array($curl, array(
-			CURLOPT_RETURNTRANSFER => 1,
-			CURLOPT_URL => $url
-		));
-		$response = curl_exec($curl);
-		$httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-		curl_close($curl);
-
-		if ($httpcode == 200){
-			unset($_SESSION['long_lived_access_token']);
-			unset($_SESSION['user_id']);
-			unset($_SESSION['username']);
-			unset($_SESSION['email']);
-			unset($_SESSION['picture']);
-			$output['success']="Succesfully disconnected";
-		}else{
-            $output['error']="Failed to revoke token for given user ($httpcode - $response - token=".substr($_SESSION['long_lived_access_token']->access_token,0,5)."... user: ".$_SESSION['username'];
-			unset($_SESSION['long_lived_access_token']);
-			unset($_SESSION['user_id']);
-			unset($_SESSION['username']);
-			unset($_SESSION['email']);
-			unset($_SESSION['picture']);
-		}
-	}
-	header('Content-type: application/json');
-	echo json_encode( $output );
 }else{
 	$output['msg']="unsupported action";
 	header('Content-type: application/json');

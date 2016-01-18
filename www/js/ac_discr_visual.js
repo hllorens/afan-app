@@ -4,7 +4,7 @@
 
 var dv_obj=new Activity('Discr. Visual','discr_visual','start_activity');
 dv_obj.help_text='Encuentra la sílaba.';
-dv_obj.MAX_PLAYED_TIMES_TEST=2;
+dv_obj.MAX_PLAYED_TIMES_TEST=4;
 dv_obj.MAX_PLAYED_TIMES=10;
 dv_obj.MAX_FAILURES=5;
 
@@ -135,7 +135,7 @@ dv_obj.start_activity=function(){
 	            <td>'+dv_obj.current_matrix[15]+'</td>\
 	        </tr>\
 	     </table>\
-	     <button id="ac_check" class="button button-long" >Hecho!</button>\
+	     <button id="ac_check" class="button button-long" >¡Hecho!</button>\
 	    ';
 		dv_obj.add_buttons(canvas_zone_vcentered);
 		document.getElementById("ac_check").addEventListener(clickOrTouch,function(){dv_obj.check();});
