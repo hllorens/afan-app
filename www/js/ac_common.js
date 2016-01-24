@@ -23,6 +23,7 @@ var Activity=function (name,type,callback_name){
     this.MAX_PLAYS_PER_LEVEL=-1;
     this.MAX_PLAYED_TIMES=-1;
     this.MAX_PLAYED_TIMES_TEST=-1;
+    this.MAX_PLAYED_TIMES_TEST_DRY=2;
     this.MAX_FAILURES=-1;
     this.MAX_FAILURES_IN_A_LEVEL=-1;
 }
@@ -38,10 +39,13 @@ Activity.prototype.add_buttons=function(elem){
     document.getElementById("go-back").addEventListener(clickOrTouch,function(){game();});
 }
 Activity.prototype.reset=function(){
+    this.played_times=0;
+    this.reset_dry();
+}
+Activity.prototype.reset_dry=function(){
     this.level=1;
     this.level_played_times=0;
     this.level_passed_times=0;
-    this.played_times=0;
     this.failed_times=0;
 	this.details={};
 	session_data.type=this.type;
@@ -49,7 +53,6 @@ Activity.prototype.reset=function(){
 	session_data.num_answered=0;
 	session_data.duration=0;
     session_data.details=[];
-    activity_timer.reset();
 }
 Activity.prototype.start=function(){
 	remove_modal();
@@ -65,6 +68,11 @@ Activity.prototype.next_activity=function(){
 	session_data.details.push(this.details);
 	session_data.duration+=activity_timer.seconds;
 	activity_timer.reset();
+    if(session_data.mode=="test" && this.played_times<this.MAX_PLAYED_TIMES_TEST_DRY){
+        this.failed_times=0;
+    }else if(session_data.mode=="test" && this.played_times==this.MAX_PLAYED_TIMES_TEST_DRY){
+        this.reset_dry();
+    }
 	this[this.callback_name]();
 }
 Activity.prototype.end=function(){
@@ -88,7 +96,7 @@ Activity.prototype.end=function(){
 
 Activity.prototype.finish=function(){
 	var the_content='<h1>...fin del juego...</h1>';
-    if(session_data.mode!="test" && !game_mode){
+    if(session_data.mode!="test" || game_mode){
 		var waiting_time=2000; // >soundLength (could be on_sound_end but too short for image show)
 		if(this.details.result=="correct"){
 		    audio_sprite.playSpriteRange("zfx_correct"); // TODO play another sound!!

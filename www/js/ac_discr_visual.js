@@ -4,8 +4,8 @@
 
 var dv_obj=new Activity('Discr. Visual','discr_visual','start_activity');
 dv_obj.help_text='Encuentra la sílaba.';
-dv_obj.MAX_PLAYED_TIMES_TEST=4;
-dv_obj.MAX_PLAYED_TIMES=10;
+dv_obj.MAX_PLAYED_TIMES_TEST=6; // 2 are DRY
+dv_obj.MAX_PLAYED_TIMES=1000; // game mode 1000=infinity
 dv_obj.MAX_FAILURES=5;
 
 dv_obj.letters1=['b','c','f','p'];
@@ -108,7 +108,7 @@ dv_obj.start_activity=function(){
 		shuffle_array(dv_obj.current_matrix);
 		
 		canvas_zone_vcentered.innerHTML='\
-	    <div class="text-center montessori-40">'+dv_obj.syllable+'</div>\
+	    <div id="hinttext">Encuentra: <span class="text-center montessori-40">'+dv_obj.syllable+'</span></div>\
 	    <table id="discr_visual_table" class="noselect">\
 	        <tr>\
 	            <td>'+dv_obj.current_matrix[0]+'</td>\
@@ -137,6 +137,10 @@ dv_obj.start_activity=function(){
 	     </table>\
 	     <button id="ac_check" class="button button-long" >¡Hecho!</button>\
 	    ';
+        dv_obj.hinttext=document.getElementById('hinttext');
+        if(session_data.mode=="test" && dv_obj.played_times<dv_obj.MAX_PLAYED_TIMES_TEST_DRY){
+            dv_obj.hinttext.innerHTML="[ENTRENA] "+dv_obj.hinttext.innerHTML;
+        }
 		dv_obj.add_buttons(canvas_zone_vcentered);
 		document.getElementById("ac_check").addEventListener(clickOrTouch,function(){dv_obj.check();});
 		dv_obj.table = document.getElementById("discr_visual_table");

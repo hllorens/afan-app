@@ -5,7 +5,7 @@ vel_obj.help_text='\
     Lee y recuerda. Posteriormente tendrás que escribir la palabra que falta.\
 ';
 vel_obj.MAX_LEVELS=4; // 3 is the max but 4 will make it play 2 more times
-vel_obj.MAX_PLAYED_TIMES=10;
+vel_obj.MAX_PLAYED_TIMES=1000; // game mode 1000=infinity
 vel_obj.sec_init=1;
 vel_obj.sec_pal=[
     {"min_age":0,"max_age":8,"sec_pal":2},
@@ -43,6 +43,7 @@ vel_obj.start_activity=function(){
 		session_data.num_answered=vel_obj.MAX_LEVELS*2;
 		vel_obj.finish();
 	}else{
+        //if(session_data.mode=="test" && this.played_times==this.MAX_PLAYED_TIMES_TEST_DRY) vel_obj.level=1; auto in common
 		if(!JsonLazy.data.velocidad_data.hasOwnProperty(vel_obj.level) || 
 		   vel_obj.level>vel_obj.MAX_LEVELS)
 			vel_obj.level=vel_obj.MAX_LEVELS;
@@ -74,15 +75,19 @@ var random_word_longer_than=function(array, min_word_length){
 var velocidad_show_pattern=function(){
 	var pattern_representation="";
 	canvas_zone_vcentered.innerHTML='\
+        <div id="hinttext">Pulsa play y memoriza la frase</div>\
         <div class="text-center montessori-div">\
-        <p class="montessori">Pulsa play y memoriza la frase</p>\
+        <p class="montessori"></p>\
         </div>\
         <input id="velocidad_answer" class="montessori-40 hidden" type="text" value="" />\
         <br /><button id="playb" class="button">PLAY</button>\
 	';
     vel_obj.add_buttons(canvas_zone_vcentered);
     document.getElementById("playb").addEventListener(clickOrTouch,function(){velocidad_uncover();});
-
+    vel_obj.hinttext=document.getElementById('hinttext');
+    if(session_data.mode=="test" && vel_obj.played_times<vel_obj.MAX_PLAYED_TIMES_TEST_DRY){
+        vel_obj.hinttext.innerHTML="[ENTRENA] "+vel_obj.hinttext.innerHTML;
+    }
 }
 
 
@@ -90,6 +95,7 @@ var velocidad_show_pattern=function(){
 var velocidad_uncover=function(){
     ac_in_process=true;
 	canvas_zone_vcentered.innerHTML=' \
+    Memoriza\
 	<div class="text-center montessori-div">\
 	<p class="montessori">'+vel_obj.sentence+'</p>\
 	</div>\
@@ -113,6 +119,7 @@ var velocidad_find_word=function(){
     activity_timer.reset();
     activity_timer.start();
 	canvas_zone_vcentered.innerHTML=' \
+    Escribe la palabra que falta\
 	<div class="text-center montessori-div">\
 	<p class="montessori">'+vel_obj.hide_word(vel_obj.sentence,vel_obj.word)+'</p>\
 	</div>\

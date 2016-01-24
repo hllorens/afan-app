@@ -9,6 +9,7 @@ var app_name='CoLE';
 // MEDIA
 var images = [
 //"../../afan-app-media/img/spacer158.png",
+//"../../afan-app-media/img/AFAN.png",
 "../../afan-app-media/img/happy.png",
 "../../afan-app-media/img/wordimg-sprite.png",
 "../../afan-app-media/img/correct.png",
@@ -371,6 +372,18 @@ function show_profile(){
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
 }
 
+function show_about(){
+    header_text.innerHTML=' &larr; '+app_name+' menu';
+    canvas_zone_vcentered.innerHTML=' \
+        <img src="../../afan-app-media/img/logo-afan.png" /><br /><h1>Programa CoLE</h1>Corrección de los errores en Lectura y Escritura<br />\
+        &copy; 2015\
+        <br /><br />M.de Ayala, H.Llorens<br />\
+        Url: <a href="http://www.centroafan.com">www.centroafan.com</a> <br />\
+        Contacto: info@centroafan.com  <br />\
+        <br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>\
+        ';
+	document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
+}
 
 function menu_screen(){
 	allowBackExit();
@@ -401,6 +414,7 @@ function menu_screen(){
 		// TODO if admin administrar... lo de sujetos puede ir aquí tb...
 		hamburger_menu_content.innerHTML=''+get_reduced_display_name(user_data.display_name)+'<ul>\
 		'+sign+'\
+		<li><a href="#" id="show_about">acerca de..</a></li>\
 		<li><a href="#" id="exit_app_hamburger">salir</a></li>\
 		</ul>';
 		header_zone.innerHTML='<a id="hamburger_icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">\
@@ -442,6 +456,7 @@ function menu_screen(){
 		document.getElementById("manage-subjects").addEventListener(clickOrTouch,function(){manage_subjects();});
         document.getElementById("results").addEventListener(clickOrTouch,function(){explore_results();});
         document.getElementById("exit_app").addEventListener(clickOrTouch,function(){exit_app();});
+        document.getElementById("show_about").addEventListener(clickOrTouch,function(){hamburger_close();show_about();});
         document.getElementById("exit_app_hamburger").addEventListener(clickOrTouch,function(){exit_app();});
 
 		if(cache_user_subjects==null){
@@ -633,11 +648,12 @@ var explore_results=function(){
         ajax_request_json(
             backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject, 
             function(data) {
+                //Resultados "+cache_user_subject_results[session_data.subject].general.user+" -  sujeto: 
                 cache_user_subject_results[session_data.subject]=data; //cache (never changes)
                 if(cache_user_subject_results[session_data.subject].elements.length==0){
-                    document.getElementById("results-div").innerHTML="Resultados "+cache_user_subject_results[session_data.subject].general.user+" - sujeto: <b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
+                    document.getElementById("results-div").innerHTML="<b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
                 }else{
-                    document.getElementById("results-div").innerHTML="Resultados "+cache_user_subject_results[session_data.subject].general.user+" - sujeto: <b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
+                    document.getElementById("results-div").innerHTML="<b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
                     var results_table=document.getElementById("results-table");
                     DataTableSimple.call(results_table, {
                         data: cache_user_subject_results[session_data.subject].elements,
@@ -645,21 +661,23 @@ var explore_results=function(){
                         pagination: 5,
                         columns: [
                             //{ data: 'id' },
-                            { data: 'timestamp', col_header: 'Id', link_function_id: 'explore_result_detail' },
-                            { data: 'type', col_header: 'Tipo',  format: 'first_4'},
-                            { data: 'mode', col_header: 'Modo',  format: 'first_4'},
-                            { data: 'age', col_header: 'Edad' },
-                            { data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
-                            { data: 'result', col_header: '%', format: 'percentage_int' } 
+                            { data: 'timestamp', col_header: 'id', link_function_id: 'explore_result_detail' },
+                            { data: 'type', col_header: 'tipo',  format: 'first_12'},
+//                            { data: 'mode', col_header: 'Modo',  format: 'first_4'},
+                            { data: 'age', col_header: 'edad' },
+//                            { data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
+//                            { data: 'result', col_header: '%', format: 'percentage_int' }
+                            { data: 'num_correct', col_header: 'corr' },
+                            { data: 'num_answered', col_header: 'total' }
                         ]
                     } );
                 }
             });	
     }else{
         if(cache_user_subject_results[session_data.subject].elements.length==0){
-            document.getElementById("results-div").innerHTML="Resultados "+cache_user_subject_results[session_data.subject].general.user+" - sujeto: <b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
+            document.getElementById("results-div").innerHTML="<b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
         }else{
-            document.getElementById("results-div").innerHTML="Resultados "+cache_user_subject_results[session_data.subject].general.user+" - sujeto: <b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
+            document.getElementById("results-div").innerHTML="<b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
             var results_table=document.getElementById("results-table");
             DataTableSimple.call(results_table, {
                 data: cache_user_subject_results[session_data.subject].elements,
@@ -667,12 +685,13 @@ var explore_results=function(){
                 pagination: 5,
                 columns: [
                     //{ data: 'id' },
-                    { data: 'timestamp', col_header: 'Id', link_function_id: 'explore_result_detail' },
-                    { data: 'type', col_header: 'Tipo',  format: 'first_4'},
-                    { data: 'mode', col_header: 'Modo',  format: 'first_4'},
-                    { data: 'age', col_header: 'Edad' },
-                    { data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
-                    { data: 'result', col_header: '%', format: 'percentage_int' } 
+                    { data: 'timestamp', col_header: 'id', link_function_id: 'explore_result_detail' },
+                    { data: 'type', col_header: 'tipo',  format: 'first_12'},
+//                    { data: 'mode', col_header: 'Modo',  format: 'first_4'},
+                    { data: 'age', col_header: 'edad' },
+//                    { data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
+                    { data: 'num_correct', col_header: 'corr' },
+                    { data: 'num_answered', col_header: 'total' } 
                 ]
             } );
         }
@@ -695,7 +714,7 @@ var explore_result_detail=function(session_id){
                     document.getElementById("results-div").innerHTML="Sesión: "+cache_user_subject_result_detail[session_id].general.session+"<br />No hay detalles";
                     return;
                 }
-				document.getElementById("results-div").innerHTML="Sesión: "+cache_user_subject_result_detail[session_id].general.session+" - Sujeto: "+cache_user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
+				document.getElementById("results-div").innerHTML=""+cache_user_subject_result_detail[session_id].elements[0].subject+" - "+cache_user_subject_result_detail[session_id].elements[0].type+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
 				var results_table=document.getElementById("results-table");
 				DataTableSimple.call(results_table, {
 					data: cache_user_subject_result_detail[session_id].elements,
@@ -703,10 +722,11 @@ var explore_result_detail=function(session_id){
 					row_id: 'id',
 					columns: [
 						//{ data: 'id' },
-						{ data: 'activity', format: 'first_12' },
-						{ data: 'choice'  , format: 'first_12'},
-						{ data: 'result',  special: 'red_incorrect' },
-						{ data: 'duration',  format: 'time_from_seconds_up_to_mins'}
+                        { data: 'id', col_header: 'id', link_function_id: 'explore_result_detail_individual' },
+						//{ data: 'activity', format: 'first_12' },
+						//{ data: 'choice'  , format: 'first_12'},
+						{ data: 'result',  col_header: 'resultado', special: 'red_incorrect' },
+						//{ data: 'duration',  format: 'time_from_seconds_up_to_mins'}
 					]
 				} );
 			});
@@ -714,7 +734,7 @@ var explore_result_detail=function(session_id){
         if(!cache_user_subject_result_detail[session_id].hasOwnProperty('elements') || cache_user_subject_result_detail[session_id].elements.length==0){
             document.getElementById("results-div").innerHTML="Sesión: "+cache_user_subject_result_detail[session_id].general.session+"<br />No hay detalles";
         }else{
-            document.getElementById("results-div").innerHTML="Sesión: "+cache_user_subject_result_detail[session_id].general.session+" - subject: "+cache_user_subject_result_detail[session_id].elements[0].subject+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
+            document.getElementById("results-div").innerHTML=""+cache_user_subject_result_detail[session_id].elements[0].subject+" - "+cache_user_subject_result_detail[session_id].elements[0].type+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
             var results_table=document.getElementById("results-table");
             DataTableSimple.call(results_table, {
                 data: cache_user_subject_result_detail[session_id].elements,
@@ -722,15 +742,53 @@ var explore_result_detail=function(session_id){
                 row_id: 'id',
                 columns: [
                     //{ data: 'id' },
-					{ data: 'activity', format: 'first_12' },
-					{ data: 'choice'  , format: 'first_12'},
-                    { data: 'result',  special: 'red_incorrect' },
-                    { data: 'duration',  format: 'time_from_seconds_up_to_mins'}
+                    { data: 'id', col_header: 'id', link_function_id: 'explore_result_detail_individual' },
+					//{ data: 'activity', format: 'first_12' },
+					//{ data: 'choice'  , format: 'first_12'},
+                    { data: 'result',  col_header: 'resultado',  special: 'red_incorrect' },
+                    //{ data: 'duration',  format: 'time_from_seconds_up_to_mins'}
                 ]
             } );
         }
 	}
 };
+
+
+var explore_result_detail_individual=function(session_ac_id){
+	preventBackExit();
+	canvas_zone_vcentered.innerHTML=' \
+	<div id="results-div">cargando detalle resultado '+session_ac_id+'...</div> \
+	<br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
+	';
+	document.getElementById("go-back").addEventListener(clickOrTouch,function(){explore_results();});
+    for(var session_id in cache_user_subject_result_detail) {
+        if (cache_user_subject_result_detail.hasOwnProperty(session_id)) {
+            for(var i=0;i<cache_user_subject_result_detail[session_id].elements.length;i++){
+                if(cache_user_subject_result_detail[session_id].elements[i].id==session_ac_id){
+                    var restext="correcto";
+                    var incorrect_style="";
+                    if(cache_user_subject_result_detail[session_id].elements[i].result=="incorrect"){
+                        restext="incorrecto";
+                        incorrect_style="style=\"background-color: red;\"";
+                    }
+                    document.getElementById("results-div").innerHTML=""+cache_user_subject_result_detail[session_id].elements[i].subject+" - "+cache_user_subject_result_detail[session_id].elements[i].type+"<br />\
+                                                                      Resultado: "+restext+" - duración: "+DataTableSimple.formats.time_from_seconds_up_to_mins(cache_user_subject_result_detail[session_id].elements[i].duration)+"<br />\
+                                                                      <table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\">\
+                                                                      <tr style=\"background: #333 none repeat scroll 0 0;color: #eee;font-weight: bold;\"><td>Respuesta correcta</td></tr>\
+                                                                      <tr><td>"+cache_user_subject_result_detail[session_id].elements[i].activity+"</td></tr>\
+                                                                      <tr style=\"background: #333 none repeat scroll 0 0;color: #eee;font-weight: bold;\"><td>Respuesta seleccionada</td></tr>\
+                                                                      <tr "+incorrect_style+"><td>"+cache_user_subject_result_detail[session_id].elements[i].choice+"</td></tr>\
+                                                                      </table>\
+                                                                      ";
+                    document.getElementById("go-back").addEventListener(clickOrTouch,function(){explore_result_detail(session_id);});
+                    break;break;
+                }
+            }
+        }
+   }
+};
+
+
 
 var game=function(){
     if(ac_in_process) return;

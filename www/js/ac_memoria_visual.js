@@ -7,7 +7,7 @@ memvis_obj.help_text='\
 '; // respetando el orden en que fueron presentadas
 
 memvis_obj.MAX_LEVELS=6;
-memvis_obj.MAX_PLAYED_TIMES=10;
+memvis_obj.MAX_PLAYED_TIMES=1000; // game mode 1000=infinity
 memvis_obj.MAX_FAILED_TIMES_TEST=2;
 
 
@@ -36,6 +36,7 @@ memvis_obj.start_activity=function(){
 	    session_data.num_answered=memvis_obj.MAX_LEVELS;
 		memvis_obj.finish();
     }else{
+        //if(session_data.mode=="test" && this.played_times==this.MAX_PLAYED_TIMES_TEST_DRY) memvis_obj.level=1; level is reset in common
         memvis_obj.current_usr_answer=[];
         memvis_obj.current_usr_answer_corrected=false;
         var sprite_images=wordimage_image_ref; //['pato','gato','sol','pez','tren','sal','col','reja','oreja','koala','bala','ala'];
@@ -52,13 +53,17 @@ memvis_obj.start_activity=function(){
             pattern_representation+='<div class="membox"><div class="wordimage wordimage-'+memvis_obj.current_key_answer[i]+' covered"></div></div>';
         }
         canvas_zone_vcentered.innerHTML='\
-                Memoriza los dibujos \
+                <div id="hinttext">Memoriza los dibujos</div> \
                 <div id="xx">\
                 '+pattern_representation+'\
                 </div>\
               <button id="playb" class="button">PLAY</button>\
         '; // en orden
         memvis_obj.add_buttons(canvas_zone_vcentered);
+        memvis_obj.hinttext=document.getElementById('hinttext');
+        if(session_data.mode=="test" && memvis_obj.played_times<memvis_obj.MAX_PLAYED_TIMES_TEST_DRY){
+            memvis_obj.hinttext.innerHTML="[ENTRENA] "+memvis_obj.hinttext.innerHTML;
+        }
         document.getElementById("playb").addEventListener(clickOrTouch,function(){
 			document.getElementById('playb').disabled=true;
 			document.getElementById('playb').classList.add('button-hidden');
