@@ -11,7 +11,7 @@ ritmo_obj.MAX_FAILED_TIMES_TEST=2;
 Like in memory
 It starts with a pattern of 1 and goes up to 6
 The user first hears the sound pattern (buttons dissabled)
-Then 2 buttons . short and __ long become enabled and the user can click them n times (the number of reproduced sounds)
+Then 2 buttons . short and ___ long become enabled and the user can click them n times (the number of reproduced sounds)
 Same behaviour as the memory game
 
 */
@@ -37,8 +37,8 @@ var ritmo=function(finish_callback){
         <div id="hinttext">Pulsa para escuchar los sonidos</div>\
         <div style="min-height:52px;"></div> \
         <div style="min-height:52px;"></div>\
-        <button id="pta" class="button" onclick="ritmo_obj.play_ta()">.</button>\
-        <button id="ptaa" class="button" onclick="ritmo_obj.play_taa()">__</button>\
+        <button id="pta" class="button button-fat" onclick="ritmo_obj.play_ta()">.</button>\
+        <button id="ptaa" class="button button-fat" onclick="ritmo_obj.play_taa()">___</button>\
         <br /><button id="ac_check" class="button button-long button-hidden" disabled="disabled">¡Empezar!</button>\
         ';//+ritmo_obj.current_key_answer;
     ritmo_obj.add_buttons(canvas_zone_vcentered);
@@ -62,8 +62,8 @@ ritmo_obj.start_activity=function(){
             <div id="hinttext">Pulsa PLAY para escuchar secuencia</div>\
             <div id="sound"><button id="playb" class="button">PLAY</button></div> \
             <div style="border:0px dotted #eee;min-height:52px;"><span id="anspan">&nbsp;</span></div>  \
-            <button id="pta" class="button button-hidden" disabled="disabled" onclick="ritmo_obj.play_ta()">.</button>\
-            <button id="ptaa" class="button button-hidden" disabled="disabled" onclick="ritmo_obj.play_taa()">__</button>\
+            <button id="pta" class="button button-fat button-hidden" disabled="disabled" onclick="ritmo_obj.play_ta()">.</button>\
+            <button id="ptaa" class="button button-fat button-hidden" disabled="disabled" onclick="ritmo_obj.play_taa()">___</button>\
             <br /><br /><button id="ac_check" class="button button-hidden" disabled="disabled">¡Hecho!</button> <button id="borrarb" class="button backgroundRed button-hidden" disabled="disabled">borrar</button>\
          ';//+ritmo_obj.current_key_answer;
         ritmo_obj.add_buttons(canvas_zone_vcentered);
@@ -156,7 +156,7 @@ ritmo_obj.play_sound=function(s){
         document.getElementById("ac_check").disabled=true;
         ritmo_obj.current_usr_answer.push(s);
         var symbol=".";
-        if(s=="ta150.m4a") symbol="__";
+        if(s=="ta150.m4a") symbol="___";
         //ritmo_obj.anspan.innerHTML+=' <button class="button button-flat">'+symbol+'</div>';
         if(ritmo_obj.current_usr_answer.length>0){
             ritmo_obj.borrarb.disabled=true;
@@ -205,7 +205,6 @@ ritmo_obj.check=function(){
 		ritmo_obj.failed_times++;
 	}
     ritmo_obj.level_played_times++;
-    ritmo_obj.played_times++;
 	ritmo_obj.end(ritmo_obj.details.result);
 
 }

@@ -169,6 +169,7 @@ button.button-flat{
 }
 
 button.button-long{width:300px;margin:0 50px;}
+button.button-fat{min-width:75px;min-height:75px;font-weight: bold;}
 
 button.button-hidden{visibility:hidden;}
 

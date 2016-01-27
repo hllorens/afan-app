@@ -155,6 +155,5 @@ memvis_obj.check=function (element){
         memvis_obj.failed_times++;
     }
     if(memvis_obj.current_usr_answer_corrected) memvis_obj.details.choice+="(corr)";
-    memvis_obj.played_times++;
     memvis_obj.end(memvis_obj.details.result);
 }

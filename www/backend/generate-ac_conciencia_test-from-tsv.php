@@ -40,7 +40,7 @@ if($file!=false){
 	  		"answers" => array_merge(array($word),$alternatives_arr),
 	  		"level" => $level
 	  	);
-	  $activity_arr[]=$activity;    
+	  $activity_arr[$level][]=$activity;    
 	}
 	fclose($file);
 }else{

@@ -48,8 +48,12 @@ function onDeviceReady() {
 
 function splash_screen(){
 	// the default index.html might contain splash screen directly (more efficient)
-	ResourceLoader.load_media(images,sounds,menu_screen,true,debug);
+	ResourceLoader.load_media(images,sounds,jsons,menu_screen,true,debug);
 }
+/* TODO add an argument to ResourceLoader ... json_files so it re-uses load bar etc...
+function load_json_data(){
+    ResourceLoader.load_json_data(json_data,menu_screen,true,debug);
+}*/
 
 // IMPORTANT: this should wait for all resources, even the jsons requested in js
 //            but it is proven false at least when a resource is not found

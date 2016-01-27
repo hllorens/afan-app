@@ -240,7 +240,6 @@ dv_obj.check=function(){
 		dv_obj.failed_times++;
 	}
     dv_obj.train_feedback=0;
-	dv_obj.played_times++;
 	dv_obj.end(dv_obj.details.result);
 
 }

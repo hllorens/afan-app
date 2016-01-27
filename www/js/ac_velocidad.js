@@ -6,7 +6,10 @@ vel_obj.help_text='\
 ';
 vel_obj.MAX_LEVELS=4; // 3 is the max but 4 will make it play 2 more times
 vel_obj.MAX_PLAYED_TIMES=1000; // game mode 1000=infinity
+vel_obj.MAX_PLAYED_TIMES_PER_LEVEL_TRAIN=4;
+vel_obj.MAX_PLAYED_TIMES_PER_LEVEL_TEST=2;
 vel_obj.sec_init=1;
+vel_obj.used_sentences=[];
 vel_obj.sec_pal=[
     {"min_age":0,"max_age":8,"sec_pal":2},
     {"min_age":8,"max_age":12,"sec_pal":1},
@@ -15,27 +18,22 @@ vel_obj.sec_pal=[
 
 var velocidad=function(finish_callback){
     if(!check_if_sounds_loaded(function(){velocidad(finish_callback);})){return;}
-    if(!JsonLazy.data.hasOwnProperty('velocidad_data')){
-        JsonLazy.load("../data/ac_velocidad_data.json", "velocidad_data", function(){velocidad(finish_callback);});
-    }else{
-        preventBackExit();
-        if(typeof(finish_callback)=='undefined') finish_callback=game;
-        vel_obj.finish_callback=finish_callback;
-        vel_obj.played_times=0;
-        vel_obj.level_played_times=0;
-        vel_obj.level_passed_times=0;
-        vel_obj.level=1;
-		vel_obj.start(); 
-	}
+    preventBackExit();
+    if(typeof(finish_callback)=='undefined') finish_callback=game;
+    vel_obj.finish_callback=finish_callback;
+    vel_obj.played_times=0;
+    vel_obj.level_played_times=0;
+    vel_obj.level_passed_times=0;
+    vel_obj.level=1;
+    vel_obj.start(); 
 }
 
 
 vel_obj.start_activity=function(){
-	if((session_data.mode!="test" && vel_obj.level_passed_times>=2) || (session_data.mode=="test" && vel_obj.level_played_times>=2)){
+	if((session_data.mode!="test" && vel_obj.level_passed_times>=vel_obj.MAX_PLAYED_TIMES_PER_LEVEL_TRAIN) || (session_data.mode=="test" && vel_obj.level_played_times>=vel_obj.MAX_PLAYED_TIMES_PER_LEVEL_TEST)){
         vel_obj.level_passed_times=0;
         vel_obj.level_played_times=0;
         vel_obj.level++;
-        vel_obj.played_times=0;
 	}
     
     if((session_data.mode=="test" && vel_obj.level>vel_obj.MAX_LEVELS) || 
@@ -43,14 +41,17 @@ vel_obj.start_activity=function(){
 		session_data.num_answered=vel_obj.MAX_LEVELS*2;
 		vel_obj.finish();
 	}else{
-        //if(session_data.mode=="test" && this.played_times==this.MAX_PLAYED_TIMES_TEST_DRY) vel_obj.level=1; auto in common
-		if(!JsonLazy.data.velocidad_data.hasOwnProperty(vel_obj.level) || 
+		if(!media_objects.jsons["ac_velocidad_data.json"].hasOwnProperty(vel_obj.level) || 
 		   vel_obj.level>vel_obj.MAX_LEVELS)
 			vel_obj.level=vel_obj.MAX_LEVELS;
         var difficulty=vel_obj.level;
         if(difficulty==1) difficulty=2;
-		var sentences=JsonLazy.data.velocidad_data[difficulty];
+		var sentences=media_objects.jsons["ac_velocidad_data.json"][difficulty];
 		vel_obj.sentence = random_array(sentences,1)[0];
+        var count=0; // externalize this using the cognitionis utils method
+        while(vel_obj.used_sentences.indexOf(vel_obj.sentence)!=-1 && count<100){
+            vel_obj.sentence = random_array(sentences,1)[0];
+        }
 		// chose one word of more than X letters (depending on the level [only useful for levels >2])
 		vel_obj.word = random_word_longer_than(vel_obj.sentence.split(" "), difficulty);
 		if(debug) console.log("sentence: "+vel_obj.sentence+" word: "+vel_obj.word);
@@ -162,7 +163,6 @@ vel_obj.check=function(){
     }else{
 	    vel_obj.details.result="incorrect";
     }
-	vel_obj.played_times++;
 	vel_obj.level_played_times++;
 	vel_obj.end()
 }

@@ -15,7 +15,6 @@ var images = [
 "../../afan-app-media/img/correct.png",
 "../../afan-app-media/img/wrong.png"
 ];
-
 var sounds = [
 	// it can be dropbox https://dl.dropboxusercontent.com/u/188219/
 	//or absolute http://www.centroafan.com/afan-app-media/audio/...m4a"
@@ -25,7 +24,12 @@ var sounds = [
 	"../../afan-app-media/audio/ta150.m4a"
 ];
 
-
+// JSON data, TODO still not used include in resource loader...
+var jsons= [
+	"../data/ac_conciencia_train.json",
+	"../data/ac_conciencia_test.json",
+	"../data/ac_velocidad_data.json"
+]
 
 var media_objects;
 var session_state="unset";

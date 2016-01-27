@@ -3,7 +3,7 @@
 date_default_timezone_set('Europe/Madrid');
 
 /// SET MAX SYLLABLES
-$MAX_SYLLABLES=2; // up to 4 or 5...
+$MAX_SYLLABLES=3; // up to 4 or 5...
 /////////
 if( isset($_GET['syllables']) ){
 	$MAX_SYLLABLES=$_GET['syllables'];
@@ -25,6 +25,7 @@ $file = fopen("words-syllables.tsv","r");
 
 $word_obj_arr=array();
 $num_words=0;
+$level=1;
 header('Content-type: text/plain');
 echo "word\tsounds--------------\tnso\tnsy\tinv\tccv\tvcc\tdiptongos\thiatos\tprobl\n";
 while(! feof($file)){
@@ -166,10 +167,11 @@ for($num_syll=1;$num_syll<=$MAX_SYLLABLES;$num_syll++){
 		
 		}
 		//print_r($similar_words); break;
+        $level=$num_syll;
 		$activity=array(
 			"type" => "sounds",
 			"sounds" => $word_obj['sounds_arr'],
-			"level" => "1",
+			"level" => $level,
 	  		"answers" => array(strtr($word_obj['word'], $table))
 	  		);
 		$similar_count=0;
@@ -184,7 +186,7 @@ for($num_syll=1;$num_syll<=$MAX_SYLLABLES;$num_syll++){
 				}
 			if($similar_count==5) break;
 		}
-		$json_activities[]=$activity;
+		$json_activities[$level][]=$activity;
 	}
 }
 
