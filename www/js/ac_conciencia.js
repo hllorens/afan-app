@@ -147,7 +147,6 @@ var acConciencia=function(){
 
 var conciencia=function(finish_callback){
     if(!check_if_sounds_loaded(function(){conciencia(finish_callback);})){return;}
-    // Load activities if needed (TODO, to standardize this could be done with resource loader)
     preventBackExit();
     var conciencia_obj=new acConciencia();
 
