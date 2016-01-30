@@ -10,9 +10,9 @@ var acDiscrVisual=function(){
     this.ac.help_text='Encuentra la sílaba.';
 
 
-    this.ac.MAX_PLAYED_TIMES_TEST=6; // 2 are DRY
-    this.ac.MAX_PLAYED_TIMES=1000; // game mode 1000=infinity
-    this.ac.MAX_FAILURES=5;
+    this.ac.MAX_PASSED_TIMES_PER_LEVEL_GAME=16;
+    this.ac.MAX_PLAYED_TIMES_PER_LEVEL_TEST=4;
+    this.ac.level=1;
 
     this.ac.letters1=['b','c','f','p'];
     this.ac.letters1_only_r=['d','t','v']
@@ -35,14 +35,14 @@ var acDiscrVisual=function(){
 
     this.ac.start_activity=function(){
         remove_modal();
-        if((session_data.mode=='test' && that.ac.played_times>=that.ac.MAX_PLAYED_TIMES_TEST) ||
-            (session_data.mode!='test' && (that.ac.played_times>that.ac.MAX_PLAYED_TIMES || that.ac.failed_times>that.ac.MAX_FAILURES))){
+        if(that.ac.level>that.ac.MAX_LEVELS){
             that.ac.finish();
         }else{
             activity_timer.reset();
             activity_timer.start();
             that.ac.current_corrections={};
             that.ac.current_matrix=[];
+            that.ac.train_feedback=0;
             that.ac.syllable=random_item(that.ac.syllables_arr);
             that.ac.dyslexic=that.ac.syllable;
             var temp = that.ac.dyslexic[1];
@@ -191,9 +191,7 @@ var acDiscrVisual=function(){
             that.ac.details.result="incorrect";
             that.ac.failed_times++;
         }
-        that.ac.train_feedback=0;
-        that.ac.end(that.ac.details.result);
-
+        that.ac.end();
     }
 
     this.ac.i_am_not_sure=function(){
@@ -204,7 +202,7 @@ var acDiscrVisual=function(){
 }
 
 var discr_visual=function(finish_callback){
-    if(!check_if_sounds_loaded(function(){conciencia(finish_callback);})){return;}
+    if(!check_if_sounds_loaded(function(){discr_visual(finish_callback);})){return;}
     preventBackExit();
     var dv_obj=new acDiscrVisual();
     if(typeof(finish_callback)=='undefined') finish_callback=game;
@@ -218,8 +216,6 @@ var discr_visual=function(finish_callback){
         
     // ONLY call initialize if something changes, otherwise use precalculated
     //dv_obj.initialize_syllables();console.log(dv_obj.syllables_arr);
-    dv_obj.ac.current_matrix=[];
-    dv_obj.ac.train_feedback=0;
     dv_obj.ac.start();
 }
 

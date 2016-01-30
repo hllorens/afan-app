@@ -149,6 +149,24 @@ button.help{
     font-weight: bold;
 }
 
+button.level{
+    color:#6a6;
+    background:#aea;
+    border: 2px solid #6a6;
+    border-radius: 50px;
+    font-size: 26px;
+    font-weight: bold;
+}
+span.level{
+    color:#6a6; /*#aea*/
+    background:#fc5;
+    border: 2px solid #6a6;
+    font-size: 36px;
+    font-weight: bold; 
+    border-radius: 25px;
+    padding: 20px;
+}
+
 button.go-back{
     color:#6a6;
     background:#fc5;
@@ -157,6 +175,14 @@ button.go-back{
     font-size: 35px;
     font-weight: bold;
 	padding: 5px 14px;
+}
+button.plusminus{
+    background: #6a6 none repeat scroll 0 0;
+    border: 2px solid #fc5;
+    border-radius: 50px;
+    color: #fc5;
+    font-size: 26px;
+    font-weight: bold;
 }
 
 button.backgroundRed{
@@ -208,7 +234,10 @@ button.button-hidden{visibility:hidden;}
 	bottom:16px; left:16px;
 }
 
-
+.fixed-bottom-left2{
+	position:absolute;
+	bottom:16px; left:75px;
+}
 
 .covered{
 	background:#ffe4a3;
@@ -407,6 +436,7 @@ a.boxclose{
   40% {
     box-shadow: 0 2.5em 0 0 #6a6;
   }
+}
 
 /*.hover_red_border:hover{
 	border:2px solid red;
@@ -434,12 +464,13 @@ a.boxclose{
 /*Galaxy S4  dips=360x640px, iphone 320x480px */
 @media screen and (max-width: 650px) {
 	#header{height:48px;}
-	.canvas-with-header{top:48px;}
+	.canvas-with-header{top:48px; bottom:0px;}
 	#results-table{font-size: 16px;}
     button.minibutton{font-size:18px;border-width:1px;min-height:40px; min-width:40px;padding:0px;}
     button.go-back{font-size: 28px;}
     .fixed-bottom-right{bottom:8px; right:8px;}
     .fixed-bottom-left{bottom:8px; left:8px;}
+    .fixed-bottom-left2{bottom:8px; left:56px;}
     .js-modal-dialog{margin: 10px auto;	width:95%;font-size:16px;}
     #discr_visual_table{font-size: 35px; margin:0 0;}
     #discr_visual_table td{padding: 10px 20px;}
@@ -447,11 +478,11 @@ a.boxclose{
 }
 
 /* Small Landscape (e.g., Galaxy S4)*/
-@media screen and (max-height: 400px) and (min-width: 420px) {
+@media screen and (max-height: 400px) and (min-width: 400px) {
 	/*#header{height:37px;}
 	#zone_canvas{top:37px;}*/
 	#header{height:0px;}
-	.canvas-with-header{top:0px; bottom:0;}
+	.canvas-with-header{top:0px; bottom:0px;}
 	#h1{font-size:14px;}
 	#answers{width:60%;}
 	body{font-size:16px;}
@@ -460,6 +491,7 @@ a.boxclose{
     button.go-back{font-size: 28px;}
     .fixed-bottom-right{bottom:8px; right:8px;}
     .fixed-bottom-left{bottom:8px; left:8px;}
+    .fixed-bottom-left2{bottom:8px; left:56px;}
     .js-modal-dialog{margin: 10px auto;	width:95%;font-size:12px;}
     #discr_visual_table{font-size: 35px; margin:0 0;}
     #discr_visual_table td{padding: 10px 20px;}

@@ -6,7 +6,8 @@ var acMemVis=function(){
     this.ac.help_text='Intenta memorizar estas imágenes. Después tendrás que localizarlas.';
 
     this.ac.MAX_LEVELS=6;
-    this.ac.MAX_PLAYED_TIMES=1000; // game mode 1000=infinity
+    this.ac.MAX_PASSED_TIMES_PER_LEVEL_GAME=4;
+    this.ac.MAX_PLAYED_TIMES_PER_LEVEL_TEST=1; // all the activities
     this.ac.MAX_FAILED_TIMES_TEST=2;
     var that=this;
 
@@ -14,9 +15,8 @@ var acMemVis=function(){
 
 
     this.ac.start_activity=function(){
-        if(that.ac.level>that.ac.MAX_LEVELS || (session_data.mode=="test" && !game_mode && that.ac.failed_times>=that.ac.MAX_FAILED_TIMES_TEST)  
-            || ( (session_data.mode!="test" || game_mode) && that.ac.played_times>=that.ac.MAX_PLAYED_TIMES)){
-            session_data.num_answered=that.ac.MAX_LEVELS;
+        if(that.ac.level>that.ac.MAX_LEVELS || 
+             (session_data.mode=="test" && !game_mode && that.ac.failed_times>=that.ac.MAX_FAILED_TIMES_TEST) ){
             that.ac.finish();
         }else{
             //if(session_data.mode=="test" && this.played_times==this.MAX_PLAYED_TIMES_TEST_DRY) that.ac.level=1; level is reset in common
@@ -56,7 +56,7 @@ var acMemVis=function(){
     }
 
     this.ac.memoria_visual_uncover_next=function(){
-        ac_in_process=true;
+        that.ac.in_process=true;
         // don't worry about recursion, all functions will end there
         if(that.ac.uncovered==that.ac.current_key_answer.length){
             that.ac.uncovered=0;
@@ -69,7 +69,7 @@ var acMemVis=function(){
     }
 
     this.ac.memoria_visual_find_pattern=function(){
-        ac_in_process=false;
+        that.ac.in_process=false;
         activity_timer.reset();
         activity_timer.start();
         canvas_zone_vcentered.innerHTML='\
@@ -123,21 +123,16 @@ var acMemVis=function(){
         // Add .sort() if order does not matter or remove if it matters
         that.ac.details.activity=that.ac.current_key_answer.sort().toString();
         that.ac.details.choice=that.ac.current_usr_answer.sort().toString();
-        that.ac.level_played_times++; // must be before check
         if(debug) console.log(that.ac.details.choice);
         if(that.ac.details.activity==that.ac.details.choice){
             that.ac.details.result="correct";
             session_data.num_correct++;
-            //if((session_data.mode=="test" && !game_mode && that.ac.level_played_times>=2) || (session_data.mode!="test" || game_mode) ){
-                that.ac.level_played_times=0;
-                that.ac.level++;
-            //}
         }else{
             that.ac.details.result="incorrect";
-            that.ac.failed_times++;
         }
         if(that.ac.current_usr_answer_corrected) that.ac.details.choice+="(corr)";
-        that.ac.end(that.ac.details.result);
+        session_data.num_answered=that.ac.MAX_LEVELS*that.ac.max_played_times_this_level_test; // not used in game
+        that.ac.end();
     }
 }
 
@@ -145,8 +140,5 @@ var memoria_visual=function(finish_callback){
     var memvis_obj=new acMemVis();
     if(typeof(finish_callback)=='undefined') finish_callback=game;
     memvis_obj.ac.finish_callback=finish_callback;
-    memvis_obj.ac.played_times=0;
-    memvis_obj.ac.failed_times=0;
-    memvis_obj.ac.level=1;
-	memvis_obj.ac.start();
+    memvis_obj.ac.start();
 }

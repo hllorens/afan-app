@@ -6,21 +6,21 @@ var acRitmo=function(){
     this.ac=new Activity('Ritmo','ritmo','start_activity');
     this.ac.help_text='Escucha la secuencia. Después tendrás que reproducirla.';
     this.ac.MAX_LEVELS=6;
-    this.ac.MAX_PLAYED_TIMES=1000; // game mode 1000=infinity
+    this.ac.MAX_PASSED_TIMES_PER_LEVEL_GAME=4;
+    this.ac.MAX_PLAYED_TIMES_PER_LEVEL_TEST=1; // all the activities
     this.ac.MAX_FAILED_TIMES_TEST=2;
-    this.ac.MAX_PLAYED_TIMES_PER_LEVEL_TRAIN=4;
     var that=this;
 
 
 
     this.ac.start_activity=function(){
-        if(that.ac.level>that.ac.MAX_LEVELS || (session_data.mode=="test" && !game_mode && that.ac.failed_times>=that.ac.MAX_FAILED_TIMES_TEST)  
-            || ( (session_data.mode!="test" || game_mode) && that.ac.played_times>=that.ac.MAX_PLAYED_TIMES)){
-            session_data.num_answered=that.ac.MAX_LEVELS;
+        if(that.ac.level>that.ac.MAX_LEVELS || 
+             (session_data.mode=="test" && !game_mode && that.ac.failed_times>=that.ac.MAX_FAILED_TIMES_TEST)){
             that.ac.finish();
         }else{
-            //if(session_data.mode=="test" && this.played_times==this.MAX_PLAYED_TIMES_TEST_DRY) that.ac.level=1; auto in common
             that.ac.started=true;
+            that.ac.ta_played_once=true;that.ac.taa_played_once=true;that.ac.both_played_once=true; // for safety, if level changed directly
+            that.ac.current_usr_answer=[];
             that.ac.current_key_answer=that.ac.generate_pattern(that.ac.level);
             canvas_zone_vcentered.innerHTML='\
                 <div id="hinttext">Pulsa PLAY para escuchar secuencia</div>\
@@ -59,14 +59,14 @@ var acRitmo=function(){
 
 
     this.ac.play_pattern=function(){
-        ac_in_process=true;
+        that.ac.in_process=true;
         if(session_data.mode=="test"){
             that.ac.playb.classList.add('button-hidden');
-            that.ac.playb.disabled=true;
         }
         document.getElementById("pta").disabled=true;
         document.getElementById("ptaa").disabled=true;
         document.getElementById("ac_check").disabled=true;
+        that.ac.playb.disabled=true;
         AudioLib.play_sound_arr(that.ac.current_key_answer,that.ac.play_pattern_ended);
     }
 
@@ -80,11 +80,12 @@ var acRitmo=function(){
     }
 
     this.ac.play_pattern_ended=function(){
-        ac_in_process=false;
+        that.ac.in_process=false;
         that.ac.borrar();
         document.getElementById("pta").disabled=false;
         document.getElementById("ptaa").disabled=false;
         document.getElementById("ac_check").disabled=false;
+        that.ac.playb.disabled=false;
         document.getElementById("pta").classList.remove('button-hidden');
         document.getElementById("ptaa").classList.remove('button-hidden');
         document.getElementById("ac_check").classList.remove('button-hidden');
@@ -111,14 +112,15 @@ var acRitmo=function(){
     }
 
     this.ac.play_sound=function(s){
-        ac_in_process=true;
+        that.ac.in_process=true;
+        /*document.getElementById("ac_check").classList.add('button-hidden');
+        document.getElementById("pta").classList.add('button-hidden');
+        document.getElementById("ptaa").classList.add('button-hidden');*/
+        document.getElementById("pta").disabled=true;
+        document.getElementById("ptaa").disabled=true;
+        document.getElementById("ac_check").disabled=true;
         if(that.ac.started){
-            /*document.getElementById("ac_check").classList.add('button-hidden');
-            document.getElementById("pta").classList.add('button-hidden');
-            document.getElementById("ptaa").classList.add('button-hidden');*/
-            document.getElementById("pta").disabled=true;
-            document.getElementById("ptaa").disabled=true;
-            document.getElementById("ac_check").disabled=true;
+            that.ac.playb.disabled=true;
             that.ac.current_usr_answer.push(s);
             var symbol=".";
             if(s=="ta150.m4a") symbol="___";
@@ -132,21 +134,21 @@ var acRitmo=function(){
     }
 
     this.ac.play_sound_end=function(){
-        ac_in_process=false;
+        that.ac.in_process=false;
+        document.getElementById("pta").disabled=false;
+        document.getElementById("ptaa").disabled=false;
+        document.getElementById("ac_check").disabled=false;
+        /*document.getElementById("pta").classList.remove('button-hidden');
+        document.getElementById("ptaa").classList.remove('button-hidden');
+        document.getElementById("ac_check").classList.remove('button-hidden');*/
         if(!that.ac.ta_played_once || !that.ac.taa_played_once){
             return;
         }else if(!that.ac.both_played_once && that.ac.ta_played_once && that.ac.taa_played_once){
             that.ac.both_played_once=true;
-            document.getElementById("ac_check").disabled=false;
             document.getElementById("ac_check").classList.remove('button-hidden');
             that.ac.hinttext.innerHTML="Pulsa Empezar";
         }else{
-            document.getElementById("pta").disabled=false;
-            document.getElementById("ptaa").disabled=false;
-            document.getElementById("ac_check").disabled=false;
-            /*document.getElementById("pta").classList.remove('button-hidden');
-            document.getElementById("ptaa").classList.remove('button-hidden');
-            document.getElementById("ac_check").classList.remove('button-hidden');*/
+            that.ac.playb.disabled=false;
             if(that.ac.current_usr_answer.length>0){
                 that.ac.borrarb.disabled=false;
                 that.ac.borrarb.classList.remove('button-hidden');
@@ -157,23 +159,18 @@ var acRitmo=function(){
 
     this.ac.check=function(){
         that.ac.details={};
-        that.ac.details.activity=that.ac.current_key_answer.toString();
-        that.ac.details.choice=that.ac.current_usr_answer.toString();
-        console.log(that.ac.details.activity+" vs "+that.ac.details.choice);
-        that.ac.level_played_times++;
+        that.ac.details.activity=that.ac.current_key_answer.toString().replace(/ta35.m4a/g,'.').replace(/ta150.m4a/g,'___');
+        that.ac.details.choice=that.ac.current_usr_answer.toString().replace(/ta35.m4a/g,'.').replace(/ta150.m4a/g,'___');
+        if(debug) console.log(that.ac.details.activity+" vs "+that.ac.details.choice);
         if(that.ac.details.activity==that.ac.details.choice){
             that.ac.details.result="correct";
             session_data.num_correct++;
-            if((session_data.mode!="test" || game_mode) && that.ac.level_played_times>=that.ac.MAX_PLAYED_TIMES_PER_LEVEL_TRAIN){
-                that.ac.level_played_times=0;
-                that.ac.level++;
-            }
         }else{
             that.ac.details.result="incorrect";
-            that.ac.failed_times++;
         }
-        that.ac.end(that.ac.details.result);
-
+        
+        session_data.num_answered=that.ac.MAX_LEVELS*that.ac.max_played_times_this_level_test; // not used in game
+        that.ac.end();
     }
 }
 
@@ -185,13 +182,7 @@ var ritmo=function(finish_callback){
     var ritmo_obj=new acRitmo();
     if(typeof(finish_callback)=='undefined') finish_callback=game;
     ritmo_obj.ac.finish_callback=finish_callback;
-    ritmo_obj.ac.current_key_answer="";
-    ritmo_obj.ac.current_usr_answer=[];
-    ritmo_obj.ac.played_times=0;
-    ritmo_obj.ac.failed_times=0;
-    ritmo_obj.ac.level=1;
     ritmo_obj.ac.started=false;
-    ritmo_obj.ac.current_key_answer=ritmo_obj.ac.generate_pattern(ritmo_obj.ac.level);
     canvas_zone_vcentered.innerHTML='\
         <div id="hinttext">Pulsa para escuchar los sonidos</div>\
         <div style="min-height:52px;"></div> \

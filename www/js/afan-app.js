@@ -37,7 +37,6 @@ var header_zone=document.getElementById('header');
 var header_text=undefined;
 var canvas_zone=document.getElementById('zone_canvas');
 var canvas_zone_vcentered=document.getElementById('zone_canvas_vcentered');
-var ac_in_process=false;
 
 if(game_mode){
 	canvas_zone.classList.remove("canvas-with-header");
@@ -216,9 +215,8 @@ function signInCallback(authResult) {
 				if (result) {
                     if(result.hasOwnProperty('error') && result.error!=""){alert("LOGIN ERROR: "+result.error); return;}
                     if(result.hasOwnProperty('info') && result.info=="new user"){
-                        open_js_modal_content_accept('<p>Usuario creado para: '+result.email+' sus datos serán validados y \
-                        recibirá un email en breve confirmando que tiene acceso completo a la aplicación.\
-                        De momento podrá probarla pero no guardar los datos.</p>');
+                        open_js_modal_content_accept('<p>Usuario creado para: '+result.email+' \
+                        en breve recibirá un email confirmando su registro.</p>');
                     }
                     if(debug){
                         console.log(result);
@@ -795,11 +793,10 @@ var explore_result_detail_individual=function(session_ac_id){
 
 
 var game=function(){
-    if(ac_in_process) return;
     remove_modal(); // for safety...
     if(debug){console.log('game-called - game-mode? '+game_mode);}
     if(objectLength(cache_user_subjects)==0){
-        open_js_modal_alert('Info', 'Debes crear al menos un participante.<br/>Participantes -> Añadir');
+        open_js_modal_alert('Info', 'Debe crear al menos un participante.<br/>Participantes -> Añadir');
         return;
     }
     // CANNOT be here, in game-mode no clicks yet---------------------------
@@ -892,7 +889,7 @@ function send_session_data(finish_callback){
         if(debug) console.log(JSON.stringify(session_data));
         if(user_data.email=='invitee'){
             var result_obj={
-                    id:""+cache_user_subject_results[session_data.subject].elements.length+1,
+                    id:""+(cache_user_subject_results[session_data.subject].elements.length+1),
 					subject: session_data.subject,
                     type:session_data.type,
                     mode:session_data.mode,
