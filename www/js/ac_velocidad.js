@@ -30,16 +30,14 @@ var acVelocidad=function(){
         }else{
             if(!media_objects.jsons["ac_velocidad_data.json"].hasOwnProperty(that.ac.level))
                 throw new Error('ac_velocidad_data.json has no activities for level: '+that.ac.level);
-            var difficulty=that.ac.level;
-            if(difficulty==1) difficulty=2;
-            var sentences=media_objects.jsons["ac_velocidad_data.json"][difficulty];
+            var sentences=media_objects.jsons["ac_velocidad_data.json"][that.ac.level];
             that.ac.sentence = random_array(sentences,1)[0];
             var count=0; // externalize this using the cognitionis utils method
             while(that.ac.used_sentences.indexOf(that.ac.sentence)!=-1 && count<100){
                 that.ac.sentence = random_array(sentences,1)[0];
             }
             // chose one word of more than X letters (depending on the level [only useful for levels >2])
-            that.ac.word = that.ac.random_word_longer_than(that.ac.sentence.split(" "), difficulty);
+            that.ac.word = that.ac.random_word_longer_than(that.ac.sentence.split(" "), that.ac.level);
             if(debug) console.log("sentence: "+that.ac.sentence+" word: "+that.ac.word);
             that.ac.velocidad_show_pattern();
         }

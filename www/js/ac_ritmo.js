@@ -59,15 +59,18 @@ var acRitmo=function(){
 
 
     this.ac.play_pattern=function(){
-        that.ac.in_process=true;
-        if(session_data.mode=="test"){
-            that.ac.playb.classList.add('button-hidden');
+        if(that.ac.in_process){alert('disabled: in process');return;}
+        else{
+            that.ac.in_process=true;
+            if(session_data.mode=="test"){
+                that.ac.playb.classList.add('button-hidden');
+            }
+            document.getElementById("pta").disabled=true;
+            document.getElementById("ptaa").disabled=true;
+            document.getElementById("ac_check").disabled=true;
+            that.ac.playb.disabled=true;
+            AudioLib.play_sound_arr(that.ac.current_key_answer,that.ac.play_pattern_ended);
         }
-        document.getElementById("pta").disabled=true;
-        document.getElementById("ptaa").disabled=true;
-        document.getElementById("ac_check").disabled=true;
-        that.ac.playb.disabled=true;
-        AudioLib.play_sound_arr(that.ac.current_key_answer,that.ac.play_pattern_ended);
     }
 
     this.ac.generate_pattern=function(length){
@@ -99,38 +102,41 @@ var acRitmo=function(){
 
 
     this.ac.play_ta=function(){
-        that.ac.play_sound('ta35.m4a');
         if(!that.ac.both_played_once){
             that.ac.ta_played_once=true;
         }
+        that.ac.play_sound('ta35.m4a');
     }
     this.ac.play_taa=function(){
-        that.ac.play_sound('ta150.m4a');
         if(!that.ac.both_played_once){
             that.ac.taa_played_once=true;
         }
+        that.ac.play_sound('ta150.m4a');
     }
 
     this.ac.play_sound=function(s){
-        that.ac.in_process=true;
-        /*document.getElementById("ac_check").classList.add('button-hidden');
-        document.getElementById("pta").classList.add('button-hidden');
-        document.getElementById("ptaa").classList.add('button-hidden');*/
-        document.getElementById("pta").disabled=true;
-        document.getElementById("ptaa").disabled=true;
-        document.getElementById("ac_check").disabled=true;
-        if(that.ac.started){
-            that.ac.playb.disabled=true;
-            that.ac.current_usr_answer.push(s);
-            var symbol=".";
-            if(s=="ta150.m4a") symbol="___";
-            //that.ac.anspan.innerHTML+=' <button class="button button-flat">'+symbol+'</div>';
-            if(that.ac.current_usr_answer.length>0){
-                that.ac.borrarb.disabled=true;
-                //that.ac.borrarb.classList.add('button-hidden');
+        if(that.ac.in_process){return;}
+        else{
+            that.ac.in_process=true;
+            /*document.getElementById("ac_check").classList.add('button-hidden');
+            document.getElementById("pta").classList.add('button-hidden');
+            document.getElementById("ptaa").classList.add('button-hidden');*/
+            document.getElementById("pta").disabled=true;
+            document.getElementById("ptaa").disabled=true;
+            document.getElementById("ac_check").disabled=true;
+            if(that.ac.started){
+                that.ac.playb.disabled=true;
+                that.ac.current_usr_answer.push(s);
+                var symbol=".";
+                if(s=="ta150.m4a") symbol="___";
+                //that.ac.anspan.innerHTML+=' <button class="button button-flat">'+symbol+'</div>';
+                if(that.ac.current_usr_answer.length>0){
+                    that.ac.borrarb.disabled=true;
+                    //that.ac.borrarb.classList.add('button-hidden');
+                }
             }
+            AudioLib.play_sound_single(s,that.ac.play_sound_end);
         }
-        AudioLib.play_sound_single(s,that.ac.play_sound_end);
     }
 
     this.ac.play_sound_end=function(){
