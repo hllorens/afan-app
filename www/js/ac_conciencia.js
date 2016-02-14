@@ -42,7 +42,7 @@ var acConciencia=function(){
             that.ac.playb.innerHTML='PLAY';
             that.ac.playb.disabled=false;
             activity_timer.reset();
-            that.ac.current_index=0;
+            //that.ac.current_index=0;
             that.ac.playb_pushed_times=0;
             /*if(debug) console.log(0+"--"+that.ac.remaining_rand_activities[that.ac.level][0]);
             that.ac.cur_data=that.ac.remaining_rand_activities[that.ac.level][0]; */
@@ -53,6 +53,7 @@ var acConciencia=function(){
             if(debug) console.log(0+"--"+that.ac.activities[that.ac.level][ac_number]);
             that.ac.cur_data=that.ac.activities[that.ac.level][ac_number];
             if(session_data.mode=="test" && that.ac.played_times<that.ac.MAX_PLAYED_TIMES_TEST_DRY){
+                that.ac.cur_data=that.ac.activities[that.ac.level][0];
                 that.ac.activities[that.ac.level].shift(); // remove element
             }
             that.ac.correct_answer=that.ac.cur_data['answers'][0];
@@ -176,6 +177,7 @@ var acConciencia=function(){
 var conciencia=function(finish_callback){
     if(!check_if_sounds_loaded(function(){conciencia(finish_callback);})){return;}
     preventBackExit();
+    remove_modal();
     var conciencia_obj=new acConciencia();
 
     // TODO most of this below can be shared (part of ac_common)
@@ -191,30 +193,8 @@ var conciencia=function(finish_callback){
         shuffle_array(conciencia_obj.ac.activities[1]);
         shuffle_array(conciencia_obj.ac.activities[2]);
         shuffle_array(conciencia_obj.ac.activities[3]);
-
         //shuffle_array(media_objects.jsons["ac_conciencia_train.json"][''+conciencia_obj.ac.level]);
-        /*
-        var start=0;
-        //for(var i=1;i<conciencia_obj)
-        // level 1
-        Math.floor(Math.random()*(media_objects.jsons["ac_conciencia_train.json"][1].length-(conciencia_obj.ac.MAX_PLAYED_TIMES_PER_LEVEL_TRAIN+1)));
-        var l1=media_objects.jsons["ac_conciencia_train.json"][1].slice(start,start+conciencia_obj.ac.MAX_PLAYED_TIMES_PER_LEVEL_TRAIN);
-        shuffle_array(l1);
-        // level 2
-        Math.floor(Math.random()*(media_objects.jsons["ac_conciencia_train.json"][2].length-(conciencia_obj.ac.MAX_PLAYED_TIMES_PER_LEVEL_TRAIN+1)));
-        var l2=media_objects.jsons["ac_conciencia_train.json"][2].slice(start,start+conciencia_obj.ac.MAX_PLAYED_TIMES_PER_LEVEL_TRAIN);
-        shuffle_array(l2);
-        // level 3
-        Math.floor(Math.random()*(media_objects.jsons["ac_conciencia_train.json"][3].length-(conciencia_obj.ac.MAX_PLAYED_TIMES_PER_LEVEL_TRAIN+1)));
-        var l3=media_objects.jsons["ac_conciencia_train.json"][3].slice(start,start+conciencia_obj.ac.MAX_PLAYED_TIMES_PER_LEVEL_TRAIN);
-        shuffle_array(l3);
-        //concat
-        conciencia_obj.ac.remaining_rand_activities=conciencia_obj.ac.remaining_rand_activities.concat(l1,l2,l3);
-        conciencia_obj.ac.remaining_rand_activities=media_objects.jsons["ac_conciencia_train.json"].slice();*/
-        //conciencia_obj.ac.activities=media_objects.jsons["ac_conciencia_train.json"];
     }else{
-        //conciencia_obj.ac.remaining_rand_activities=dry_activities.concat(media_objects.jsons["ac_conciencia_test.json"].slice()); // copy by value
-        //conciencia_obj.ac.remaining_rand_activities=media_objects.jsons["ac_conciencia_test.json"].slice(); // copy by value
         conciencia_obj.ac.activities[1]=media_objects.jsons["ac_conciencia_test.json"][1].slice();
         conciencia_obj.ac.activities[2]=media_objects.jsons["ac_conciencia_test.json"][2].slice();
         conciencia_obj.ac.activities[3]=media_objects.jsons["ac_conciencia_test.json"][3].slice();

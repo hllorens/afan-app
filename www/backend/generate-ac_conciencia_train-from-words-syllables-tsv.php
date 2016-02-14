@@ -19,7 +19,9 @@ $vowels_arr = array('a','e','i','o','u');
 $trabadas_arr = array('r','l');
 $table = array('à'=>'a', 'á'=>'a', 'ç'=>'c', 'è'=>'e', 'é'=>'e', 'í'=>'i', 'ï'=>'i', 'ñ'=>'ny', 'ò'=>'o', 'ó'=>'o', 'ú'=>'u' );
 
-
+// ccv trabada  ccv con l o r                    3 puntos
+// directa cv (normal), inversa vc (+dificil)    2 punts
+// diptongo   vv in the same syllable            0 puntos
 
 $file = fopen("words-syllables.tsv","r");
 
@@ -167,7 +169,16 @@ for($num_syll=1;$num_syll<=$MAX_SYLLABLES;$num_syll++){
 		
 		}
 		//print_r($similar_words); break;
-        $level=$num_syll;
+        $difficulty=$num_syll+$word_obj['num_inversas']*2+$word_obj['num_ccv_trabadas']*3;
+        $level=1;
+        if($difficulty>2){
+            $level=2;
+        }
+        if($difficulty>=5){
+            $level=3;
+        }
+        echo "difficulty $difficulty level $level";
+        
 		$activity=array(
 			"type" => "sounds",
 			"sounds" => $word_obj['sounds_arr'],

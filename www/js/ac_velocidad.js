@@ -28,16 +28,28 @@ var acVelocidad=function(){
              (session_data.mode=="test" && !game_mode && that.ac.failed_times>=that.ac.MAX_FAILED_TIMES_TEST)){
             that.ac.finish();
         }else{
-            if(!media_objects.jsons["ac_velocidad_data.json"].hasOwnProperty(that.ac.level))
-                throw new Error('ac_velocidad_data.json has no activities for level: '+that.ac.level);
-            var sentences=media_objects.jsons["ac_velocidad_data.json"][that.ac.level];
-            that.ac.sentence = random_array(sentences,1)[0];
-            var count=0; // externalize this using the cognitionis utils method
-            while(that.ac.used_sentences.indexOf(that.ac.sentence)!=-1 && count<100){
-                that.ac.sentence = random_array(sentences,1)[0];
+            if(!that.ac.activities.hasOwnProperty(that.ac.level))
+                throw new Error('ac_velocidad_'+session_data.mode+'.json has no activities for level: '+that.ac.level);
+            var sentences=that.ac.activities[that.ac.level];
+            //that.ac.sentence = random_array(sentences,1)[0];
+            //var count=0; // externalize this using the cognitionis utils method
+            //while(that.ac.used_sentences.indexOf(that.ac.sentence)!=-1 && count<100){
+            //    that.ac.sentence = random_array(sentences,1)[0];
+            //    count++;
+            //}
+            var ac_number=that.ac.level_played_times;
+            if(ac_number>=that.ac.activities[that.ac.level].length){
+                ac_number=Math.floor(Math.random()*that.ac.activities[that.ac.level].length);
+            }
+            that.ac.sentence = sentences[ac_number];
+            if(session_data.mode=="test" && that.ac.played_times<that.ac.MAX_PLAYED_TIMES_TEST_DRY){
+                that.ac.sentence = sentences[0];
+                that.ac.activities[that.ac.level].shift(); // remove element
             }
             // chose one word of more than X letters (depending on the level [only useful for levels >2])
-            that.ac.word = that.ac.random_word_longer_than(that.ac.sentence.split(" "), that.ac.level);
+            that.ac.word = that.ac.random_word_longer_than(that.ac.sentence.split(" "), that.ac.level+1);
+            if (session_data.mode=="test")
+                that.ac.word = that.ac.longest_farest_word(that.ac.sentence.split(" "));
             if(debug) console.log("sentence: "+that.ac.sentence+" word: "+that.ac.word);
             that.ac.velocidad_show_pattern();
         }
@@ -54,6 +66,15 @@ var acVelocidad=function(){
         }while(item.length<=mwl && way_out_of_infinite_loop!=1000);
         if(way_out_of_infinite_loop==1000)
             throw new Error("cognitionis random_word_longer_than,  loop>1000, min_word_length="+min_word_length);
+        return item;
+    }
+
+    this.ac.longest_farest_word=function(array){
+        var item=array[0];
+        for (var i=0;i<array.length;i++){
+            if(array[i].length>=item.length)
+                item=array[i];
+        }
         return item;
     }
 
@@ -155,9 +176,32 @@ var acVelocidad=function(){
 var velocidad=function(finish_callback){
     if(!check_if_sounds_loaded(function(){velocidad(finish_callback);})){return;}
     preventBackExit();
+    remove_modal();
     var vel_obj=new acVelocidad();
     if(typeof(finish_callback)=='undefined') finish_callback=game;
     vel_obj.ac.finish_callback=finish_callback;
+    
+    vel_obj.ac.activities={};
+    if(session_data.mode=="training"){
+        vel_obj.ac.activities[1]=media_objects.jsons["ac_velocidad_train.json"][1].slice();
+        vel_obj.ac.activities[2]=media_objects.jsons["ac_velocidad_train.json"][2].slice();
+        vel_obj.ac.activities[3]=media_objects.jsons["ac_velocidad_train.json"][3].slice();
+        vel_obj.ac.activities[4]=media_objects.jsons["ac_velocidad_train.json"][4].slice();
+        shuffle_array(vel_obj.ac.activities[1]);
+        shuffle_array(vel_obj.ac.activities[2]);
+        shuffle_array(vel_obj.ac.activities[3]);
+        shuffle_array(vel_obj.ac.activities[4]);
+        //shuffle_array(media_objects.jsons["ac_conciencia_train.json"][''+vel_obj.ac.level]);
+    }else{
+        vel_obj.ac.activities[1]=media_objects.jsons["ac_velocidad_test.json"][1].slice();
+        vel_obj.ac.activities[2]=media_objects.jsons["ac_velocidad_test.json"][2].slice();
+        vel_obj.ac.activities[3]=media_objects.jsons["ac_velocidad_test.json"][3].slice();
+        vel_obj.ac.activities[4]=media_objects.jsons["ac_velocidad_test.json"][4].slice();
+        var start=Math.floor(Math.random()*(media_objects.jsons["ac_velocidad_train.json"][1].length-(vel_obj.ac.MAX_PLAYED_TIMES_TEST_DRY+1)));
+        var dry_activities=media_objects.jsons["ac_velocidad_train.json"][1].slice(start,start+vel_obj.ac.MAX_PLAYED_TIMES_TEST_DRY);
+        vel_obj.ac.activities[1]=dry_activities.concat(vel_obj.ac.activities[1]);
+    }
+
     vel_obj.ac.start(); 
 }
 

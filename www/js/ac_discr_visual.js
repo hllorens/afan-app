@@ -204,6 +204,7 @@ var acDiscrVisual=function(){
 var discr_visual=function(finish_callback){
     if(!check_if_sounds_loaded(function(){discr_visual(finish_callback);})){return;}
     preventBackExit();
+    remove_modal();
     var dv_obj=new acDiscrVisual();
     if(typeof(finish_callback)=='undefined') finish_callback=game;
     dv_obj.ac.finish_callback=finish_callback;

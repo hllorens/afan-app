@@ -183,8 +183,9 @@ var acRitmo=function(){
 
 var ritmo=function(finish_callback){
     if(!check_if_sounds_loaded(function(){ritmo(finish_callback);})){return;}
-    AudioLib.init(media_objects.sounds,debug);
+    AudioLib.init(media_objects.sounds,debug); // for non sprite sounds
     preventBackExit();
+    remove_modal();
     var ritmo_obj=new acRitmo();
     if(typeof(finish_callback)=='undefined') finish_callback=game;
     ritmo_obj.ac.finish_callback=finish_callback;

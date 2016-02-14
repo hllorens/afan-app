@@ -28,7 +28,8 @@ var sounds = [
 var jsons= [
 	"../data/ac_conciencia_train.json",
 	"../data/ac_conciencia_test.json",
-	"../data/ac_velocidad_data.json"
+	"../data/ac_velocidad_train.json",
+	"../data/ac_velocidad_test.json"
 ]
 
 var media_objects;
@@ -305,42 +306,52 @@ var check_missing_elements=function(){
 	var undefined_sounds={total:0};
 	var undefined_images={total:0};
 	var msg="";
-	if(JsonLazy.data.hasOwnProperty('conciencia_train')){
-		for (var i=0;i<JsonLazy.data.conciencia_train.length;i++){
-			var act_sounds=JsonLazy.data.conciencia_train[i].sounds;
-			for (var s=0;s<act_sounds.length;s++){
-				if(act_sounds[s]=="\/") continue;
-				if(!audio_object_sprite_ref.hasOwnProperty(act_sounds[s]) && !undefined_sounds.hasOwnProperty(act_sounds[s])){
-					undefined_sounds[act_sounds[s]]=true;
-					undefined_sounds.total=undefined_sounds.total+1;
-					msg+="\n sound("+act_sounds[s]+") not found in training ("+JsonLazy.data.conciencia_train[i].answers[0]+").";
-				}
-			}
-			if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+JsonLazy.data.conciencia_train[i].answers[0]) 
-		        && !undefined_images.hasOwnProperty(JsonLazy.data.conciencia_train[i].answers[0])){
-				undefined_images[JsonLazy.data.conciencia_train[i].answers[0]]=true;
-				undefined_images.total=undefined_images.total+1;
-				msg+="\n image("+JsonLazy.data.conciencia_train[i].answers[0]+") not found in training.";
-			}
-		}
-		for (var i=0;i<JsonLazy.data.conciencia_test.length;i++){
-			var act_sounds=JsonLazy.data.conciencia_test[i].sounds;
-			for (var s=0;s<act_sounds.length;s++){
-				if(act_sounds[s]=="\/") continue;
-				if(!audio_object_sprite_ref.hasOwnProperty(act_sounds[s]) && !undefined_sounds.hasOwnProperty(act_sounds[s])){
-					undefined_sounds[act_sounds[s]]=true;
-					undefined_sounds.total=undefined_sounds.total+1;
-					msg+="\n sound("+act_sounds[s]+") not found in test ("+JsonLazy.data.conciencia_test[i].answers[0]+").";
-				}
-			}
-			if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+JsonLazy.data.conciencia_test[i].answers[0]) 
-		        && !undefined_images.hasOwnProperty(JsonLazy.data.conciencia_test[i].answers[0])){
-				undefined_images[JsonLazy.data.conciencia_test[i].answers[0]]=true;
-				undefined_images.total=undefined_images.total+1;
-				msg+="\n image("+JsonLazy.data.conciencia_test[i].answers[0]+") not found in test.";
-			}
-		}
-	}
+	if(media_objects.jsons.hasOwnProperty("ac_conciencia_train.json")){
+        var level=1;
+        do{
+            for (var i=0;i<media_objects.jsons["ac_conciencia_train.json"][level].length;i++){
+                var act_sounds=media_objects.jsons["ac_conciencia_train.json"][level][i].sounds;
+                for (var s=0;s<act_sounds.length;s++){
+                    if(act_sounds[s]=="\/") continue;
+                    if(!audio_object_sprite_ref.hasOwnProperty(act_sounds[s]) && !undefined_sounds.hasOwnProperty(act_sounds[s])){
+                        undefined_sounds[act_sounds[s]]=true;
+                        undefined_sounds.total=undefined_sounds.total+1;
+                        msg+="\n sound("+act_sounds[s]+") not found in training ("+media_objects.jsons["ac_conciencia_train.json"][level][i].answers[0]+").";
+                    }
+                }
+                if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+media_objects.jsons["ac_conciencia_train.json"][level][i].answers[0]) 
+                    && !undefined_images.hasOwnProperty(media_objects.jsons["ac_conciencia_train.json"][level][i].answers[0])){
+                    undefined_images[media_objects.jsons["ac_conciencia_train.json"][level][i].answers[0]]=true;
+                    undefined_images.total=undefined_images.total+1;
+                    msg+="\n image("+media_objects.jsons["ac_conciencia_train.json"][level][i].answers[0]+") not found in training.";
+                }
+            }
+            level++;
+        }while(media_objects.jsons["ac_conciencia_train.json"].hasOwnProperty(level));
+        level=1;
+        do{
+            for (var i=0;i<media_objects.jsons["ac_conciencia_test.json"].length;i++){
+                var act_sounds=media_objects.jsons["ac_conciencia_test.json"][i].sounds;
+                for (var s=0;s<act_sounds.length;s++){
+                    if(act_sounds[s]=="\/") continue;
+                    if(!audio_object_sprite_ref.hasOwnProperty(act_sounds[s]) && !undefined_sounds.hasOwnProperty(act_sounds[s])){
+                        undefined_sounds[act_sounds[s]]=true;
+                        undefined_sounds.total=undefined_sounds.total+1;
+                        msg+="\n sound("+act_sounds[s]+") not found in test ("+media_objects.jsons["ac_conciencia_test.json"][i].answers[0]+").";
+                    }
+                }
+                if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+media_objects.jsons["ac_conciencia_test.json"][i].answers[0]) 
+                    && !undefined_images.hasOwnProperty(media_objects.jsons["ac_conciencia_test.json"][i].answers[0])){
+                    undefined_images[media_objects.jsons["ac_conciencia_test.json"][i].answers[0]]=true;
+                    undefined_images.total=undefined_images.total+1;
+                    msg+="\n image("+media_objects.jsons["ac_conciencia_test.json"][i].answers[0]+") not found in test.";
+                }
+            }
+            level++;
+        }while(media_objects.jsons["ac_conciencia_test.json"].hasOwnProperty(level));
+	}else{
+        msg+="\n ac_conciencia_train.json not found.";
+    }
 	if(msg==""){
 		alert("All elements are defined");
 	}else{
@@ -856,6 +867,7 @@ var check_if_sounds_loaded=function(callback){
 var memoria=function(){
     if(!check_if_sounds_loaded(memoria)){return;}
     preventBackExit();
+    remove_modal();
 	canvas_zone_vcentered.innerHTML=' \
 	<br /><button class="button" id="memoria_visual">Memoria Visual</button> \
 	<br /><button class="button" id="memoria_auditiva">Memoria Auditiva</button> \

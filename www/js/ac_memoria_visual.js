@@ -137,6 +137,7 @@ var acMemVis=function(){
 }
 
 var memoria_visual=function(finish_callback){
+    remove_modal();
     var memvis_obj=new acMemVis();
     if(typeof(finish_callback)=='undefined') finish_callback=game;
     memvis_obj.ac.finish_callback=finish_callback;

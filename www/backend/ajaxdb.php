@@ -21,12 +21,12 @@ $timestamp_seconds=date("Y-m-d H:i:s");
 $db_credentials = json_decode(file_get_contents("../../../../secrets/db_credentials_afan-app.json"));
 $gclient_secret = json_decode(file_get_contents("../../../../secrets/gclient_secret_afan-app.json"));
 
-$db_connection =  mysql_pconnect( $db_credentials->db_server, $db_credentials->user, $db_credentials->pass  ) or die( 'Could not open connection to server' );
-mysql_select_db( $db_credentials->db_name, $db_connection) or die( 'Could not select database' );
+$db_connection =  mysqli_connect( $db_credentials->db_server, $db_credentials->user, $db_credentials->pass  ) or die( 'Could not open connection to server' );
+mysqli_select_db( $db_connection, $db_credentials->db_name) or die( 'Could not select database' );
 
 /* SET UTF-8 independently of the MySQL and PHP installation */
-mysql_query("SET NAMES 'utf8'");	
-mysql_query("set time_zone:='Europe/Madrid'");	
+mysqli_query($db_connection, "SET NAMES 'utf8'");	
+mysqli_query($db_connection, "set time_zone:='Europe/Madrid'");	
 
 $output=array();
 	
@@ -34,8 +34,8 @@ if ($action == "get_users"){
 	if($_SESSION['access_level']!='admin'){echo "ERROR: no admin";return;}
 	$sQuery = "SELECT * FROM users";
 	//echo "query: $sQuery ";
-	$rResult = mysql_query( $sQuery, $db_connection ) or die(mysql_error());
-	while ( $aRow = mysql_fetch_array( $rResult ) )	{
+	$rResult = mysqli_query( $db_connection, $sQuery ) or die(mysqli_error( $db_connection ));
+	while ( $aRow = mysqli_fetch_array( $rResult ) )	{
 		$output[$aRow['email']] = array();
 		$output[$aRow['email']]['email'] = $aRow['email'];
 		$output[$aRow['email']]['access_level'] = $aRow['access_level'];
@@ -59,8 +59,8 @@ if ($action == "get_users"){
     }else{
         $user = $_REQUEST['user'];
         $sQuery = "SELECT * FROM users WHERE email='".$user."'";
-        $rResult = mysql_query( $sQuery, $db_connection ) or die(mysql_error());
-        if ( $aRow = mysql_fetch_array( $rResult ) ){ //existing user
+        $rResult = mysqli_query( $db_connection, $sQuery ) or die(mysqli_error( $db_connection ));
+        if ( $aRow = mysqli_fetch_array( $rResult ) ){ //existing user
             $_SESSION['access_level'] = $aRow['access_level'];
 			$_SESSION['user_id'] = $user;
 			$_SESSION['display_name'] = $aRow['display_name'];
@@ -68,8 +68,8 @@ if ($action == "get_users"){
 			$_SESSION['email'] = $user;
 
             $sQuery = "UPDATE users  SET last_login='$timestamp_seconds',last_provider='bypass' WHERE email='".$_SESSION['email']."';";
-            $rResult = mysql_query( $sQuery, $db_connection );
-            if(!$rResult){$output['error']="Error: ".mysql_error()." -- ".$sQuery;}
+            $rResult = mysqli_query( $db_connection, $sQuery );
+            if(!$rResult){$output['error']="Error: ".mysqli_error( $db_connection )." -- ".$sQuery;}
         }else{
             $output['error']="Error: empty user? no user info with the token?";
         }
@@ -150,19 +150,19 @@ if ($action == "get_users"){
                 $_SESSION['picture'] = $userInfo->picture;
                 $_SESSION['email'] = $userInfo->email;
                 $sQuery = "SELECT * FROM users WHERE email='".$userInfo->email."'"; //echo "query: $sQuery ";
-                $rResult = mysql_query( $sQuery, $db_connection ) or die(mysql_error());
-                if ( $aRow = mysql_fetch_array( $rResult ) ){ //existing user
+                $rResult = mysqli_query( $db_connection, $sQuery ) or die(mysqli_error( $db_connection ));
+                if ( $aRow = mysqli_fetch_array( $rResult ) ){ //existing user
                     $_SESSION['access_level'] = $aRow['access_level'];
                     // update the user last_login and last_provider
                     $sQuery = "UPDATE users  SET last_login='$timestamp_seconds',last_provider='google' WHERE email='".$_SESSION['email']."';";
-                    $rResult = mysql_query( $sQuery, $db_connection );
-                    if(!$rResult){$output['error']="Error: ".mysql_error()." -- ".$sQuery;}
+                    $rResult = mysqli_query( $db_connection, $sQuery );
+                    if(!$rResult){$output['error']="Error: ".mysqli_error( $db_connection )." -- ".$sQuery;}
                 }else if(!empty($_SESSION['email'])){ //new user
                     $_SESSION['access_level'] = 'normal'; //invitee
                     mail("hectorlm1983@gmail.com","New afan-app user","NEW USER: ".$_SESSION['email'].". Change from 'invitee' to something else or DELETE");
                     $sQuery = "INSERT INTO users (email, display_name, access_level, picture, last_login, last_provider, creation_timestamp) VALUES ('".$_SESSION['email']."', '".$_SESSION['display_name']."', '".$_SESSION['access_level']."', '".$_SESSION['picture']."', '$timestamp_seconds', 'google', '$timestamp_seconds');";
-                    $rResult = mysql_query( $sQuery, $db_connection );
-                    if(!$rResult){$output['error']="Error: Exists. ".mysql_error()." -- ".$sQuery;}
+                    $rResult = mysqli_query( $db_connection, $sQuery );
+                    if(!$rResult){$output['error']="Error: Exists. ".mysqli_error( $db_connection )." -- ".$sQuery;}
                     $output['info']="new user";
                 }else{
                     $output['error']="Error: empty user? no user info with the token?";
@@ -217,8 +217,8 @@ if ($action == "get_users"){
 
 	$sQuery = "SELECT * FROM subjects WHERE user='$user';";
 	//echo "query: $sQuery ";
-	$rResult = mysql_query( $sQuery, $db_connection ) or die(mysql_error());
-	while ( $aRow = mysql_fetch_array( $rResult ) )	{
+	$rResult = mysqli_query( $db_connection, $sQuery ) or die(mysqli_error( $db_connection ));
+	while ( $aRow = mysqli_fetch_array( $rResult ) )	{
 		$output[$aRow['alias']] = array();
 		$output[$aRow['alias']]['id'] = $aRow['id'];
 		$output[$aRow['alias']]['user'] = $aRow['user'];
@@ -242,12 +242,12 @@ if ($action == "get_users"){
 	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
 
 	$sQuery = "INSERT INTO subjects (user, alias, name, birthdate,comments) VALUES ('$user', '$alias', '$name', '$birthdate', '$comments');";
-	$rResult = mysql_query( $sQuery, $db_connection );
-	if(!$rResult){header('HTTP/1.1 500 Internal Server Error');die("Error: Exists. ".mysql_error()." -- ".$sQuery);}
+	$rResult = mysqli_query( $db_connection, $sQuery );
+	if(!$rResult){header('HTTP/1.1 500 Internal Server Error');die("Error: Exists. ".mysqli_error( $db_connection )." -- ".$sQuery);}
 	$sQuery = "SELECT LAST_INSERT_ID() as lid;";
-	$rResult = mysql_query( $sQuery, $db_connection );
-	if(!$rResult){header('HTTP/1.1 500 Internal Server Error');die("Error: ".mysql_error()." -- ".$sQuery);}
-	$aRow = mysql_fetch_array( $rResult );
+	$rResult = mysqli_query( $db_connection, $sQuery );
+	if(!$rResult){header('HTTP/1.1 500 Internal Server Error');die("Error: ".mysqli_error( $db_connection )." -- ".$sQuery);}
+	$aRow = mysqli_fetch_array( $rResult );
 	header('Content-type: application/json');
 	$output["success"]=$alias;
 	$output["data"]=array();
@@ -270,8 +270,8 @@ if ($action == "get_users"){
 
 	
 	$sQuery = "UPDATE subjects  SET name='$name', birthdate='$birthdate',comments='$comments' WHERE id=$lid;";
-	$rResult = mysql_query( $sQuery, $db_connection );
-	if(!$rResult){header('HTTP/1.1 500 Internal Server Error');die("Error: Exists. ".mysql_error()." -- ".$sQuery);}
+	$rResult = mysqli_query( $db_connection, $sQuery );
+	if(!$rResult){header('HTTP/1.1 500 Internal Server Error');die("Error: Exists. ".mysqli_error( $db_connection )." -- ".$sQuery);}
 	header('Content-type: application/json');
 	$output["success"]=$alias;
 	$output["data"]=array();
@@ -299,8 +299,8 @@ if ($action == "get_users"){
 	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
 
 	$sQuery = "INSERT INTO sessions(reference,user,subject,age,num_answered,num_correct,result,level,duration,timestamp)  VALUES ('$reference','$user','$subject','$age','$num_answered','$num_correct','$result','$level','$duration','$timestamp');"; 
-	$rResult = mysql_query( $sQuery, $db_connection );
-	if(!$rResult){ $output["msg"]=mysql_error()." -- ".$sQuery; }
+	$rResult = mysqli_query( $db_connection, $sQuery );
+	if(!$rResult){ $output["msg"]=mysqli_error( $db_connection )." -- ".$sQuery; }
 	else{ $output["msg"]="Success. Data session stored in the server. --"; }
 	//else{$output='{"msg":"Success. Data session stored in the server. -- '.$sQuery.'"}';}	
 
@@ -329,14 +329,14 @@ if ($action == "get_users"){
 	$error=0;
 	
 	$sQuery = "INSERT INTO sessions(type,mode,user,subject,age,num_answered,num_correct,result,level,duration,timestamp)  VALUES ('$type','$mode','$user','$subject','$age','$num_answered','$num_correct','$result','$level','$duration','$timestamp');"; 
-	$rResult = mysql_query( $sQuery, $db_connection );
-	if(!$rResult){ $output["msg"]=mysql_error()." -- ".$sQuery; $error=1;}
+	$rResult = mysqli_query( $db_connection, $sQuery );
+	if(!$rResult){ $output["msg"]=mysqli_error( $db_connection )." -- ".$sQuery; $error=1;}
 	else{ 
-		$session_id=mysql_insert_id();
+		$session_id=mysqli_insert_id($db_connection);
 		foreach ($str_json["details"] as $detail){
 			$sQuery = "INSERT INTO session_activities(type,mode,user,subject,session,activity,choice,result,level,duration,timestamp)  VALUES ('$type','$mode','$user','$subject','$session_id','".$detail["activity"]."','".$detail["choice"]."','".$detail["result"]."','$level','".$detail["duration"]."','".$detail["timestamp"]."')"; 
-			$rResult = mysql_query( $sQuery, $db_connection );
-			if(!$rResult){ $output["msg"]=mysql_error()." -- ".$sQuery; $error=1; break;}
+			$rResult = mysqli_query( $db_connection, $sQuery );
+			if(!$rResult){ $output["msg"]=mysqli_error( $db_connection )." -- ".$sQuery; $error=1; break;}
 		}
 		if($error==0) $output["msg"]="Success. Data session stored in the server. --"; // -- '.$sQuery.'"}';}
 	}
@@ -360,9 +360,9 @@ if ($action == "get_users"){
 	$output['elements'] = array();
 
 
-	$rResult = mysql_query( $sQuery, $db_connection ) or die(mysql_error());
+	$rResult = mysqli_query( $db_connection, $sQuery ) or die(mysqli_error( $db_connection ));
 	$element_count=0;	
-	while ( $aRow = mysql_fetch_array( $rResult ) )	{
+	while ( $aRow = mysqli_fetch_array( $rResult ) )	{
 		$output['elements'][]=array();
 		$output['elements'][$element_count]['id'] = $aRow['id'];
 		$output['elements'][$element_count]['type']=$aRow['type'];
@@ -393,9 +393,9 @@ if ($action == "get_users"){
 	$output['general']['session'] = $session;
 	$output['elements'] = array();
 
-	$rResult = mysql_query( $sQuery, $db_connection ) or die(mysql_error());
+	$rResult = mysqli_query( $db_connection, $sQuery ) or die(mysqli_error( $db_connection ));
 	$element_count=0;	
-	while ( $aRow = mysql_fetch_array( $rResult ) )	{
+	while ( $aRow = mysqli_fetch_array( $rResult ) )	{
 		$output['elements'][]=array();
 		$output['elements'][$element_count]['id'] = $aRow['id'];
 		$output['elements'][$element_count]['type']=$aRow['type'];
@@ -424,9 +424,9 @@ if ($action == "get_users"){
 	// create a detailed acction log db so that we can recover actions, authors, dates and previous states
 	$sQuery = "DELETE FROM sessions WHERE id='$id' AND subject='$subject' AND user='$user';";
 
-	$rResult = mysql_query( $sQuery, $db_connection ) or die(mysql_error());
-	$rResult = mysql_query( $sQuery, $db_connection );
-	if(!$rResult){ $output["msg"]=mysql_error()." -- ".$sQuery; }
+	$rResult = mysqli_query( $db_connection, $sQuery ) or die(mysqli_error( $db_connection ));
+	$rResult = mysqli_query( $db_connection, $sQuery );
+	if(!$rResult){ $output["msg"]=mysqli_error( $db_connection )." -- ".$sQuery; }
 	else{ $output["msg"]="Success. Session $id of $subject deleted. --"; }	
 
 	header('Content-type: application/json');
