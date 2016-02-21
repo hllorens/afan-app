@@ -671,7 +671,7 @@ var explore_results=function(){
                     DataTableSimple.call(results_table, {
                         data: cache_user_subject_results[session_data.subject].elements,
                         row_id: 'id',
-                        pagination: 5,
+                        pagination_date: 5,
                         columns: [
                             //{ data: 'id' },
                             { data: 'timestamp', col_header: 'id', link_function_id: 'explore_result_detail' },
@@ -695,7 +695,7 @@ var explore_results=function(){
             DataTableSimple.call(results_table, {
                 data: cache_user_subject_results[session_data.subject].elements,
                 row_id: 'id',
-                pagination: 5,
+                pagination_date: 5,
                 columns: [
                     //{ data: 'id' },
                     { data: 'timestamp', col_header: 'id', link_function_id: 'explore_result_detail' },

@@ -352,7 +352,7 @@ if ($action == "get_users"){
 
 	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
 
-	$sQuery = "SELECT * FROM sessions WHERE user='$user' AND subject='$subject';";
+	$sQuery = "SELECT * FROM sessions WHERE user='$user' AND subject='$subject' ORDER BY timestamp desc;"; // order asc
 	//echo "query: $sQuery ";
 	$output['general'] = array();
 	$output['general']['user'] = $user;
