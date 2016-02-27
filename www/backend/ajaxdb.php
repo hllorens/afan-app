@@ -243,21 +243,25 @@ if ($action == "get_users"){
 
 	$sQuery = "INSERT INTO subjects (user, alias, name, birthdate,comments) VALUES ('$user', '$alias', '$name', '$birthdate', '$comments');";
 	$rResult = mysqli_query( $db_connection, $sQuery );
-	if(!$rResult){header('HTTP/1.1 500 Internal Server Error');die("Error: Exists. ".mysqli_error( $db_connection )." -- ".$sQuery);}
-	$sQuery = "SELECT LAST_INSERT_ID() as lid;";
-	$rResult = mysqli_query( $db_connection, $sQuery );
-	if(!$rResult){header('HTTP/1.1 500 Internal Server Error');die("Error: ".mysqli_error( $db_connection )." -- ".$sQuery);}
-	$aRow = mysqli_fetch_array( $rResult );
-	header('Content-type: application/json');
-	$output["success"]=$alias;
-	$output["data"]=array();
-	$output["data"]["id"]=$aRow['lid'];
-	$output["data"]["user"]=$user;
-	$output["data"]["alias"]=$alias;
-	$output["data"]["name"]=$name;
-	$output["data"]["birthdate"]=$birthdate;
-	$output["data"]["comments"]=$comments;
-	echo json_encode( $output );
+	if(!$rResult){
+        //header('HTTP/1.1 500 Internal Server Error');die("Error: Exists. ".mysqli_error( $db_connection )." -- ".$sQuery);
+        $output["error"]="El sujeto $user ya existe, elija otro nombre.";
+    }else{
+        $sQuery = "SELECT LAST_INSERT_ID() as lid;";
+        $rResult = mysqli_query( $db_connection, $sQuery );
+        if(!$rResult){header('HTTP/1.1 500 Internal Server Error');die("Error: ".mysqli_error( $db_connection )." -- ".$sQuery);}
+        $aRow = mysqli_fetch_array( $rResult );
+        header('Content-type: application/json');
+        $output["success"]=$alias;
+        $output["data"]=array();
+        $output["data"]["id"]=$aRow['lid'];
+        $output["data"]["user"]=$user;
+        $output["data"]["alias"]=$alias;
+        $output["data"]["name"]=$name;
+        $output["data"]["birthdate"]=$birthdate;
+        $output["data"]["comments"]=$comments;
+    }
+    echo json_encode( $output );
 }else if ($action == "update_subject"){
 	$lid=get_value('lid');
 	$user=get_value('user');
@@ -346,6 +350,38 @@ if ($action == "get_users"){
 	echo json_encode( $output );
 	//print_r($output);
 
+}else if ($action == "get_results_global"){
+	$user=get_value("user");
+	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
+	$sQuery = "SELECT subject,type,num_correct,num_answered,result,timestamp FROM (SELECT * FROM `sessions` s WHERE user='$user' ORDER BY s.timestamp DESC) as z  GROUP BY subject, type ORDER BY subject ASC";
+	//echo "query: $sQuery ";
+	$output['general'] = array();
+	$output['general']['user'] = $user;
+	$output['general']['subject'] = $subject;
+	$output['elements'] = array();
+    $num_elems=0;
+
+
+	$rResult = mysqli_query( $db_connection, $sQuery ) or die(mysqli_error( $db_connection ));
+	while ( $aRow = mysqli_fetch_array( $rResult ) ){
+        //!in_array($aRow['subject'],$output['elements'])){
+        if (count($output['elements'])==0 || $output['elements'][(count($output['elements'])-1)]['subject']!=$aRow['subject']){
+            /*if(count($output['elements'])!=0){
+                echo $output['elements'][(count($output['elements'])-1)]['subject']."    ".$aRow['subject']."    ".count($output['elements']);
+            }*/
+            $output['elements'][]=array();
+            $output['elements'][$num_elems]['subject']=$aRow['subject'];
+            $output['elements'][$num_elems]['conciencia']="-";
+            $output['elements'][$num_elems]['memoria_visual']="-";
+            $output['elements'][$num_elems]['ritmo']="-";
+            $output['elements'][$num_elems]['velocidad']="-";
+            $output['elements'][$num_elems]['discr_visual']="-";
+            $num_elems++;
+        }
+		$output['elements'][($num_elems-1)][$aRow['type']] = $aRow['num_correct']."/".$aRow['num_answered'];
+	}
+	header('Content-type: application/json');
+	echo json_encode( $output );
 }else if ($action == "get_results"){
 	$user=get_value("user");
 	$subject=get_value("subject");

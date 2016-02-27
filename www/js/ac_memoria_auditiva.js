@@ -16,6 +16,9 @@ var acMemAud=function(){
 }
 
 var memoria_auditiva=function(finish_callback){
+    if(!check_if_sounds_loaded(function(){memoria_auditiva(finish_callback);})){return;}
+    preventBackExit();
+    remove_modal();
     var memaud_obj=new acMemAud();
     if(typeof(finish_callback)=='undefined') finish_callback=game;
     memaud_obj.ac.finish_callback=finish_callback;

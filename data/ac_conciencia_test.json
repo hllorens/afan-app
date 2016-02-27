@@ -35,8 +35,8 @@
         },
         {
             "type" : "sounds",
-            "sounds" : ["k", "o", "\/", "a", "\/", "l", "a"],
-            "answers" : ["koala", "jaula", "bala"],
+            "sounds" : ["j", "a", "\/", "u", "\/", "l", "a"],
+            "answers" : ["jaula", "koala", "bala"],
             "level" : 1
         }
     ]

@@ -137,6 +137,8 @@ var acMemVis=function(){
 }
 
 var memoria_visual=function(finish_callback){
+    if(!check_if_sounds_loaded(function(){memoria_visual(finish_callback);})){return;}
+    preventBackExit();
     remove_modal();
     var memvis_obj=new acMemVis();
     if(typeof(finish_callback)=='undefined') finish_callback=game;

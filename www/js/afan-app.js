@@ -467,7 +467,7 @@ function menu_screen(){
 		document.getElementById("hamburger_icon").addEventListener(clickOrTouch,hamburger_toggle);
 		document.getElementById("header_text").addEventListener(clickOrTouch,function(){menu_screen();});
 		document.getElementById("manage-subjects").addEventListener(clickOrTouch,function(){manage_subjects();});
-        document.getElementById("results").addEventListener(clickOrTouch,function(){explore_results();});
+        document.getElementById("results").addEventListener(clickOrTouch,function(){show_results();});
         document.getElementById("exit_app").addEventListener(clickOrTouch,function(){exit_app();});
         document.getElementById("show_about").addEventListener(clickOrTouch,function(){hamburger_close();show_about();});
         document.getElementById("exit_app_hamburger").addEventListener(clickOrTouch,function(){exit_app();});
@@ -562,13 +562,16 @@ var add_subject=function(){
             ajax_request_json(
             backend_url+'ajaxdb.php?action=add_subject&user='+user_data.email+'&alias='+document.getElementById('new-alias').value+'&name='+document.getElementById('new-name').value+'&birthdate='+document.getElementById('new-birthdate').value+'&comments='+document.getElementById('new-comments').value, 
             function(data) {
-                if(data['success']!='undefined'){
+                if(data.hasOwnProperty('success')){
                     cache_user_subjects[data['success']]=data['data'];
                     remove_modal();
                     remove_modal("js-modal-window-alert");
                     manage_subjects(); // to reload with the new user...
                 }else{
-                    alert("ERROR: "+JSON.stringify(data));
+                    remove_modal();
+                    remove_modal("js-modal-window-alert");
+                    manage_subjects(); // to reload with the new user...
+                    alert("ERROR: "+data['error']);
                 }
             }
             );
@@ -577,7 +580,7 @@ var add_subject=function(){
 	var cancel_function=function(){ remove_modal("js-modal-window-alert"); };
 	var form_html='<form id="my-form" action="javascript:void(0);"> \
 			<ul class="errorMessages"></ul>\
-			<label for="new-alias">Alias</label> <input id="new-alias" type="text" required="required" readonly="readonly" /><br /> \
+			<!--<label for="new-alias">Alias</label>--> <input id="new-alias" type="text" required="required" readonly="readonly" style="visibility:hidden;" /><br /> \
 			<label for="new-name">Nombre</label> <input id="new-name" type="text" required="required" onkeyup="update_alias()" /><br /> \
 			<label for="new-birthdate">Fecha Nac.</label> <input id="new-birthdate" type="date" placeholder="yyyy-mm-dd" required="required" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"  /><br /> \
 			<label>Comentarios</label> <textarea id="new-comments"></textarea><br /> \
@@ -638,8 +641,8 @@ var edit_subject=function(sid){
 	}
 	var form_html='<form id="my-form" action="javascript:void(0);"> \
 			<ul class="errorMessages"></ul>\
-			<label>Usuario</label><input type="text" readonly="readonly" value="'+subj2edit.user+'" /><br /> \
-			<label for="new-alias">Alias</label> <input id="new-alias" type="text" required="required" readonly="readonly" value="'+subj2edit.alias+'" /><br /> \
+			<!--<label>Usuario</label><input type="text" readonly="readonly" value="'+subj2edit.user+'" /><br />--> \
+			<!--<label for="new-alias">Alias</label>--> <input id="new-alias" type="text" required="required" readonly="readonly" style="visibility:hidden;" value="'+subj2edit.alias+'" /><br /> \
 			<label for="new-name">Nombre</label> <input id="new-name" type="text" required="required" value="'+subj2edit.name+'" /><br /> \
 			<label for="new-birthdate">Fecha Nac.</label> <input id="new-birthdate" type="date" placeholder="yyyy-mm-dd" required="required" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"  value="'+subj2edit.birthdate+'" /><br /> \
 			<label>Comentarios</label> <textarea id="new-comments">'+subj2edit.comments+'</textarea><br /> \
@@ -647,6 +650,20 @@ var edit_subject=function(sid){
 			</form>'; //title="Error: yyyy-mm-dd"		
 	open_js_modal_alert("Editar Participante",form_html,accept_function,cancel_function);
 };
+
+
+var show_results=function(){
+	preventBackExit();
+	header_text.innerHTML=' &larr; '+app_name+' menu';
+	canvas_zone_vcentered.innerHTML=' \
+	    <button id="summary_view" class="button">Todos</button><br /> \
+	    <button id="explore_results" class="button">Solo '+session_data.subject+'</button><br /> \
+	<br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
+	';
+    document.getElementById("explore_results").addEventListener(clickOrTouch,function(){explore_results();});
+    document.getElementById("summary_view").addEventListener(clickOrTouch,function(){summary_view();});
+	document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
+}
 
 
 var explore_results=function(){
@@ -661,55 +678,80 @@ var explore_results=function(){
         ajax_request_json(
             backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject, 
             function(data) {
-                //Resultados "+cache_user_subject_results[session_data.subject].general.user+" -  sujeto: 
-                cache_user_subject_results[session_data.subject]=data; //cache (never changes)
-                if(cache_user_subject_results[session_data.subject].elements.length==0){
-                    document.getElementById("results-div").innerHTML="<b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
-                }else{
-                    document.getElementById("results-div").innerHTML="<b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
-                    var results_table=document.getElementById("results-table");
-                    DataTableSimple.call(results_table, {
-                        data: cache_user_subject_results[session_data.subject].elements,
-                        row_id: 'id',
-                        pagination_date: 5,
-                        columns: [
-                            //{ data: 'id' },
-                            { data: 'timestamp', col_header: 'id', link_function_id: 'explore_result_detail' },
-                            { data: 'type', col_header: 'tipo',  format: 'first_12'},
-//                            { data: 'mode', col_header: 'Modo',  format: 'first_4'},
-                            { data: 'age', col_header: 'edad' },
-//                            { data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
-//                            { data: 'result', col_header: '%', format: 'percentage_int' }
-                            { data: 'num_correct', col_header: 'corr' },
-                            { data: 'num_answered', col_header: 'total' }
-                        ]
-                    } );
-                }
-            });	
+                cache_user_subject_results[session_data.subject]=data;
+                show_user_results();
+            });
     }else{
-        if(cache_user_subject_results[session_data.subject].elements.length==0){
-            document.getElementById("results-div").innerHTML="<b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
-        }else{
-            document.getElementById("results-div").innerHTML="<b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
+        show_user_results();
+    }
+};
+
+var show_user_results=function(){
+    if(cache_user_subject_results[session_data.subject].elements.length==0){
+        document.getElementById("results-div").innerHTML="<b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
+    }else{
+        document.getElementById("results-div").innerHTML='\
+         <b>'+cache_user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
+        var results_table=document.getElementById("results-table");
+        DataTableSimple.call(results_table, {
+            data: cache_user_subject_results[session_data.subject].elements,
+            row_id: 'id',
+            pagination_date: 5,
+            columns: [
+                //{ data: 'id' },
+                { data: 'type', col_header: 'tipo',  format: 'first_12'},
+//                    { data: 'mode', col_header: 'Modo',  format: 'first_4'},
+                //{ data: 'age', col_header: 'edad' },
+//                    { data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
+                { data: 'num_correct', col_header: 'corr' },
+                { data: 'num_answered', col_header: 'total' },
+                { data: 'ver', col_header: 'detalle', link_function_id_button: 'explore_result_detail' }
+            ]
+        } );
+    }
+}
+
+var summary_view=function(session_id){
+	preventBackExit();
+    var bkgr_canvas=document.getElementById("zone_canvas").style.background;
+    var bkgr_page=document.getElementById("page").style.background;
+    document.getElementById("header").style.display="none";
+    document.getElementById("page").style.background="#fff";
+    document.getElementById("zone_canvas").style.background="#fff";
+	canvas_zone_vcentered.innerHTML=' \
+	<div id="results-div">cargando resumen para imprimir...</div> \
+	<br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
+	';
+	document.getElementById("go-back").addEventListener(clickOrTouch,function(){
+        document.getElementById("zone_canvas").style.background=bkgr_canvas;
+        document.getElementById("page").style.background=bkgr_page;
+        document.getElementById("header").style.display="block";
+        show_results();
+     }.bind(bkgr_canvas,bkgr_page));
+    ajax_request_json(
+        backend_url+'ajaxdb.php?action=get_results_global&user='+session_data.user,
+        function(data) {
+            document.getElementById("results-div").innerHTML='\
+             <b>Resumen</b><br /><table id="results-table"></table>';
             var results_table=document.getElementById("results-table");
             DataTableSimple.call(results_table, {
-                data: cache_user_subject_results[session_data.subject].elements,
-                row_id: 'id',
-                pagination_date: 5,
+                data: data.elements,
+                //row_id: 'id',
+                //pagination_date: 30,
                 columns: [
                     //{ data: 'id' },
-                    { data: 'timestamp', col_header: 'id', link_function_id: 'explore_result_detail' },
-                    { data: 'type', col_header: 'tipo',  format: 'first_12'},
-//                    { data: 'mode', col_header: 'Modo',  format: 'first_4'},
-                    { data: 'age', col_header: 'edad' },
-//                    { data: 'duration', col_header: 'Tiempo',  format: 'time_from_seconds_up_to_mins'}, 
-                    { data: 'num_correct', col_header: 'corr' },
-                    { data: 'num_answered', col_header: 'total' } 
+                    { data: 'subject', col_header: 'nombre',  format: 'first_12'},
+                    { data: 'conciencia'},
+                    { data: 'memoria_visual', col_header: 'memvis'},
+                    { data: 'ritmo'},
+                    { data: 'velocidad', col_header: 'veloc'},
+                    { data: 'discr_visual', col_header: 'discr'},
                 ]
             } );
         }
-    }
-};
+    );
+}
+
 
 var explore_result_detail=function(session_id){
 	preventBackExit();
@@ -722,49 +764,39 @@ var explore_result_detail=function(session_id){
 		ajax_request_json(
 			backend_url+'ajaxdb.php?action=get_result_detail&session='+session_id+'&user='+session_data.user, 
 			function(data) {
-				cache_user_subject_result_detail[session_id]=data; //cache (never changes)
-                if(!cache_user_subject_result_detail[session_id].hasOwnProperty('elements') || cache_user_subject_result_detail[session_id].elements.length==0){
-                    document.getElementById("results-div").innerHTML="Sesión: "+cache_user_subject_result_detail[session_id].general.session+"<br />No hay detalles";
-                    return;
-                }
-				document.getElementById("results-div").innerHTML=""+cache_user_subject_result_detail[session_id].elements[0].subject+" - "+cache_user_subject_result_detail[session_id].elements[0].type+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
-				var results_table=document.getElementById("results-table");
-				DataTableSimple.call(results_table, {
-					data: cache_user_subject_result_detail[session_id].elements,
-					pagination: 6,
-					row_id: 'id',
-					columns: [
-						//{ data: 'id' },
-                        { data: 'id', col_header: 'id', link_function_id: 'explore_result_detail_individual' },
-						//{ data: 'activity', format: 'first_12' },
-						//{ data: 'choice'  , format: 'first_12'},
-						{ data: 'result',  col_header: 'resultado', special: 'red_incorrect' },
-						//{ data: 'duration',  format: 'time_from_seconds_up_to_mins'}
-					]
-				} );
-			});
-	}else{
-        if(!cache_user_subject_result_detail[session_id].hasOwnProperty('elements') || cache_user_subject_result_detail[session_id].elements.length==0){
-            document.getElementById("results-div").innerHTML="Sesión: "+cache_user_subject_result_detail[session_id].general.session+"<br />No hay detalles";
-        }else{
-            document.getElementById("results-div").innerHTML=""+cache_user_subject_result_detail[session_id].elements[0].subject+" - "+cache_user_subject_result_detail[session_id].elements[0].type+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
-            var results_table=document.getElementById("results-table");
-            DataTableSimple.call(results_table, {
-                data: cache_user_subject_result_detail[session_id].elements,
-                pagination: 6,
-                row_id: 'id',
-                columns: [
-                    //{ data: 'id' },
-                    { data: 'id', col_header: 'id', link_function_id: 'explore_result_detail_individual' },
-					//{ data: 'activity', format: 'first_12' },
-					//{ data: 'choice'  , format: 'first_12'},
-                    { data: 'result',  col_header: 'resultado',  special: 'red_incorrect' },
-                    //{ data: 'duration',  format: 'time_from_seconds_up_to_mins'}
-                ]
-            } );
-        }
-	}
+				cache_user_subject_result_detail[session_id]=data;
+                show_user_results_detail(session_id);
+            }
+        );
+    }else{
+        show_user_results_detail(session_id);
+    }
 };
+
+
+var show_user_results_detail=function(session_id){
+    if(!cache_user_subject_result_detail[session_id].hasOwnProperty('elements') || cache_user_subject_result_detail[session_id].elements.length==0){
+        document.getElementById("results-div").innerHTML="Sesión: "+cache_user_subject_result_detail[session_id].general.session+"<br />No hay detalles";
+    }else{
+        document.getElementById("results-div").innerHTML=""+cache_user_subject_result_detail[session_id].elements[0].subject+" - "+cache_user_subject_result_detail[session_id].elements[0].type+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
+        var results_table=document.getElementById("results-table");
+        DataTableSimple.call(results_table, {
+            data: cache_user_subject_result_detail[session_id].elements,
+            pagination: 6,
+            row_id: 'id',
+            columns: [
+                //{ data: 'id' },
+                //{ data: 'id', col_header: 'id', link_function_id: 'explore_result_detail_individual' },
+                //{ data: 'activity', format: 'first_12' },
+                //{ data: 'choice'  , format: 'first_12'},
+                { data: 'result',  col_header: 'resultado',  special: 'red_incorrect' },
+                //{ data: 'duration',  format: 'time_from_seconds_up_to_mins'}
+                { data: 'ver', col_header: 'detalle', link_function_id_button: 'explore_result_detail_individual' }
+            ]
+        } );
+    }
+}
+
 
 
 var explore_result_detail_individual=function(session_ac_id){
@@ -782,7 +814,7 @@ var explore_result_detail_individual=function(session_ac_id){
                     var incorrect_style="";
                     if(cache_user_subject_result_detail[session_id].elements[i].result=="incorrect"){
                         restext="incorrecto";
-                        incorrect_style="style=\"background-color: red;\"";
+                        incorrect_style="style=\"color: red;\""; //background color
                     }
                     document.getElementById("results-div").innerHTML=""+cache_user_subject_result_detail[session_id].elements[i].subject+" - "+cache_user_subject_result_detail[session_id].elements[i].type+"<br />\
                                                                       Resultado: "+restext+" - duración: "+DataTableSimple.formats.time_from_seconds_up_to_mins(cache_user_subject_result_detail[session_id].elements[i].duration)+"<br />\
@@ -827,7 +859,7 @@ var game=function(){
     }
     canvas_zone_vcentered.innerHTML=' \
     <br /><button id="conciencia" class="button">Conciencia</button> \
-    <br /><button id="memoria" class="button">Memoria</button> \
+    <br /><button id="memoria_visual" class="button">Memoria Visual</button> \
     <br /><button id="ritmo" class="button">Ritmo</button> \
     <br /><button id="velocidad" class="button">Velocidad</button> \
     <br /><button id="discr_visual" class="button">Discr. Visual</button> \
@@ -837,7 +869,7 @@ var game=function(){
     
     document.getElementById("completo").addEventListener(clickOrTouch,function(){completo();});
     document.getElementById("conciencia").addEventListener(clickOrTouch,function(){conciencia();});
-    document.getElementById("memoria").addEventListener(clickOrTouch,function(){memoria();});
+    document.getElementById("memoria_visual").addEventListener(clickOrTouch,function(){memoria_visual();});
     document.getElementById("ritmo").addEventListener(clickOrTouch,function(){ritmo();});
     document.getElementById("velocidad").addEventListener(clickOrTouch,function(){velocidad();});
     document.getElementById("discr_visual").addEventListener(clickOrTouch,function(){discr_visual();});
@@ -863,22 +895,7 @@ var check_if_sounds_loaded=function(callback){
 	}
 }
 
-/******** EXTERNALIZE WHEN DONE *********************/
-var memoria=function(){
-    if(!check_if_sounds_loaded(memoria)){return;}
-    preventBackExit();
-    remove_modal();
-	canvas_zone_vcentered.innerHTML=' \
-	<br /><button class="button" id="memoria_visual">Memoria Visual</button> \
-	<br /><button class="button" id="memoria_auditiva">Memoria Auditiva</button> \
-	<br /><button class="button" id="go_back_button" class="minibutton fixed-bottom-right go-back">&larr;</button>\
-	';
-    document.getElementById("memoria_visual").addEventListener(clickOrTouch,function(){memoria_visual();});
-    document.getElementById("memoria_auditiva").addEventListener(clickOrTouch,function(){memoria_auditiva();});
-    document.getElementById("go_back_button").addEventListener(clickOrTouch,function(){game();});
-}
 
-/*****************************************************/
 
 
 
