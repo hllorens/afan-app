@@ -357,7 +357,6 @@ if ($action == "get_users"){
 	//echo "query: $sQuery ";
 	$output['general'] = array();
 	$output['general']['user'] = $user;
-	$output['general']['subject'] = $subject;
 	$output['elements'] = array();
     $num_elems=0;
 
@@ -376,9 +375,11 @@ if ($action == "get_users"){
             $output['elements'][$num_elems]['ritmo']="-";
             $output['elements'][$num_elems]['velocidad']="-";
             $output['elements'][$num_elems]['discr_visual']="-";
+            $output['elements'][$num_elems]['timestamp']="-";
             $num_elems++;
         }
 		$output['elements'][($num_elems-1)][$aRow['type']] = $aRow['num_correct']."/".$aRow['num_answered'];
+		$output['elements'][($num_elems-1)]['timestamp'] = $aRow['timestamp'];
 	}
 	header('Content-type: application/json');
 	echo json_encode( $output );

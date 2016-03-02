@@ -527,7 +527,7 @@ var manage_subjects=function(){
 	if(user_subjects_data.length==0){
 		document.getElementById("results-div").innerHTML="Resultados user: "+session_data.user+"<br />No hay participantes";
 	}else{
-		document.getElementById("results-div").innerHTML="Resultados user: "+session_data.user+"<br /><table id=\"results-table\"></table>";
+		document.getElementById("results-div").innerHTML="Resultados user: "+session_data.user+"<br /><table id=\"results-table\"  class=\"results-table\"></table>";
 		var results_table=document.getElementById("results-table");
 		DataTableSimple.call(results_table, {
 			data: user_subjects_data,
@@ -691,7 +691,7 @@ var show_user_results=function(){
         document.getElementById("results-div").innerHTML="<b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
     }else{
         document.getElementById("results-div").innerHTML='\
-         <b>'+cache_user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"></table>";
+         <b>'+cache_user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"  class=\"results-table\"></table>";
         var results_table=document.getElementById("results-table");
         DataTableSimple.call(results_table, {
             data: cache_user_subject_results[session_data.subject].elements,
@@ -711,45 +711,207 @@ var show_user_results=function(){
     }
 }
 
+var analize_subject=function(){
+	preventBackExit();
+    var bkgr_canvas=document.getElementById("zone_canvas").style.background;
+    var bkgr_page=document.getElementById("page").style.background;
+    document.getElementById("header").style.display="none";
+    document.getElementById("page").style.background="#fff";
+    document.getElementById("page").style.overflow='auto';
+    document.getElementById("zone_canvas").style.background="#fff";
+    document.getElementById("zone_canvas").style.overflow='auto';
+    allow_scrolling();
+	canvas_zone_vcentered.innerHTML=' \
+	<div id="results-div">cargando resumen para imprimir...</div> \
+	<button id="go-back" class="minibutton fixed-top-right no-print">&larr;</button> \
+	';
+	document.getElementById("go-back").addEventListener(clickOrTouch,function(){
+        prevent_scrolling();
+        document.getElementById("zone_canvas").style.background=bkgr_canvas;
+        document.getElementById("zone_canvas").style.overflow='hidden';
+        document.getElementById("page").style.background=bkgr_page;
+        document.getElementById("page").style.overflow='hidden';
+        document.getElementById("header").style.display="block";
+        show_results();
+     }.bind(bkgr_canvas,bkgr_page)); 
+    if(!cache_user_subject_results.hasOwnProperty(session_data.subject)){
+        ajax_request_json(
+            backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject, 
+            function(data) {
+                cache_user_subject_results[session_data.subject]=data;
+                show_subject_analysis();
+            });
+    }else{
+        show_subject_analysis();
+    }
+};
+
+var show_subject_analysis=function(){
+    if(cache_user_subject_results[session_data.subject].elements.length==0){
+        document.getElementById("results-div").innerHTML="<b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
+    }else{
+        var analysis_data={}; // per activity type
+        // último, media (min,max), tests
+        document.getElementById("results-div").innerHTML='\
+         <b>'+cache_user_subject_results[session_data.subject].general.subject+'</b><br />\
+           Edad:     Curso(-repetidos): <br />\
+           Análisis: <br />\
+           <table id="results-table"  class=\"results-table\"></table>\
+           <br />\
+           Progreso: gráfico de progreso\
+         ';
+         // cuando lo guardemos añadir las horas de "juego"
+         // conciencia: 5h
+         // ritmo: xh
+    }
+}
+
+
+
+
+
+
 var summary_view=function(session_id){
 	preventBackExit();
     var bkgr_canvas=document.getElementById("zone_canvas").style.background;
     var bkgr_page=document.getElementById("page").style.background;
     document.getElementById("header").style.display="none";
     document.getElementById("page").style.background="#fff";
+    document.getElementById("page").style.overflow='auto';
     document.getElementById("zone_canvas").style.background="#fff";
+    document.getElementById("zone_canvas").style.overflow='auto';
+    allow_scrolling();
 	canvas_zone_vcentered.innerHTML=' \
 	<div id="results-div">cargando resumen para imprimir...</div> \
-	<br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button> \
+	<button id="go-back" class="minibutton fixed-top-right no-print">&larr;</button> \
 	';
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){
+        prevent_scrolling();
         document.getElementById("zone_canvas").style.background=bkgr_canvas;
+        document.getElementById("zone_canvas").style.overflow='hidden';
         document.getElementById("page").style.background=bkgr_page;
+        document.getElementById("page").style.overflow='hidden';
         document.getElementById("header").style.display="block";
         show_results();
-     }.bind(bkgr_canvas,bkgr_page));
+     }.bind(bkgr_canvas,bkgr_page)); 
     ajax_request_json(
         backend_url+'ajaxdb.php?action=get_results_global&user='+session_data.user,
         function(data) {
-            document.getElementById("results-div").innerHTML='\
-             <b>Resumen</b><br /><table id="results-table"></table>';
-            var results_table=document.getElementById("results-table");
-            DataTableSimple.call(results_table, {
-                data: data.elements,
-                //row_id: 'id',
-                //pagination_date: 30,
-                columns: [
-                    //{ data: 'id' },
-                    { data: 'subject', col_header: 'nombre',  format: 'first_12'},
-                    { data: 'conciencia'},
-                    { data: 'memoria_visual', col_header: 'memvis'},
-                    { data: 'ritmo'},
-                    { data: 'velocidad', col_header: 'veloc'},
-                    { data: 'discr_visual', col_header: 'discr'},
-                ]
-            } );
+            document.getElementById("results-div").innerHTML='';
+            var data2=classify_results_by_age(data.elements);
+            for(var age_generation in data2) {
+                if (data2.hasOwnProperty(age_generation)) {
+                    document.getElementById("results-div").innerHTML+='\
+                     <b>'+age_generation+' años</b><br /><table id="results-table'+age_generation+'" class="results-table"></table>';
+                    var results_table=document.getElementById("results-table"+age_generation);
+                    DataTableSimple.call(results_table, {
+                        data: data2[age_generation],
+                        //row_id: 'id',
+                        //pagination_date: 30,
+                        columns: [
+                            //{ data: 'id' },
+                            { data: 'subject', col_header: 'nombre',  format: 'first_12'},
+                            { data: 'conciencia'},
+                            { data: 'memoria_visual', col_header: 'memvis'},
+                            { data: 'ritmo'},
+                            { data: 'velocidad', col_header: 'veloc'},
+                            { data: 'discr_visual', col_header: 'discr'},
+                        ]
+                    } );
+                }
+            }
         }
     );
+}
+
+var classify_results_by_age=function(data){
+    var result={};
+    for(var i=0;i<data.length;i++){
+        var class_age=calculateAgeGeneration(cache_user_subjects[data[i]['subject']].birthdate,data[i]['timestamp']);
+        if(!result.hasOwnProperty(class_age)){
+            result[class_age]=[];
+        }
+        result[class_age].push(data[i]);
+    }
+    return result;
+}
+
+
+var summary_view2=function(){
+    var bkgr_canvas=document.getElementById("zone_canvas").style.background;
+    var bkgr_page=document.getElementById("page").style.background;
+    document.getElementById("header").style.display="none";
+    document.getElementById("page").style.background="#fff";
+    document.getElementById("page").style.overflow='auto';
+    document.getElementById("zone_canvas").style.background="#fff";
+    document.getElementById("zone_canvas").style.overflow='auto';
+    allow_scrolling();
+	canvas_zone_vcentered.innerHTML=' \
+	<button id="go-back" class="minibutton fixed-top-right no-print">&larr;</button> \
+	<div id="results-div"><b>Resumen</b><br /><table id="results-table" class="results-table">\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
+    </table></div> \
+	';
+	document.getElementById("go-back").addEventListener(clickOrTouch,function(){
+        prevent_scrolling();
+        document.getElementById("zone_canvas").style.background=bkgr_canvas;
+        document.getElementById("zone_canvas").style.overflow='hidden';
+        document.getElementById("page").style.background=bkgr_page;
+        document.getElementById("page").style.overflow='hidden';
+        document.getElementById("header").style.display="block";
+        show_results();
+     }.bind(bkgr_canvas,bkgr_page)); 
 }
 
 
@@ -778,7 +940,7 @@ var show_user_results_detail=function(session_id){
     if(!cache_user_subject_result_detail[session_id].hasOwnProperty('elements') || cache_user_subject_result_detail[session_id].elements.length==0){
         document.getElementById("results-div").innerHTML="Sesión: "+cache_user_subject_result_detail[session_id].general.session+"<br />No hay detalles";
     }else{
-        document.getElementById("results-div").innerHTML=""+cache_user_subject_result_detail[session_id].elements[0].subject+" - "+cache_user_subject_result_detail[session_id].elements[0].type+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"></table>";
+        document.getElementById("results-div").innerHTML=""+cache_user_subject_result_detail[session_id].elements[0].subject+" - "+cache_user_subject_result_detail[session_id].elements[0].type+"<br /><table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"  class=\"results-table\"></table>";
         var results_table=document.getElementById("results-table");
         DataTableSimple.call(results_table, {
             data: cache_user_subject_result_detail[session_id].elements,
@@ -818,7 +980,7 @@ var explore_result_detail_individual=function(session_ac_id){
                     }
                     document.getElementById("results-div").innerHTML=""+cache_user_subject_result_detail[session_id].elements[i].subject+" - "+cache_user_subject_result_detail[session_id].elements[i].type+"<br />\
                                                                       Resultado: "+restext+" - duración: "+DataTableSimple.formats.time_from_seconds_up_to_mins(cache_user_subject_result_detail[session_id].elements[i].duration)+"<br />\
-                                                                      <table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\">\
+                                                                      <table style=\"border:1px solid black; margin: 0 auto;\" id=\"results-table\"  class=\"results-table\">\
                                                                       <tr style=\"background: #333 none repeat scroll 0 0;color: #eee;font-weight: bold;\"><td>Respuesta correcta</td></tr>\
                                                                       <tr><td>"+cache_user_subject_result_detail[session_id].elements[i].activity+"</td></tr>\
                                                                       <tr style=\"background: #333 none repeat scroll 0 0;color: #eee;font-weight: bold;\"><td>Respuesta seleccionada</td></tr>\
