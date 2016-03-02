@@ -117,8 +117,10 @@ var users_select_elem="none";
 
 // Cache, clear this if user changes, session, or when they are modified...
 var cache_user_subjects=null;
+var cache_cognitionis_pagination_page=0;
 var cache_user_subject_results={};
 var cache_user_subject_result_detail={};
+var cache_user_summary_view={};
 
 function login_screen(){
 	if(debug){alert('login_screen called');}
@@ -154,12 +156,23 @@ function invitee_access(){
 	user_data.email='invitee';
 	user_data.display_name='invitado';
 	user_data.access_level='invitee';
-    cache_user_subjects={'invitado':{"id": "invitado", "alias":"invitado", "name":"invitado", "birthdate":"2010-01-01", "comments":"", "user":"afan"}};
+    
+    ajax_request_json(
+        '../data/invitado_data.json', 
+        function(data) {
+            cache_user_subjects=data.cache_user_subjects;
+            session_data.subject=objectProperties(cache_user_subjects)[0];
+            cache_user_subject_results=data.cache_user_subject_results;
+            cache_user_subject_result_detail=data.cache_user_subject_result_detail;
+            cache_user_summary_view=data.cache_user_summary_view;
+            menu_screen();
+        });    
+    /*cache_user_subjects={'invitado':{"id": "invitado", "alias":"invitado", "name":"invitado", "birthdate":"2010-01-01", "comments":"", "user":"afan"}};
     cache_user_subject_results[session_data.subject]={};
     cache_user_subject_results[session_data.subject].general={'user':'invitado','subject':'invitado'};
-    cache_user_subject_results[session_data.subject].elements=[];
+    cache_user_subject_results[session_data.subject].elements=[];*/
     // cache_user_subject_result_detail is created lively in case of results
-    menu_screen();
+    
 }
 
 function login_bypass(){
@@ -411,7 +424,7 @@ function menu_screen(){
 	}
 	
 	/*if(is_app){session_data.user='montsedeayala@gmail.com'; // will find a way to set the usr, by google account}*/
-	
+	cache_cognitionis_pagination_page=0;
 	if(debug) console.log('user.email: '+user_data.email);
 	if(session_state=="unset"){
         canvas_zone_vcentered.innerHTML='...waiting for session state...';
@@ -708,6 +721,9 @@ var show_user_results=function(){
                 { data: 'ver', col_header: 'detalle', link_function_id_button: 'explore_result_detail' }
             ]
         } );
+        if(cache_cognitionis_pagination_page!=0){
+            document.getElementById('results-table-nav').children[cache_cognitionis_pagination_page].click();
+        }
     }
 }
 
@@ -794,35 +810,51 @@ var summary_view=function(session_id){
         document.getElementById("header").style.display="block";
         show_results();
      }.bind(bkgr_canvas,bkgr_page)); 
-    ajax_request_json(
-        backend_url+'ajaxdb.php?action=get_results_global&user='+session_data.user,
-        function(data) {
-            document.getElementById("results-div").innerHTML='';
-            var data2=classify_results_by_age(data.elements);
-            for(var age_generation in data2) {
-                if (data2.hasOwnProperty(age_generation)) {
-                    document.getElementById("results-div").innerHTML+='\
-                     <b>'+age_generation+' años</b><br /><table id="results-table'+age_generation+'" class="results-table"></table>';
-                    var results_table=document.getElementById("results-table"+age_generation);
-                    DataTableSimple.call(results_table, {
-                        data: data2[age_generation],
-                        //row_id: 'id',
-                        //pagination_date: 30,
-                        columns: [
-                            //{ data: 'id' },
-                            { data: 'subject', col_header: 'nombre',  format: 'first_12'},
-                            { data: 'conciencia'},
-                            { data: 'memoria_visual', col_header: 'memvis'},
-                            { data: 'ritmo'},
-                            { data: 'velocidad', col_header: 'veloc'},
-                            { data: 'discr_visual', col_header: 'discr'},
-                        ]
-                    } );
-                }
+    if(!cache_user_summary_view.hasOwnProperty('general')){
+        ajax_request_json(
+            backend_url+'ajaxdb.php?action=get_results_global&user='+session_data.user,
+            function(data) {
+                cache_user_summary_view=data;
+                show_summary_view();
+            }
+        );
+    }else{
+        show_summary_view();        
+    }
+}
+
+var show_summary_view=function(){
+    if(cache_user_summary_view.length==0){
+        document.getElementById("results-div").innerHTML="<br />No hay resultados";
+    }else{
+        document.getElementById("results-div").innerHTML='';
+        var data2=classify_results_by_age(cache_user_summary_view.elements); //data.elements
+        for(var age_generation in data2) {
+            if (data2.hasOwnProperty(age_generation)) {
+                document.getElementById("results-div").innerHTML+='\
+                 <b>'+age_generation+' años</b><br /><table id="results-table'+age_generation+'" class="results-table"></table>';
+                var results_table=document.getElementById("results-table"+age_generation);
+                DataTableSimple.call(results_table, {
+                    data: data2[age_generation],
+                    //row_id: 'id',
+                    //pagination_date: 30,
+                    columns: [
+                        //{ data: 'id' },
+                        { data: 'subject', col_header: 'nombre',  format: 'first_12'},
+                        { data: 'conciencia'},
+                        { data: 'memoria_visual', col_header: 'memvis'},
+                        { data: 'ritmo'},
+                        { data: 'velocidad', col_header: 'veloc'},
+                        { data: 'discr_visual', col_header: 'discr'},
+                    ]
+                } );
             }
         }
-    );
+    }
 }
+
+
+
 
 var classify_results_by_age=function(data){
     var result={};
@@ -1098,10 +1130,29 @@ function send_session_data(finish_callback){
 																session: result_obj.id
 															} ,
 															 elements: result_obj.details};
+            var found_in_summary=false;
+            for(var i=0;i<cache_user_summary_view.elements.length;i++){
+                if(cache_user_summary_view.elements[i].subject==session_data.subject){
+                    cache_user_summary_view.elements[i][session_data.type]=session_data.num_correct+"/"+session_data.num_answered;
+                    found_in_summary=true;
+                }
+            }
+            if(!found_in_summary){
+                var sum_res={
+                        "subject" : session_data.subject,
+                        "conciencia" : "-",
+                        "memoria_visual": "-",
+                        "ritmo" : "-",
+                        "velocidad" : "-",
+                        "discr_visual" : "-",
+                        "timestamp" : session_data.timestamp
+                    };
+                sum_res[session_data.type]=session_data.num_correct+"/"+session_data.num_answered;
+                cache_user_summary_view.elements.push(sum_res);
+            }
             canvas_zone_vcentered.innerHTML='<br />Resultados guardados  "invitado"<br /><br />\
             <br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>';
 			document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
-
             if(typeof(finish_callback)!='undefined'){finish_callback();}
         }else{
             var xhr = new XMLHttpRequest();
@@ -1114,8 +1165,9 @@ function send_session_data(finish_callback){
                 var data=JSON.parse(this.responseText);
                 canvas_zone_vcentered.innerHTML='<br />Fin del Test<br />Datos guardados en el servidor.<br /><br />\
                 <br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>';
-				document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
+                document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
                 delete cache_user_subject_results[session_data.subject];
+                cache_user_summary_view={};
                 if(debug) console.log('Storing data. Server message: '+data.msg);
                 if(typeof(finish_callback)!='undefined'){finish_callback();}
             };
