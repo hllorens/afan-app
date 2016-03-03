@@ -1027,6 +1027,13 @@ var explore_result_detail_individual=function(session_ac_id){
    }
 };
 
+var reset_session=function(){
+    session_data.num_correct=0;
+    session_data.num_answered=0;
+    session_data.duration=0;
+    session_data.details=[];
+    activity_timer.reset(); // also stops the timer
+}
 
 
 var game=function(){
@@ -1039,12 +1046,10 @@ var game=function(){
     // CANNOT be here, in game-mode no clicks yet---------------------------
     //if(!check_if_sounds_loaded(memoria)){return;}
     // ---------------------------------------------------------------------- 
+    // send data if seesion.mode is training
+    if(session_data.mode=="training" && !game_mode && session_data.duration!=0){send_session_data(game);return;}
     //reset game variables --------
-	session_data.num_correct=0;
-	session_data.num_answered=0;
-	session_data.duration=0;
-    session_data.details=[];
-    activity_timer.reset(); // also stops the timer
+    reset_session();
     //-----------------------------
 	var extra_options="";
 	if(!game_mode){
@@ -1156,16 +1161,17 @@ function send_session_data(finish_callback){
             if(typeof(finish_callback)!='undefined'){finish_callback();}
         }else{
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", "http://www.centroafan.com/afan-app/www/"+backend_url+'ajaxdb.php',true);
+            xhr.open("POST", backend_url+'ajaxdb.php',true); //"http://www.centroafan.com/afan-app/www/"+
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
             xhr.responsetype="json";
             xhr.send("action=send_session_data_post&json_string="+(JSON.stringify(session_data))); 
-            canvas_zone_vcentered.innerHTML='<br />Fin del Test<br />...Enviando test al servidor...<br /><br />';
+            canvas_zone_vcentered.innerHTML='<br />...Enviando datos al servidor...<br /><br />';
             xhr.onload = function () {
                 var data=JSON.parse(this.responseText);
-                canvas_zone_vcentered.innerHTML='<br />Fin del Test<br />Datos guardados en el servidor.<br /><br />\
+                canvas_zone_vcentered.innerHTML='<br />Datos guardados en el servidor.<br /><br />\
                 <br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>';
                 document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
+                reset_session();
                 delete cache_user_subject_results[session_data.subject];
                 cache_user_summary_view={};
                 if(debug) console.log('Storing data. Server message: '+data.msg);

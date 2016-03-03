@@ -332,19 +332,25 @@ if ($action == "get_users"){
 
 	$error=0;
 	
-	$sQuery = "INSERT INTO sessions(type,mode,user,subject,age,num_answered,num_correct,result,level,duration,timestamp)  VALUES ('$type','$mode','$user','$subject','$age','$num_answered','$num_correct','$result','$level','$duration','$timestamp');"; 
-	$rResult = mysqli_query( $db_connection, $sQuery );
-	if(!$rResult){ $output["msg"]=mysqli_error( $db_connection )." -- ".$sQuery; $error=1;}
-	else{ 
-		$session_id=mysqli_insert_id($db_connection);
-		foreach ($str_json["details"] as $detail){
-			$sQuery = "INSERT INTO session_activities(type,mode,user,subject,session,activity,choice,result,level,duration,timestamp)  VALUES ('$type','$mode','$user','$subject','$session_id','".$detail["activity"]."','".$detail["choice"]."','".$detail["result"]."','$level','".$detail["duration"]."','".$detail["timestamp"]."')"; 
-			$rResult = mysqli_query( $db_connection, $sQuery );
-			if(!$rResult){ $output["msg"]=mysqli_error( $db_connection )." -- ".$sQuery; $error=1; break;}
-		}
-		if($error==0) $output["msg"]="Success. Data session stored in the server. --"; // -- '.$sQuery.'"}';}
-	}
-
+    if($mode=="test"){
+        $sQuery = "INSERT INTO sessions(type,mode,user,subject,age,num_answered,num_correct,result,level,duration,timestamp)  VALUES ('$type','$mode','$user','$subject','$age','$num_answered','$num_correct','$result','$level','$duration','$timestamp');"; 
+        $rResult = mysqli_query( $db_connection, $sQuery );
+        if(!$rResult){ $output["msg"]=mysqli_error( $db_connection )." -- ".$sQuery; $error=1;}
+        else{ 
+            $session_id=mysqli_insert_id($db_connection);
+            foreach ($str_json["details"] as $detail){
+                $sQuery = "INSERT INTO session_activities(type,mode,user,subject,session,activity,choice,result,level,duration,timestamp)  VALUES ('$type','$mode','$user','$subject','$session_id','".$detail["activity"]."','".$detail["choice"]."','".$detail["result"]."','$level','".$detail["duration"]."','".$detail["timestamp"]."')"; 
+                $rResult = mysqli_query( $db_connection, $sQuery );
+                if(!$rResult){ $output["msg"]=mysqli_error( $db_connection )." -- ".$sQuery; $error=1; break;}
+            }
+            if($error==0) $output["msg"]="Success. Data session stored in the server. --"; // -- '.$sQuery.'"}';}
+        }
+    }else{
+        $sQuery = "INSERT INTO sessions_train(type,mode,user,subject,age,num_answered,num_correct,result,level,duration,timestamp)  VALUES ('$type','$mode','$user','$subject','$age','$num_answered','$num_correct','$result','$level','$duration','$timestamp');"; 
+        $rResult = mysqli_query( $db_connection, $sQuery );
+        if(!$rResult){ $output["msg"]=mysqli_error( $db_connection )." -- ".$sQuery; $error=1;}
+    }
+    
 
 	header('Content-type: application/json');
 	echo json_encode( $output );

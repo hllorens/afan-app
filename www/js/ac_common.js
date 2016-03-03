@@ -184,6 +184,7 @@ var Activity = (function(){
                 throw new Error('finish: details.result is not "correct" or "incorrect"');
             }
             setTimeout(function(){this.finish_callback();}.bind(this), waiting_time);
+            //send_session_data(this.finish_callback); is done in game if duration is not 0
         }else{
             send_session_data(this.finish_callback);
         }
