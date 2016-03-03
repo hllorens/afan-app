@@ -1030,6 +1030,7 @@ var explore_result_detail_individual=function(session_ac_id){
 var reset_session=function(){
     session_data.num_correct=0;
     session_data.num_answered=0;
+    session_data.result=0;
     session_data.duration=0;
     session_data.details=[];
     activity_timer.reset(); // also stops the timer
@@ -1106,59 +1107,57 @@ var check_if_sounds_loaded=function(callback){
 
 function send_session_data(finish_callback){
     remove_modal();
-	if(game_mode){
-        if(typeof(finish_callback)!='undefined'){
-            finish_callback();
-        }else{
-            game();
-        }
-    }else{
+	if(!game_mode){
 		if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
         if(debug) console.log(JSON.stringify(session_data));
         if(user_data.email=='invitee'){
-            var result_obj={
-                    id:""+(cache_user_subject_results[session_data.subject].elements.length+1),
-					subject: session_data.subject,
-                    type:session_data.type,
-                    mode:session_data.mode,
-                    age: session_data.age,
-                    num_answered:session_data.num_answered,
-                    num_correct:session_data.num_correct,
-                    result:session_data.result,
-                    level:session_data.level,
-                    duration:session_data.duration,
-                    timestamp:session_data.timestamp,
-					details: session_data.details
-                };
-            cache_user_subject_results[session_data.subject].elements.push(result_obj);
-            cache_user_subject_result_detail[result_obj.id]={general: {
-																session: result_obj.id
-															} ,
-															 elements: result_obj.details};
-            var found_in_summary=false;
-            for(var i=0;i<cache_user_summary_view.elements.length;i++){
-                if(cache_user_summary_view.elements[i].subject==session_data.subject){
-                    cache_user_summary_view.elements[i][session_data.type]=session_data.num_correct+"/"+session_data.num_answered;
-                    found_in_summary=true;
-                }
-            }
-            if(!found_in_summary){
-                var sum_res={
-                        "subject" : session_data.subject,
-                        "conciencia" : "-",
-                        "memoria_visual": "-",
-                        "ritmo" : "-",
-                        "velocidad" : "-",
-                        "discr_visual" : "-",
-                        "timestamp" : session_data.timestamp
+            if(session_data.mode=="test"){
+                var result_obj={
+                        id:""+(cache_user_subject_results[session_data.subject].elements.length+1),
+                        subject: session_data.subject,
+                        type:session_data.type,
+                        mode:session_data.mode,
+                        age: session_data.age,
+                        num_answered:session_data.num_answered,
+                        num_correct:session_data.num_correct,
+                        result:session_data.result,
+                        level:session_data.level,
+                        duration:session_data.duration,
+                        timestamp:session_data.timestamp,
+                        details: session_data.details
                     };
-                sum_res[session_data.type]=session_data.num_correct+"/"+session_data.num_answered;
-                cache_user_summary_view.elements.push(sum_res);
+                cache_user_subject_results[session_data.subject].elements.push(result_obj);
+                cache_user_subject_result_detail[result_obj.id]={general: {
+                                                                    session: result_obj.id
+                                                                } ,
+                                                                 elements: result_obj.details};
+                var found_in_summary=false;
+                for(var i=0;i<cache_user_summary_view.elements.length;i++){
+                    if(cache_user_summary_view.elements[i].subject==session_data.subject){
+                        cache_user_summary_view.elements[i][session_data.type]=session_data.num_correct+"/"+session_data.num_answered;
+                        found_in_summary=true;
+                    }
+                }
+                if(!found_in_summary){
+                    var sum_res={
+                            "subject" : session_data.subject,
+                            "conciencia" : "-",
+                            "memoria_visual": "-",
+                            "ritmo" : "-",
+                            "velocidad" : "-",
+                            "discr_visual" : "-",
+                            "timestamp" : session_data.timestamp
+                        };
+                    sum_res[session_data.type]=session_data.num_correct+"/"+session_data.num_answered;
+                    cache_user_summary_view.elements.push(sum_res);
+                }
+                canvas_zone_vcentered.innerHTML='<br />Resultados guardados  "invitado"<br /><br />\
+                <br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>';
+            }else{
+                canvas_zone_vcentered.innerHTML='<br />cargando menú...<br /><br />\
+                <br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>';
             }
-            canvas_zone_vcentered.innerHTML='<br />Resultados guardados  "invitado"<br /><br />\
-            <br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>';
-			document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
-            if(typeof(finish_callback)!='undefined'){finish_callback();}
+            document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
         }else{
             var xhr = new XMLHttpRequest();
             xhr.open("POST", backend_url+'ajaxdb.php',true); //"http://www.centroafan.com/afan-app/www/"+
@@ -1171,13 +1170,14 @@ function send_session_data(finish_callback){
                 canvas_zone_vcentered.innerHTML='<br />Datos guardados en el servidor.<br /><br />\
                 <br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>';
                 document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
-                reset_session();
                 delete cache_user_subject_results[session_data.subject];
                 cache_user_summary_view={};
                 if(debug) console.log('Storing data. Server message: '+data.msg);
-                if(typeof(finish_callback)!='undefined'){finish_callback();}
             };
         }
     }
+    reset_session();
+    if(typeof(finish_callback)!='undefined'){finish_callback();}
+    else{game();}
 }
 
