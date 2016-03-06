@@ -48,7 +48,7 @@ if ($action == "get_users"){
 	echo "$state";
 }else if ($action == "login_bypass"){
     $output['error']="";
-    $output['info']="";
+    $output['info']="bypass";
     unset($_SESSION['long_lived_access_token']);
     unset($_SESSION['user_id']);
     unset($_SESSION['username']);
