@@ -17,13 +17,7 @@ var exit_url="http://www.centroafan.com";
 var backend_url='backend/' //../backend
 
 
-var exit_app=function(){
-		if(is_app){
-			navigator.app.exitApp();
-		}else{
-			location.href = exit_url;
-		}
-}
+
 
 var is_app=is_cordova();
 if(is_app){
@@ -32,6 +26,13 @@ if(is_app){
 	onDeviceReady();
 }
 
+var exit_app=function(){
+		if(is_cordova()){
+			navigator.app.exitApp();
+		}else{
+			location.href = exit_url;
+		}
+}
 
 function onDeviceReady() {
 	device_info="browser"

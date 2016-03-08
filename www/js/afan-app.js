@@ -430,7 +430,7 @@ function menu_screen(){
 		hamburger_menu_content.innerHTML=''+get_reduced_display_name(user_data.display_name)+'<ul>\
 		'+sign+'\
 		<li><a href="#" id="show_about">acerca de..</a></li>\
-		<li><a href="#" id="exit_app_hamburger">salir</a></li>\
+		<li><a id="exit_app_hamburger">salir</a></li>\
 		</ul>';
 		header_zone.innerHTML='<a id="hamburger_icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">\
 		<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"/></svg></a> <span id="header_text">'+app_name+'</span>';
@@ -472,7 +472,7 @@ function menu_screen(){
         document.getElementById("results").addEventListener(clickOrTouch,function(){show_results();});
         document.getElementById("exit_app").addEventListener(clickOrTouch,function(){exit_app();});
         document.getElementById("show_about").addEventListener(clickOrTouch,function(){hamburger_close();show_about();});
-        document.getElementById("exit_app_hamburger").addEventListener(clickOrTouch,function(){exit_app();});
+        document.getElementById("exit_app_hamburger").addEventListener(clickOrTouch,function(){hamburger_close();exit_app();});
 
 		if(cache_user_subjects==null){
 			ajax_request_json(
@@ -800,6 +800,9 @@ function send_session_data(finish_callback){
                 <br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>';
             }
             document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
+            reset_session();
+            if(typeof(finish_callback)!='undefined'){finish_callback();}
+            else{game();}
         }else{
             var xhr = new XMLHttpRequest();
             xhr.open("POST", backend_url+'ajaxdb.php',true); //"http://www.centroafan.com/afan-app/www/"+
@@ -815,11 +818,12 @@ function send_session_data(finish_callback){
                 delete cache_user_subject_results[session_data.subject];
                 cache_user_summary_view={};
                 if(debug) console.log('Storing data. Server message: '+data.msg);
+                reset_session();
+                if(typeof(finish_callback)!='undefined'){finish_callback();}
+                else{game();}
             };
         }
     }
-    reset_session();
-    if(typeof(finish_callback)!='undefined'){finish_callback();}
-    else{game();}
+
 }
 

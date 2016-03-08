@@ -162,10 +162,10 @@ var show_summary_view=function(){
                     columns: [
                         //{ data: 'id' },
                         { data: 'subject', col_header: 'nombre',  format: 'first_12'},
-                        { data: 'conciencia'},
+                        { data: 'conciencia', col_header: 'conc'},
                         { data: 'memoria_visual', col_header: 'memvis'},
                         { data: 'ritmo'},
-                        { data: 'velocidad', col_header: 'veloc'},
+                        { data: 'velocidad', col_header: 'vel'},
                         { data: 'discr_visual', col_header: 'discr'},
                     ]
                 } );
