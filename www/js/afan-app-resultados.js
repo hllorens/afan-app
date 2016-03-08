@@ -297,7 +297,7 @@ var show_user_results_detail=function(session_id){
         var results_table=document.getElementById("results-table");
         DataTableSimple.call(results_table, {
             data: cache_user_subject_result_detail[session_id].elements,
-            pagination: 6,
+            pagination: 8,
             row_id: 'id',
             columns: [
                 //{ data: 'id' },

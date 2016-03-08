@@ -8,7 +8,7 @@ var acVelocidad=function(){
     this.ac.MAX_LEVELS=4; // 3 is the max but 4 will make it play 2 more times
     this.ac.MAX_PASSED_TIMES_PER_LEVEL_GAME=4;
     this.ac.MAX_PLAYED_TIMES_PER_LEVEL_TEST=2;
-    this.ac.MAX_FAILED_TIMES_TEST=2;
+    //this.ac.MAX_FAILED_TIMES_TEST=2;
 
     this.ac.sec_init=1;
     this.ac.used_sentences=[];
@@ -24,8 +24,7 @@ var acVelocidad=function(){
 
 
     this.ac.start_activity=function(){
-        if(that.ac.level>that.ac.MAX_LEVELS || 
-             (session_data.mode=="test" && !game_mode && that.ac.failed_times>=that.ac.MAX_FAILED_TIMES_TEST)){
+        if(that.ac.level>that.ac.MAX_LEVELS){ //|| (session_data.mode=="test" && !game_mode && that.ac.failed_times>=that.ac.MAX_FAILED_TIMES_TEST)
             that.ac.finish();
         }else{
             if(!that.ac.activities.hasOwnProperty(that.ac.level))
