@@ -7,7 +7,7 @@ var acRitmo=function(){
     this.ac.help_text='Escucha la secuencia. Después tendrás que reproducirla.';
     this.ac.MAX_LEVELS=6;
     this.ac.MAX_PASSED_TIMES_PER_LEVEL_GAME=4;
-    this.ac.MAX_PLAYED_TIMES_PER_LEVEL_TEST=1; // all the activities
+    this.ac.MAX_PLAYED_TIMES_PER_LEVEL_TEST=2; // all the activities
     //this.ac.MAX_FAILED_TIMES_TEST=2;
     var that=this;
 

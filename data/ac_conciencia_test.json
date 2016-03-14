@@ -33,11 +33,23 @@
             "answers" : ["banyera", "ballena", "antena"],
             "level" : 1
         },
+		{
+			"type" : "sounds",
+			"sounds" : ["k", "a", "\/", "m", "i", "\/", "n", "o"],
+			"level" : 2,
+			"answers" : ["camino", "camisa", "camion"]
+		},
+		{
+			"type" : "sounds",
+			"sounds" : ["p", "l", "a", "\/", "t", "o"],
+			"level" : 3,
+			"answers" : ["plato", "plano", "pato"]
+		},
         {
             "type" : "sounds",
             "sounds" : ["j", "a", "\/", "u", "\/", "l", "a"],
             "answers" : ["jaula", "koala", "bala"],
-            "level" : 1
+            "level" : 3
         }
     ]
 }
