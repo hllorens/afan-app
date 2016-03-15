@@ -321,9 +321,9 @@ if ($action == "get_users"){
 	$subject=$str_json["subject"];
 	$age=$str_json["age"];
 	$num_answered=$str_json["num_answered"];
-	$num_correct=$str_json["num_correct"];
+	$num_correct=round((double) $str_json["num_correct"],2);
 	$result=0;
-	if(((int) $num_answered)!=0) $result= ((int) $num_correct) / ((int) $num_answered);
+	if(((int) $num_answered)!=0) $result= round(((int) $num_correct) / ((int) $num_answered), 2);
 	$level=$str_json["level"];
 	$duration=$str_json["duration"];
 	$timestamp=$str_json["timestamp"];

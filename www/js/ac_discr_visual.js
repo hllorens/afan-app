@@ -135,7 +135,6 @@ var acDiscrVisual=function(){
         var current_correct=0;
         var current_answered=0;
         var choice_counts={};
-        session_data.num_answered+=that.ac.syllable_repetition;
         current_answered+=that.ac.syllable_repetition;
         for (var i = 0;i<that.ac.table.rows.length; i++) {
            for (var j = 0;j<that.ac.table.rows[i].cells.length; j++) {
@@ -147,18 +146,20 @@ var acDiscrVisual=function(){
                         choice_counts[elem.innerHTML]=1;
                     }
                     if(elem.innerHTML==that.ac.syllable){
-                        session_data.num_correct++;
                         current_correct++;
                     }else if(elem.innerHTML==that.ac.dyslexic){
-                        session_data.num_answered++;
                         current_answered++;
                     }else{
-                        session_data.num_answered++;
                         current_answered++;
                     }
                 }
            }  
         }
+        //session_data.num_answered+=current_answered;
+        //session_data.num_correct+=current_correct;
+        session_data.num_answered+=1;
+        session_data.num_correct+=(current_correct/current_answered);
+
         //alert("correct="+session_data.num_correct+" incorrect/missing="+(session_data.num_answered-session_data.num_correct));
 
         // build activity details ----------------------------------
