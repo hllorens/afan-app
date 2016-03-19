@@ -25,7 +25,7 @@ var show_user_results=function(){
         document.getElementById("results-div").innerHTML="<b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
     }else{
         document.getElementById("results-div").innerHTML='\
-         <b>'+cache_user_subject_results[session_data.subject].general.subject+"</b><br /><table id=\"results-table\"  class=\"results-table\"></table>";
+         <div style=""><span style="font-weight:bold;">'+cache_user_subject_results[session_data.subject].general.subject+'</span><button id="stat" class="stat"></button></div><table id="results-table"  class="results-table"></table>';
         var results_table=document.getElementById("results-table");
         DataTableSimple.call(results_table, {
             data: cache_user_subject_results[session_data.subject].elements,
@@ -45,6 +45,7 @@ var show_user_results=function(){
         if(cache_cognitionis_pagination_page!=0){
             document.getElementById('results-table-nav').children[cache_cognitionis_pagination_page].click();
         }
+        document.getElementById("stat").addEventListener(clickOrTouch,analize_subject);
     }
 }
 
@@ -60,6 +61,7 @@ var analize_subject=function(){
     allow_scrolling();
 	canvas_zone_vcentered.innerHTML=' \
 	<div id="results-div">cargando resumen para imprimir...</div> \
+    <div class="fixed-top-left"><img src="../../afan-app-media/img/logo-afan.png" /><br /><span class="small-text">Programa CoLE</span></div>\
 	<button id="go-back" class="minibutton fixed-top-right no-print">&larr;</button> \
 	';
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){
@@ -69,7 +71,7 @@ var analize_subject=function(){
         document.getElementById("page").style.background=bkgr_page;
         document.getElementById("page").style.overflow='hidden';
         document.getElementById("header").style.display="block";
-        show_results();
+        explore_results();
      }.bind(bkgr_canvas,bkgr_page)); 
     if(!cache_user_subject_results.hasOwnProperty(session_data.subject)){
         ajax_request_json(
@@ -87,26 +89,96 @@ var show_subject_analysis=function(){
     if(cache_user_subject_results[session_data.subject].elements.length==0){
         document.getElementById("results-div").innerHTML="<b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
     }else{
-        var analysis_data={}; // per activity type
+        var analysis=analyze_subject_data(); // per activity type
         // último, media (min,max), tests
+        //           <table id="results-table"  class=\"results-table\"></table>\
+
         document.getElementById("results-div").innerHTML='\
+         <br /><br />\
          <b>'+cache_user_subject_results[session_data.subject].general.subject+'</b><br />\
-           Edad:     Curso(-repetidos): <br />\
-           Análisis: <br />\
-           <table id="results-table"  class=\"results-table\"></table>\
+           Edad: '+cache_user_subject_results[session_data.subject].elements[0].age+'<br />\
+           <br />Conciencia\
+           <div id="chart-conciencia" style="width:80%;margin:0 auto;"></div>\
+           <div id="text-conciencia" class="small-text">No hay suficientes datos</div>\
+           <br /><br />Memoria Visual\
+           <div id="chart-memoria_visual" style="width:80%;margin:0 auto;"></div>\
+           <div id="text-memoria_visual" class="small-text">No hay suficientes datos</div>\
+           <br /><br />Ritmo\
+           <div id="chart-ritmo" style="width:80%;margin:0 auto;"></div>\
+           <div id="text-ritmo" class="small-text">No hay suficientes datos</div>\
+           <br /><br />Velocidad\
+           <div id="chart-velocidad" style="width:80%;margin:0 auto;"></div>\
+           <div id="text-velocidad" class="small-text">No hay suficientes datos</div>\
+           <br /><br />Discriminación visual\
+           <div id="chart-discr_visual" style="width:80%;margin:0 auto;"></div>\
+           <div id="text-discr_visual" class="small-text">No hay suficientes datos</div>\
            <br />\
-           Progreso: gráfico de progreso\
          ';
-         // cuando lo guardemos añadir las horas de "juego"
-         // conciencia: 5h
-         // ritmo: xh
+        // cuando lo guardemos añadir las horas de "juego"
+        // conciencia: 5h
+        // ritmo: xh
+        for (var type in analysis) {
+            if (analysis.hasOwnProperty(type) && analysis[type].data.length>1) {
+                 new Chartist.Line('#chart-'+type, 
+                                    {labels: analysis[type].labels, //
+                                    series: [analysis[type].data]}, //
+                                    {height: '200px',  
+                                    lineSmooth: Chartist.Interpolation.cardinal({fillHoles: true}),
+                                    //fullWidth: true, chartPadding: {right: 40}, // could be removed but looks a bit bad if only 2 tests
+                                    low: 0, high: 1});
+                document.getElementById('text-'+type).innerHTML='min: '+analysis[type].min.toFixed(2)+' - max: '+analysis[type].max.toFixed(2)+' - media: '+analysis[type].mean.toFixed(2);
+            }
+        }
     }
 }
 
+var global2normal_results=function(data){
+    var normal_data=[];
+    for(var i=0;i<data.length;i++){
+        if(data[i].hasOwnProperty('result') && data[i].result['conciencia']!='-') normal_data.push({timestamp:data[i].timestamp,type:'conciencia',result:data[i].result['conciencia']});
+        if(data[i].hasOwnProperty('result') && data[i].result['memoria_visual']!='-') normal_data.push({timestamp:data[i].timestamp,type:'memoria_visual',result:data[i].result['memoria_visual']});
+        if(data[i].hasOwnProperty('result') && data[i].result['ritmo']!='-') normal_data.push({timestamp:data[i].timestamp,type:'ritmo',result:data[i].result['ritmo']});
+        if(data[i].hasOwnProperty('result') && data[i].result['velocidad']!='-') normal_data.push({timestamp:data[i].timestamp,type:'velocidad',result:data[i].result['velocidad']});
+        if(data[i].hasOwnProperty('result') && data[i].result['discr_visual']!='-') normal_data.push({timestamp:data[i].timestamp,type:'discr_visual',result:data[i].result['discr_visual']});
+    }
+    return normal_data;
+}
 
 
+var analyze_subject_data=function(){
+    return analyze_data(cache_user_subject_results[session_data.subject].elements);
+}
 
+var analyze_data=function(data){
+    // inverse for to order by date (earliest first)
+    var analysis={};
+    // compute labels & data
+    for (var i=data.length-1;i>=0;--i){
+        var type=data[i].type;
+        var result=Number(data[i].result);
+        var date=data[i].timestamp.substr(0,10);
+        if (!analysis.hasOwnProperty(type)){
+            analysis[type]={'min':result,'max':result,'sum':result, 'elems':1, 'labels':[date.substr(8,2).replace(/^0+/, '')+'.'+date.substr(5,2).replace(/^0+/, '')+'.'+date.substr(2,2)], 'data':[result]};
+        }else{
+            analysis[type].labels.push(date.substr(8,2).replace(/^0+/, '')+'.'+date.substr(5,2).replace(/^0+/, '')+'.'+date.substr(2,2));
+            analysis[type].data.push(result);
+            if(result>analysis[type].max) analysis[type].max=result;
+            if(result<analysis[type].min) analysis[type].min=result;
+            analysis[type].sum+=result;
+            analysis[type].elems++;
+            if(analysis[type].labels.length>2) analysis[type].labels[analysis[type].labels.length-2]=analysis[type].labels.length-1;
+        }
+    }
 
+    // calculations
+    for (var type in analysis) {
+        if (analysis.hasOwnProperty(type)) {
+            analysis[type].mean=analysis[type].sum/analysis[type].elems;
+        }
+    }
+    
+    return analysis;
+}
 
 var summary_view=function(session_id){
 	preventBackExit();
@@ -120,6 +192,7 @@ var summary_view=function(session_id){
     allow_scrolling();
 	canvas_zone_vcentered.innerHTML=' \
 	<div id="results-div">cargando resumen para imprimir...</div> \
+    <div class="fixed-top-left"><img src="../../afan-app-media/img/logo-afan.png" /><br /><span class="small-text">Programa CoLE</span></div>\
 	<button id="go-back" class="minibutton fixed-top-right no-print">&larr;</button> \
 	';
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){
@@ -148,7 +221,7 @@ var show_summary_view=function(){
     if(cache_user_summary_view.length==0){
         document.getElementById("results-div").innerHTML="<br />No hay resultados";
     }else{
-        document.getElementById("results-div").innerHTML='';
+        document.getElementById("results-div").innerHTML='<br /><br />';
         var data2=classify_results_by_age(cache_user_summary_view.elements); //data.elements
         for(var age_generation in data2) {
             if (data2.hasOwnProperty(age_generation)) {
@@ -169,12 +242,54 @@ var show_summary_view=function(){
                         { data: 'discr_visual', col_header: 'discr'},
                     ]
                 } );
+                var analysis=analyze_data(global2normal_results(data2[age_generation]));
+                var table_analysis=[
+                                    {'analysis':'min','conciencia':'-','memoria_visual':'-','ritmo':'-','velocidad':'-','discr_visual':'-'},
+                                    {'analysis':'media','conciencia':'-','memoria_visual':'-','ritmo':'-','velocidad':'-','discr_visual':'-'},
+                                    {'analysis':'max','conciencia':'-','memoria_visual':'-','ritmo':'-','velocidad':'-','discr_visual':'-'}
+                                    ];
+                document.getElementById("results-div").innerHTML+='<table id="analysis-table'+age_generation+'" class="results-table"></table>';
+                for (var type in {'conciencia':0,'memoria_visual':0,'ritmo':0,'velocidad':0,'discr_visual':0}) {
+                    if (analysis.hasOwnProperty(type)) {
+                        table_analysis[0][type]=analysis[type].min.toFixed(2);
+                        table_analysis[1][type]=analysis[type].mean.toFixed(2);
+                        table_analysis[2][type]=analysis[type].max.toFixed(2);
+                    }
+                }
+                var results_table=document.getElementById("analysis-table"+age_generation);
+                DataTableSimple.call(results_table, {
+                    data: table_analysis,
+                    //row_id: 'id',
+                    //pagination_date: 30,
+                    columns: [
+                        //{ data: 'id' },
+                        { data: 'analysis', col_header: '-calc-',  format: 'first_12'},
+                        { data: 'conciencia', col_header: 'conc'},
+                        { data: 'memoria_visual', col_header: 'memvis'},
+                        { data: 'ritmo'},
+                        { data: 'velocidad', col_header: 'vel'},
+                        { data: 'discr_visual', col_header: 'discr'},
+                    ]
+                } );
+                document.getElementById("results-div").innerHTML+='<br />';
             }
         }
     }
 }
 
-
+/*
+            for (var type in {'conciencia':0,'memoria_visual':0,'ritmo':0,'velocidad':0,'discr_visual':0}) {
+                if (analysis.hasOwnProperty(type)) {
+                    document.getElementById("analysis-table'+age_generation").innerHTML+='\
+                        <tr><b>'+type+'</b> min:'+analysis[type].min.toFixed(2)+', max:'+analysis[type].max.toFixed(2)+', media:'+analysis[type].mean.toFixed(2)+'</div>\
+                      ';
+                }else{
+                    document.getElementById("analysis-table'+age_generation").innerHTML+='\
+                        <div><b>'+type+'</b> min: -, max: -, media: -</div>\
+                      ';
+                }
+            }
+*/
 
 
 var classify_results_by_age=function(data){
@@ -190,82 +305,6 @@ var classify_results_by_age=function(data){
 }
 
 
-var summary_view2=function(){
-    var bkgr_canvas=document.getElementById("zone_canvas").style.background;
-    var bkgr_page=document.getElementById("page").style.background;
-    document.getElementById("header").style.display="none";
-    document.getElementById("page").style.background="#fff";
-    document.getElementById("page").style.overflow='auto';
-    document.getElementById("zone_canvas").style.background="#fff";
-    document.getElementById("zone_canvas").style.overflow='auto';
-    allow_scrolling();
-	canvas_zone_vcentered.innerHTML=' \
-	<button id="go-back" class="minibutton fixed-top-right no-print">&larr;</button> \
-	<div id="results-div"><b>Resumen</b><br /><table id="results-table" class="results-table">\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\
-    </table></div> \
-	';
-	document.getElementById("go-back").addEventListener(clickOrTouch,function(){
-        prevent_scrolling();
-        document.getElementById("zone_canvas").style.background=bkgr_canvas;
-        document.getElementById("zone_canvas").style.overflow='hidden';
-        document.getElementById("page").style.background=bkgr_page;
-        document.getElementById("page").style.overflow='hidden';
-        document.getElementById("header").style.display="block";
-        show_results();
-     }.bind(bkgr_canvas,bkgr_page)); 
-}
 
 
 var explore_result_detail=function(session_id){
@@ -356,3 +395,63 @@ var explore_result_detail_individual=function(session_ac_id){
 
 
 
+/*var analyze_subject_data_merged_types=function(){
+    // inverse for to order by date (earliest first), max one per day (the last of that day)
+    var analysis={};
+    var labels=[];
+    var types=[];
+    var types_counts={};
+    var type_min_count=2;
+    
+    // compute types
+    for (var i=cache_user_subject_results[session_data.subject].elements.length-1;i>=0;--i){
+        var type=cache_user_subject_results[session_data.subject].elements[i].type;
+        var date=cache_user_subject_results[session_data.subject].elements[i].timestamp.substr(0,10);
+        if (!types_counts.hasOwnProperty(type)) types_counts[type]=1;
+        else types_counts[type]++;
+        if(!analysis.hasOwnProperty(type) && types_counts[type]==type_min_count){
+            analysis[type]={'min':999,'max':-1,'sum':0, 'elems':0, 'labels':[], 'data':[]};
+            types.push(type);
+        } 
+    }
+
+    // compute labels & data (one per day, the last one)
+    for (var i=cache_user_subject_results[session_data.subject].elements.length-1;i>=0;--i){
+        var type=cache_user_subject_results[session_data.subject].elements[i].type;
+        var result=cache_user_subject_results[session_data.subject].elements[i].result;
+        var date=cache_user_subject_results[session_data.subject].elements[i].timestamp.substr(0,10);
+        if (analysis.hasOwnProperty(type)){
+            if(labels.indexOf(date)==-1){
+                labels.push(date);
+                for(var x=0;x<types.length;x++){
+                    analysis[types[x]].labels.push(date);
+                    analysis[types[x]].data.push(null);
+                }
+            }
+            analysis[type].data[labels.indexOf(date)]=Number(result);
+        }
+    }
+    for (var type in analysis) {
+        if (analysis.hasOwnProperty(type)) {
+            for(var x=0;x<analysis[type].data.length;x++){
+                var elem=analysis[type].data[x];
+                if(elem!=null){
+                    elem=Number(elem);
+                    if(elem>analysis[type].max) analysis[type].max=elem;
+                    if(elem<analysis[type].min) analysis[type].min=elem;
+                    analysis[type].sum+=elem;
+                    analysis[type].elems++;
+                }
+                analysis[type].labels[x]=x;
+            }
+        }
+    }
+    // calculations
+    for (var type in analysis) {
+        if (analysis.hasOwnProperty(type)) {
+            analysis[type].mean=analysis[type].sum/analysis[type].elems;
+        }
+    }
+    
+    return analysis;
+}*/

@@ -13,6 +13,7 @@ var images = [
 "../../afan-app-media/img/happy.png",
 "../../afan-app-media/img/wordimg-sprite.png",
 "../../afan-app-media/img/correct.png",
+"../../afan-app-media/img/stat.png",
 "../../afan-app-media/img/wrong.png"
 ];
 var sounds = [
@@ -768,7 +769,7 @@ function send_session_data(finish_callback){
                         timestamp:session_data.timestamp,
                         details: session_data.details
                     };
-                cache_user_subject_results[session_data.subject].elements.push(result_obj);
+                cache_user_subject_results[session_data.subject].elements.unshift(result_obj);
                 cache_user_subject_result_detail[result_obj.id]={general: {
                                                                     session: result_obj.id
                                                                 } ,

@@ -382,10 +382,21 @@ if ($action == "get_users"){
             $output['elements'][$num_elems]['velocidad']="-";
             $output['elements'][$num_elems]['discr_visual']="-";
             $output['elements'][$num_elems]['timestamp']="-";
+            $output['elements'][$num_elems]['result']=array();
+            $output['elements'][$num_elems]['result']['subject']=$aRow['subject'];
+            $output['elements'][$num_elems]['result']['conciencia']="-";
+            $output['elements'][$num_elems]['result']['memoria_visual']="-";
+            $output['elements'][$num_elems]['result']['ritmo']="-";
+            $output['elements'][$num_elems]['result']['velocidad']="-";
+            $output['elements'][$num_elems]['result']['discr_visual']="-";
+            $output['elements'][$num_elems]['result']['timestamp']="-";
+            
             $num_elems++;
         }
 		$output['elements'][($num_elems-1)][$aRow['type']] = $aRow['num_correct']."/".$aRow['num_answered'];
 		$output['elements'][($num_elems-1)]['timestamp'] = $aRow['timestamp'];
+		$output['elements'][($num_elems-1)]['result'][$aRow['type']] = $aRow['result'];
+		$output['elements'][($num_elems-1)]['result']['timestamp'] = $aRow['timestamp'];
 	}
 	header('Content-type: application/json');
 	echo json_encode( $output );
