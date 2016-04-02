@@ -21,10 +21,14 @@ var backend_url='backend/' //../backend
 
 var is_app=is_cordova();
 if(is_app){
+    alert("is app");
 	document.addEventListener('deviceready', onDeviceReady, false);
+    backend_url='http://www.centroafan.com/afan-app/www/backend/';
 }else{
 	onDeviceReady();
 }
+
+
 
 var exit_app=function(){
 		if(is_cordova()){
@@ -41,8 +45,8 @@ function onDeviceReady() {
                         'PhoneGap=' + device.phonegap + '-' + 
                         'Platform=' + device.platform + '-' + 
                         'UUID='     + device.uuid     + '-' + 
-                        'Ver='  + device.version
-		
+                        'Ver='  + device.version + '-' + 
+                        'Online='  + (navigator.connection.type == Connection.NONE); // remove if this fails, might need cordova plugin add cordova-plugin-network-information
 	}
 	splash_screen();
 }

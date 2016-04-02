@@ -14,6 +14,11 @@ function get_value($name){
 	return 	$_REQUEST[$name];
 }
 
+$jsoncallback='none';
+if( isset($_REQUEST['jsoncallback']) ){
+    $jsoncallback=$_REQUEST['jsoncallback'];
+}
+
 $action=get_value("action");
 $timestamp_seconds=date("Y-m-d H:i:s");
 

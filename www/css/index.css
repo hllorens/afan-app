@@ -136,7 +136,7 @@ button.button{
 button.stat{
 	border:1px solid #6a6;
 	background-color: #eee;
-    background-image: url('../../../afan-app-media/img/stat.png');
+    background-image: url('../external-git-ignored/afan-app-media/img/stat.png');
     background-repeat: no-repeat;
 	color:#111;
 	min-width:48px;min-height:34px;
@@ -556,9 +556,9 @@ a.boxclose{
     h1, h2, h3 { page-break-after: avoid; }
     table {
       border-collapse: collapse !important; 
-      tr{ page-break-inside: avoid;}
-      th{-webkit-print-color-adjust: exact;}
     }
+    tr{ page-break-inside: avoid;}
+    th{-webkit-print-color-adjust: exact;}
     .results-table tr:nth-child(even) {background: #fff;}
     .results-table tr:nth-child(odd) {background: #eee;-webkit-print-color-adjust: exact;}
     #header{display:none;}

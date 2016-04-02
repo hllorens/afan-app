@@ -61,7 +61,7 @@ var analize_subject=function(){
     allow_scrolling();
 	canvas_zone_vcentered.innerHTML=' \
 	<div id="results-div">cargando resumen para imprimir...</div> \
-    <div class="fixed-top-left"><img src="../../afan-app-media/img/logo-afan.png" /><br /><span class="small-text">Programa CoLE</span></div>\
+    <div class="fixed-top-left"><img src="'+media_objects.images['logo-afan.png'].src+'" /><br /><span class="small-text">Programa CoLE</span></div>\
 	<button id="go-back" class="minibutton fixed-top-right no-print">&larr;</button> \
 	';
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){
@@ -192,7 +192,7 @@ var summary_view=function(session_id){
     allow_scrolling();
 	canvas_zone_vcentered.innerHTML=' \
 	<div id="results-div">cargando resumen para imprimir...</div> \
-    <div class="fixed-top-left"><img src="../../afan-app-media/img/logo-afan.png" /><br /><span class="small-text">Programa CoLE</span></div>\
+    <div class="fixed-top-left"><img src="'+media_objects.images['logo-afan.png'].src+'" /><br /><span class="small-text">Programa CoLE</span></div>\
 	<button id="go-back" class="minibutton fixed-top-right no-print">&larr;</button> \
 	';
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){
