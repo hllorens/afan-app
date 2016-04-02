@@ -14,16 +14,12 @@ prevent_scrolling();
 
 // variables
 var exit_url="http://www.centroafan.com";
-var backend_url='backend/' //../backend
-
-
 
 
 var is_app=is_cordova();
 if(is_app){
-    alert("is app");
+    console.log("is app");
 	document.addEventListener('deviceready', onDeviceReady, false);
-    backend_url='http://www.centroafan.com/afan-app/www/backend/';
 }else{
 	onDeviceReady();
 }

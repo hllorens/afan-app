@@ -9,16 +9,16 @@ var explore_results=function(){
 	';
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){show_results();});
     if(!cache_user_subject_results.hasOwnProperty(session_data.subject)){
-        ajax_request_json(
-            backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject, 
-            function(data) {
-                cache_user_subject_results[session_data.subject]=data;
-                show_user_results();
-            });
+        jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_cache_user_subject_results_show_results&action=get_results&user='+session_data.user+'&subject='+session_data.subject);
     }else{
         show_user_results();
     }
 };
+
+var set_cache_user_subject_results_show_results=function(data) {
+    cache_user_subject_results[session_data.subject]=data;
+    show_user_results();
+}
 
 var show_user_results=function(){
     if(cache_user_subject_results[session_data.subject].elements.length==0){
@@ -74,15 +74,15 @@ var analize_subject=function(){
         explore_results();
      }.bind(bkgr_canvas,bkgr_page)); 
     if(!cache_user_subject_results.hasOwnProperty(session_data.subject)){
-        ajax_request_json(
-            backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject, 
-            function(data) {
-                cache_user_subject_results[session_data.subject]=data;
-                show_subject_analysis();
-            });
+        jsonp_request(backend_url+'ajaxdb.php?jsoncallback=action=get_results&user='+session_data.user+'&subject='+session_data.subject);
     }else{
         show_subject_analysis();
     }
+};
+
+var set_cache_user_subject_results_show_analysis=function(data) {
+    cache_user_subject_results[session_data.subject]=data;
+    show_subject_analysis();
 };
 
 var show_subject_analysis=function(){
@@ -205,17 +205,16 @@ var summary_view=function(session_id){
         show_results();
      }.bind(bkgr_canvas,bkgr_page)); 
     if(!cache_user_summary_view.hasOwnProperty('general')){
-        ajax_request_json(
-            backend_url+'ajaxdb.php?action=get_results_global&user='+session_data.user,
-            function(data) {
-                cache_user_summary_view=data;
-                show_summary_view();
-            }
-        );
+        jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_cache_user_summary_view&action=get_results_global&user='+session_data.user);
     }else{
-        show_summary_view();        
+        show_summary_view();
     }
 }
+
+var set_cache_user_summary_view=function(data) {
+    cache_user_summary_view=data;
+    show_summary_view();
+};
 
 var show_summary_view=function(){
     if(cache_user_summary_view.length==0){
@@ -315,18 +314,16 @@ var explore_result_detail=function(session_id){
 	';
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){explore_results();});
 	if(!cache_user_subject_result_detail.hasOwnProperty(session_id)){
-		ajax_request_json(
-			backend_url+'ajaxdb.php?action=get_result_detail&session='+session_id+'&user='+session_data.user, 
-			function(data) {
-				cache_user_subject_result_detail[session_id]=data;
-                show_user_results_detail(session_id);
-            }
-        );
+		jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_cache_user_subject_detail_show_detail&action=get_result_detail&session='+session_id+'&user='+session_data.user);
     }else{
         show_user_results_detail(session_id);
     }
 };
 
+var set_cache_user_subject_detail_show_detail=function(data) {
+    cache_user_subject_result_detail[session_id]=data;
+    show_user_results_detail(session_id);
+};
 
 var show_user_results_detail=function(session_id){
     if(!cache_user_subject_result_detail[session_id].hasOwnProperty('elements') || cache_user_subject_result_detail[session_id].elements.length==0){
