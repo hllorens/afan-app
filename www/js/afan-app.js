@@ -6,6 +6,27 @@ if(QueryString.hasOwnProperty('game_mode') && QueryString.game_mode=='true') gam
 
 var app_name='CoLE';
 
+var internet_access=true;
+function check_internet_access(){
+    check_internet_access_with_img_url('http://www.centroafan.com/logo-afan.jpg',set_internet_access_true,set_internet_access_false);
+}
+var set_internet_access_true=function(){
+    internet_access=true;
+    jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_session_state&action=gen_session_state');
+    menu_screen();
+}
+var set_internet_access_false=function(){
+    internet_access=false;
+    session_state="offline";
+    menu_screen();
+}
+
+var set_session_state=function(result) {
+    if(result.hasOwnProperty('error') && result.error!=""){alert("SET SESSION STATE ERROR: "+result.error); return;}
+    session_state=result.state; //console.log(session_state);
+};
+
+
 var backend_url='backend/' //../backend
 if(is_local()){backend_url='http://www.centroafan.com/dev-afan-app/www/backend/';}
 
@@ -66,16 +87,6 @@ var audio_sprite_name='letters128kbps.m4a';
 // already done in php? to match img name (ascii) and answer? Maybe keep "original answer" with the correct letters 
 //var letter_equivalence = { 'à':'a', 'á':'a', 'ç':'c', 'è':'e', 'é':'e', 'í':'i', 'ï':'i', 'ñ':'ny', 'ò':'o', 'ó':'o', 'ú':'u' };
 
-if(navigator.onLine){
-    jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_session_state&action=gen_session_state');
-}else{
-    session_state="offline";
-}
-
-var set_session_state=function(result) {
-    if(result.hasOwnProperty('error') && result.error!=""){alert("SET SESSION STATE ERROR: "+result.error); return;}
-    session_state=result.state; //console.log(session_state);
-};
 
 // NOTE: to accelerate the sound edited: start+0.2 and end -0.1
 var audio_object_sprite_ref={
