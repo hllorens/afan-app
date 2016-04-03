@@ -18,6 +18,11 @@ $jsoncallback='none';
 if( isset($_REQUEST['jsoncallback']) ){
     $jsoncallback=$_REQUEST['jsoncallback'];
 }
+$allow_null_CORS='false';
+if( isset($_REQUEST['allow_null_CORS']) ){
+    $allow_null_CORS=$_REQUEST['allow_null_CORS'];
+}
+
 
 $action=get_value("action");
 $timestamp_seconds=date("Y-m-d H:i:s");
@@ -36,6 +41,13 @@ mysqli_query($db_connection, "set time_zone:='Europe/Madrid'");
 
 function submit_data($jsoncallback, $output){
     if($jsoncallback == "none"){
+        // to solve CORS
+        if($allow_null_CORS){header("Access-Control-Allow-Origin: null");}
+        else{header("Access-Control-Allow-Origin: *");}
+        // allow cookie passing in CORS (session maintenance)
+        header("Access-Control-Allow-Credentials: true");
+        header("Access-Control-Allow-Methods: GET, POST"); // might want to add , PUT, DELETE, OPTIONS
+        header("Access-Control-Allow-Headers: *"); // Important X-Requested-With
         header('Content-type: application/json');
         echo json_encode( $output );
     }else{
@@ -71,7 +83,7 @@ if ($action == "get_users"){
     unset($_SESSION['email']);
     unset($_SESSION['picture']);
     if ( (get_value("state")) != ($_SESSION["state"]) ) {
-        $output['error']="FAILURE: Forgery attack? Invalid state parameter ".get_value("state");
+        $output['error']="FAILURE: Forgery attack? Invalid state parameter ".get_value("state")." expected: ".$_SESSION["state"];
     }else{
         $user = $_REQUEST['user'];
         $sQuery = "SELECT * FROM users WHERE email='".$user."'";
