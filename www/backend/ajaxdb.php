@@ -14,10 +14,9 @@ function get_value($name){
 	return 	$_REQUEST[$name];
 }
 
-$jsoncallback='none';
-if( isset($_REQUEST['jsoncallback']) ){
-    $jsoncallback=$_REQUEST['jsoncallback'];
-}
+
+
+
 
 $action=get_value("action");
 $timestamp_seconds=date("Y-m-d H:i:s");
@@ -34,12 +33,19 @@ mysqli_query($db_connection, "SET NAMES 'utf8'");
 mysqli_query($db_connection, "set time_zone:='Europe/Madrid'");	
 
 
-function submit_data($jsoncallback, $output){
-    if($jsoncallback == "none"){
+function submit_data($output){
+    if(!isset($_REQUEST['jsoncallback'])){
+        // to solve CORS
+        if(isset($_REQUEST['allow_null_CORS'])){header("Access-Control-Allow-Origin: null");}
+        else{header("Access-Control-Allow-Origin: *");}
+        // allow cookie passing in CORS (session maintenance)
+        header("Access-Control-Allow-Credentials: true");
+        header("Access-Control-Allow-Methods: GET, POST"); // might want to add , PUT, DELETE, OPTIONS
+        header("Access-Control-Allow-Headers: *"); // Important X-Requested-With
         header('Content-type: application/json');
         echo json_encode( $output );
     }else{
-        echo $jsoncallback."(JSON.parse('".json_encode( $output )."'))";
+        echo $_REQUEST['jsoncallback']."(JSON.parse('".json_encode( $output )."'))";
     }
 }
 
@@ -56,12 +62,12 @@ if ($action == "get_users"){
 		$output[$aRow['email']]['email'] = $aRow['email'];
 		$output[$aRow['email']]['access_level'] = $aRow['access_level'];
 	}
-    submit_data($jsoncallback,$output);
+    submit_data($output);
 }else if ($action == "gen_session_state"){
 	$state = md5(rand());
 	$_SESSION["state"]=$state;
 	$output['state']=$state;
-    submit_data($jsoncallback,$output);
+    submit_data($output);
 }else if ($action == "login_bypass"){
     $output['error']="";
     $output['info']="bypass";
@@ -71,7 +77,7 @@ if ($action == "get_users"){
     unset($_SESSION['email']);
     unset($_SESSION['picture']);
     if ( (get_value("state")) != ($_SESSION["state"]) ) {
-        $output['error']="FAILURE: Forgery attack? Invalid state parameter ".get_value("state");
+        $output['error']="FAILURE: Forgery attack? Invalid state parameter ".get_value("state")." expected: ".$_SESSION["state"];
     }else{
         $user = $_REQUEST['user'];
         $sQuery = "SELECT * FROM users WHERE email='".$user."'";
@@ -96,7 +102,7 @@ if ($action == "get_users"){
     $output['email']=$_SESSION['email'];
     $output['access_level']=$_SESSION['access_level'];
     $output['toksum']=substr($_SESSION['long_lived_access_token']->access_token,0,5);    
-    submit_data($jsoncallback,$output);
+    submit_data($output);
 }else if ($action == "gconnect"){
     $CLIENT_ID = $gclient_secret->client_id;
     $CLIENT_SECRET = $gclient_secret->client_secret;
@@ -191,7 +197,7 @@ if ($action == "get_users"){
     $output['email']=$_SESSION['email'];
     $output['access_level']=$_SESSION['access_level'];
     $output['toksum']=substr($_SESSION['long_lived_access_token']->access_token,0,5);    
-    submit_data($jsoncallback,$output);
+    submit_data($output);
 }else if ($action == "gdisconnect"){
 	if (empty($_SESSION['long_lived_access_token'])){
            $output['error']="No one is logged";
@@ -223,7 +229,7 @@ if ($action == "get_users"){
 			unset($_SESSION['picture']);
 		}
 	}
-    submit_data($jsoncallback,$output);
+    submit_data($output);
 }else if ($action == "get_subjects"){
 	$user=get_value("user");
 	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
@@ -241,7 +247,7 @@ if ($action == "get_users"){
 		$output[$aRow['alias']]['comments'] = $aRow['comments'];
 	}
 
-    submit_data($jsoncallback,$output);
+    submit_data($output);
 	//print_r($output);
 
 }else if ($action == "add_subject"){
@@ -272,7 +278,7 @@ if ($action == "get_users"){
         $output["data"]["birthdate"]=$birthdate;
         $output["data"]["comments"]=$comments;
     }
-    submit_data($jsoncallback,$output);
+    submit_data($output);
 }else if ($action == "update_subject"){
 	$lid=get_value('lid');
 	$user=get_value('user');
@@ -295,7 +301,7 @@ if ($action == "get_users"){
 	$output["data"]["name"]=$name;
 	$output["data"]["birthdate"]=$birthdate;
 	$output["data"]["comments"]=$comments;
-    submit_data($jsoncallback,$output);
+    submit_data($output);
 }else if ($action == "send_session_data"){
 	$output["msg"]="success";
 	$reference=get_value("reference");
@@ -318,7 +324,7 @@ if ($action == "get_users"){
 	else{ $output["msg"]="Success. Data session stored in the server. --"; }
 	//else{$output='{"msg":"Success. Data session stored in the server. -- '.$sQuery.'"}';}	
 
-    submit_data($jsoncallback,$output);
+    submit_data($output);
 	//print_r($output);
 
 }else if ($action == "send_session_data_post"){
@@ -361,7 +367,7 @@ if ($action == "get_users"){
     }
     
 
-    submit_data($jsoncallback,$output);
+    submit_data($output);
 	//print_r($output);
 
 }else if ($action == "get_results_global"){
@@ -406,7 +412,7 @@ if ($action == "get_users"){
 		$output['elements'][($num_elems-1)]['result'][$aRow['type']] = $aRow['result'];
 		$output['elements'][($num_elems-1)]['result']['timestamp'] = $aRow['timestamp'];
 	}
-    submit_data($jsoncallback,$output);
+    submit_data($output);
 }else if ($action == "get_results"){
 	$user=get_value("user");
 	$subject=get_value("subject");
@@ -438,7 +444,7 @@ if ($action == "get_users"){
 		$element_count++;		
 	}
 
-    submit_data($jsoncallback,$output);
+    submit_data($output);
 	//print_r($output);
 
 }else if ($action == "get_result_detail"){
@@ -471,7 +477,7 @@ if ($action == "get_users"){
 		$element_count++;
 	}
 
-    submit_data($jsoncallback,$output);
+    submit_data($output);
 	//print_r($output);
 
 }else if ($action == "delete_session"){
@@ -488,11 +494,11 @@ if ($action == "get_users"){
 	if(!$rResult){ $output["msg"]=mysqli_error( $db_connection )." -- ".$sQuery; }
 	else{ $output["msg"]="Success. Session $id of $subject deleted. --"; }	
 
-    submit_data($jsoncallback,$output);
+    submit_data($output);
 	//print_r($output);
 }else{
 	$output['msg']="unsupported action";
-    submit_data($jsoncallback,$output);
+    submit_data($output);
 }
 
 session_write_close(); // OPTIONAL: makes sure session is stored, may be add it as soon as vars are written..., should happen at the end of the script
