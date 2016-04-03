@@ -9,7 +9,7 @@ var explore_results=function(){
 	';
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){show_results();});
     if(!cache_user_subject_results.hasOwnProperty(session_data.subject)){
-        jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_cache_user_subject_results_show_results&action=get_results&user='+session_data.user+'&subject='+session_data.subject);
+        ajax_CORS_request_json(backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject,set_cache_user_subject_results_show_results);
     }else{
         show_user_results();
     }
@@ -74,7 +74,7 @@ var analize_subject=function(){
         explore_results();
      }.bind(bkgr_canvas,bkgr_page)); 
     if(!cache_user_subject_results.hasOwnProperty(session_data.subject)){
-        jsonp_request(backend_url+'ajaxdb.php?jsoncallback=action=get_results&user='+session_data.user+'&subject='+session_data.subject);
+        ajax_CORS_request_json(backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject, set_cache_user_subject_results_show_analysis);
     }else{
         show_subject_analysis();
     }
@@ -205,7 +205,7 @@ var summary_view=function(session_id){
         show_results();
      }.bind(bkgr_canvas,bkgr_page)); 
     if(!cache_user_summary_view.hasOwnProperty('general')){
-        jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_cache_user_summary_view&action=get_results_global&user='+session_data.user);
+        ajax_CORS_request_json(backend_url+'ajaxdb.php?action=get_results_global&user='+session_data.user, set_cache_user_summary_view);
     }else{
         show_summary_view();
     }
@@ -314,7 +314,7 @@ var explore_result_detail=function(session_id){
 	';
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){explore_results();});
 	if(!cache_user_subject_result_detail.hasOwnProperty(session_id)){
-		jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_cache_user_subject_detail_show_detail&action=get_result_detail&session='+session_id+'&user='+session_data.user);
+		ajax_CORS_request_json(backend_url+'ajaxdb.php?action=get_result_detail&session='+session_id+'&user='+session_data.user, set_cache_user_subject_detail_show_detail);
     }else{
         show_user_results_detail(session_id);
     }

@@ -12,7 +12,8 @@ function check_internet_access(){
 }
 var set_internet_access_true=function(){
     internet_access=true;
-    jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_session_state&action=gen_session_state');
+    //jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_session_state&action=gen_session_state');
+    ajax_CORS_request_json(backend_url+'ajaxdb.php?action=gen_session_state',set_session_state);
     menu_screen();
 }
 var set_internet_access_false=function(){
@@ -51,8 +52,7 @@ var sounds = [
 ];
 
 
-// More efficient for offline scenario to use require or dirctly iclude the data,
-// jsonp would not work without server php (maybe it could be all local with nodejs and local db)
+// More efficient for offline scenario to use require or dirctly iclude the data
 var jsons= [
 //	"external-git-ignored/data/ac_conciencia_train.json",
 //	"external-git-ignored/data/ac_conciencia_test.json",
@@ -225,7 +225,8 @@ var set_login_bypass=function(result) {
 };
 
 function login_bypass(){
-	jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_login_bypass&action=login_bypass&state='+session_state+'&user='+user_bypass);
+	//jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_login_bypass&action=login_bypass&state='+session_state+'&user='+user_bypass);
+	ajax_CORS_request_json(backend_url+'ajaxdb.php?action=login_bypass&state='+session_state+'&user='+user_bypass,set_login_bypass);
 }
 
 function signInCallback(authResult) {
@@ -234,7 +235,7 @@ function signInCallback(authResult) {
 		canvas_zone_vcentered.innerHTML='<div class="loader">Loading...</div>';
 		// Send one-time-code to server, if responds -> success
 		if(debug) console.log(authResult);
-		jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_user_signin&action=gconnect&state='+session_state+'&code='+authResult['code']);
+		ajax_CORS_request_json(backend_url+'ajaxdb.php?action=gconnect&state='+session_state+'&code='+authResult['code'],set_user_signin);
 	}
 }
 
@@ -275,7 +276,7 @@ var set_user_signin=function(result) {
 function gdisconnect(){
 	hamburger_close();
 	if(user_data.email=='invitee'){ login_screen(); return;}
-	jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_gdisconnect&action=gdisconnect');
+	ajax_CORS_request_json(backend_url+'ajaxdb.php?action=gdisconnect',set_gdisconnect);
 }
 
 var set_gdisconnect=function(result) {
@@ -290,7 +291,7 @@ var set_gdisconnect=function(result) {
 
 function admin_screen(){
 	header_text.innerHTML=' &larr; '+app_name+' menu';
-	jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_admin_screen&action=get_users');
+	ajax_CORS_request_json(backend_url+'ajaxdb.php?action=get_users', set_admin_screen);
 }
 
 var set_admin_screen=function(data) {
@@ -497,7 +498,8 @@ function menu_screen(){
         document.getElementById("exit_app_hamburger").addEventListener(clickOrTouch,function(){hamburger_close();exit_app();});
 
 		if(cache_user_subjects==null){
-			jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_cache_subjects&action=get_subjects&user='+session_data.user);
+			//jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_cache_subjects&action=get_subjects&user='+session_data.user);
+			ajax_CORS_request_json(backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user,set_cache_subjects);
 		}else{
             prepare_menu_when_subjects_loaded();
 		}
@@ -582,7 +584,7 @@ var add_subject=function(){
 			myformsubmit.click(); // won't submit (invalid), but show errors
 		}else{
 			open_js_modal_content('<h1>Añadiendo... '+document.getElementById('new-alias').value+'</h1>');
-            jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_add_subject&action=add_subject&user='+user_data.email+'&alias='+document.getElementById('new-alias').value+'&name='+document.getElementById('new-name').value+'&birthdate='+document.getElementById('new-birthdate').value+'&comments='+document.getElementById('new-comments').value);
+            ajax_CORS_request_json(backend_url+'ajaxdb.php?action=add_subject&user='+user_data.email+'&alias='+document.getElementById('new-alias').value+'&name='+document.getElementById('new-name').value+'&birthdate='+document.getElementById('new-birthdate').value+'&comments='+document.getElementById('new-comments').value,set_add_subject);
 		}
 	};
 	var cancel_function=function(){ remove_modal("js-modal-window-alert"); };
@@ -640,7 +642,7 @@ var edit_subject=function(sid){
                 remove_modal("js-modal-window-alert");
                 manage_subjects(); // to reload with the new user...
             }else{
-                jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_update_subject&action=update_subject&lid='+sid+'&user='+user_data.email+'&alias='+document.getElementById('new-alias').value+'&name='+document.getElementById('new-name').value+'&birthdate='+document.getElementById('new-birthdate').value+'&comments='+document.getElementById('new-comments').value);
+                ajax_CORS_request_json(backend_url+'ajaxdb.php?action=update_subject&lid='+sid+'&user='+user_data.email+'&alias='+document.getElementById('new-alias').value+'&name='+document.getElementById('new-name').value+'&birthdate='+document.getElementById('new-birthdate').value+'&comments='+document.getElementById('new-comments').value, set_update_subject);
             }
 		}
 	};
