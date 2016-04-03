@@ -9,7 +9,12 @@ var explore_results=function(){
 	';
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){show_results();});
     if(!cache_user_subject_results.hasOwnProperty(session_data.subject)){
-        ajax_CORS_request_json(backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject,set_cache_user_subject_results_show_results);
+        if(internet_access){
+            ajax_CORS_request_json(backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject,set_cache_user_subject_results_show_results);
+        }else{
+            alert("TODO we need to store all the results results DATA at once (even details) (slower but easier since then we know all is in sync), even create a special function to create THE DUMP which could store everything in LOCAL storage");
+            //cache_user_subjects[session_data.subject]=JSON.parse(localStorage.getItem("cache_user_subjects")[session_data.subject]);
+        }
     }else{
         show_user_results();
     }
@@ -17,6 +22,7 @@ var explore_results=function(){
 
 var set_cache_user_subject_results_show_results=function(data) {
     cache_user_subject_results[session_data.subject]=data;
+    //localStorage.setItem("cache_user_subjects", JSON.stringify({session_data.subject: data})); // better retrieve all the data at once
     show_user_results();
 }
 
@@ -314,13 +320,18 @@ var explore_result_detail=function(session_id){
 	';
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){explore_results();});
 	if(!cache_user_subject_result_detail.hasOwnProperty(session_id)){
-		ajax_CORS_request_json(backend_url+'ajaxdb.php?action=get_result_detail&session='+session_id+'&user='+session_data.user, set_cache_user_subject_detail_show_detail);
+		ajax_CORS_request_json(backend_url+'ajaxdb.php?action=get_result_detail&session='+session_id+'&user='+session_data.user, function(data) {
+				cache_user_subject_result_detail[session_id]=data;
+                show_user_results_detail(session_id);
+            });
     }else{
         show_user_results_detail(session_id);
     }
 };
 
+// TODO
 var set_cache_user_subject_detail_show_detail=function(data) {
+    // TODO TODO, we need to know how to bind session_id here if we want to externalize the function
     cache_user_subject_result_detail[session_id]=data;
     show_user_results_detail(session_id);
 };

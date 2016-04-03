@@ -217,6 +217,7 @@ var set_login_bypass=function(result) {
         session_data.user_access_level=result.access_level;
         cache_user_subjects=null; cache_user_subject_results={};
         cache_user_subject_result_detail={};
+        localStorage.setItem("user_data", JSON.stringify(user_data));
         menu_screen();
     } else {
         alert('Failed to make a server-side call. Check your configuration and console.</br>Result:'+ result);
@@ -225,8 +226,20 @@ var set_login_bypass=function(result) {
 };
 
 function login_bypass(){
-	//jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_login_bypass&action=login_bypass&state='+session_state+'&user='+user_bypass);
-	ajax_CORS_request_json(backend_url+'ajaxdb.php?action=login_bypass&state='+session_state+'&user='+user_bypass,set_login_bypass);
+    if(internet_access){ajax_CORS_request_json(backend_url+'ajaxdb.php?action=login_bypass&state='+session_state+'&user='+user_bypass,set_login_bypass);}
+    else{
+        user_data = JSON.parse(localStorage.getItem("user_data"));
+        if(user_data.hasOwnProperty('email')){
+            session_data.user=user_data.email;
+            session_data.user_access_level=user_data.access_level;
+            cache_user_subjects=null; cache_user_subject_results={};
+            cache_user_subject_result_detail={};
+            alert('No tienes acceso a internet. Pero hay datos para: '+user_data.email);
+            menu_screen();
+        }else{
+            alert('No tienes acceso a internet. Ni datos locales.');
+        }
+    }
 }
 
 function signInCallback(authResult) {
@@ -498,8 +511,11 @@ function menu_screen(){
         document.getElementById("exit_app_hamburger").addEventListener(clickOrTouch,function(){hamburger_close();exit_app();});
 
 		if(cache_user_subjects==null){
-			//jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_cache_subjects&action=get_subjects&user='+session_data.user);
-			ajax_CORS_request_json(backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user,set_cache_subjects);
+            if(internet_access){ajax_CORS_request_json(backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user,set_cache_subjects);}
+            else{
+                cache_user_subjects=JSON.parse(localStorage.getItem("cache_user_subjects"));
+                prepare_menu_when_subjects_loaded();
+            }
 		}else{
             prepare_menu_when_subjects_loaded();
 		}
@@ -510,6 +526,7 @@ function menu_screen(){
 
 var set_cache_subjects=function(data) {
     cache_user_subjects=data;
+    localStorage.setItem("cache_user_subjects", JSON.stringify(data));
     prepare_menu_when_subjects_loaded();
 };
 
