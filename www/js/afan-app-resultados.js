@@ -9,22 +9,12 @@ var explore_results=function(){
 	';
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){show_results();});
     if(!cache_user_subject_results.hasOwnProperty(session_data.subject)){
-        if(internet_access){
-            ajax_CORS_request_json(backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject,set_cache_user_subject_results_show_results);
-        }else{
-            alert("TODO we need to store all the results results DATA at once (even details) (slower but easier since then we know all is in sync), even create a special function to create THE DUMP which could store everything in LOCAL storage");
-            //cache_user_subjects[session_data.subject]=JSON.parse(localStorage.getItem("cache_user_subjects")[session_data.subject]);
-        }
-    }else{
-        show_user_results();
+        console.log('NOTE: Trying to access a subject that still does not have any result...');
+        cache_user_subjects[session_data.subject]={"general":{"user":session_data.user,"subject": session_data.subject},"elements":[]};
     }
+    show_user_results();
 };
 
-var set_cache_user_subject_results_show_results=function(data) {
-    cache_user_subject_results[session_data.subject]=data;
-    //localStorage.setItem("cache_user_subjects", JSON.stringify({session_data.subject: data})); // better retrieve all the data at once
-    show_user_results();
-}
 
 var show_user_results=function(){
     if(cache_user_subject_results[session_data.subject].elements.length==0){
@@ -80,16 +70,12 @@ var analize_subject=function(){
         explore_results();
      }.bind(bkgr_canvas,bkgr_page)); 
     if(!cache_user_subject_results.hasOwnProperty(session_data.subject)){
-        ajax_CORS_request_json(backend_url+'ajaxdb.php?action=get_results&user='+session_data.user+'&subject='+session_data.subject, set_cache_user_subject_results_show_analysis);
-    }else{
-        show_subject_analysis();
+        console.log('NOTE: Trying to access a subject that still does not have any result...');
+        cache_user_subjects[session_data.subject]={"general":{"user":session_data.user,"subject": session_data.subject},"elements":[]};
     }
-};
-
-var set_cache_user_subject_results_show_analysis=function(data) {
-    cache_user_subject_results[session_data.subject]=data;
     show_subject_analysis();
 };
+
 
 var show_subject_analysis=function(){
     if(cache_user_subject_results[session_data.subject].elements.length==0){
@@ -210,24 +196,41 @@ var summary_view=function(session_id){
         document.getElementById("header").style.display="block";
         show_results();
      }.bind(bkgr_canvas,bkgr_page)); 
-    if(!cache_user_summary_view.hasOwnProperty('general')){
-        ajax_CORS_request_json(backend_url+'ajaxdb.php?action=get_results_global&user='+session_data.user, set_cache_user_summary_view);
-    }else{
-        show_summary_view();
-    }
+    
+    show_summary_view();
 }
 
-var set_cache_user_summary_view=function(data) {
-    cache_user_summary_view=data;
-    show_summary_view();
-};
+var calculate_user_summary_view=function(){
+    var ret={'general':{'user':session_data.user},'elements':[]};
+    for (var subj in cache_user_subject_results) {
+        if (cache_user_subject_results.hasOwnProperty(subj)) {
+            if(ret.elements.length==0 || ret.elements[ret.elements.length-1].subject!=subj){
+                ret.elements.push({
+                                   'subject':subj,'conciencia':'-','memoria_visual':'-','ritmo':'-','velocidad':'-','discr_visual':'-','timestamp':'-',
+                                   'result':{'subject':subj,'conciencia':'-','memoria_visual':'-','ritmo':'-','velocidad':'-','discr_visual':'-','timestamp':'-'},
+                                   'complete': 'no'
+                                   });
+            }
+        }
+        for(var i=0;i<cache_user_subject_results[subj].elements.length;i++){
+            if(ret.elements[ret.elements.length-1][cache_user_subject_results[subj].elements[i].type]=='-'){
+                ret.elements[ret.elements.length-1][cache_user_subject_results[subj].elements[i].type]=cache_user_subject_results[subj].elements[i].num_correct+'/'+cache_user_subject_results[subj].elements[i].num_answered;
+                ret.elements[ret.elements.length-1].timestamp=cache_user_subject_results[subj].elements[i].timestamp;
+                ret.elements[ret.elements.length-1].result[cache_user_subject_results[subj].elements[i].type]=cache_user_subject_results[subj].elements[i].result;
+                ret.elements[ret.elements.length-1].result.timestamp=cache_user_subject_results[subj].elements[i].timestamp;
+            }
+        }
+    }
+    return ret;
+}
 
 var show_summary_view=function(){
-    if(cache_user_summary_view.length==0){
+    user_summary_view=calculate_user_summary_view();
+    if(user_summary_view.length==0){
         document.getElementById("results-div").innerHTML="<br />No hay resultados";
     }else{
         document.getElementById("results-div").innerHTML='<br /><br />';
-        var data2=classify_results_by_age(cache_user_summary_view.elements); //data.elements
+        var data2=classify_results_by_age(user_summary_view.elements); //data.elements
         for(var age_generation in data2) {
             if (data2.hasOwnProperty(age_generation)) {
                 document.getElementById("results-div").innerHTML+='\
@@ -282,19 +285,7 @@ var show_summary_view=function(){
     }
 }
 
-/*
-            for (var type in {'conciencia':0,'memoria_visual':0,'ritmo':0,'velocidad':0,'discr_visual':0}) {
-                if (analysis.hasOwnProperty(type)) {
-                    document.getElementById("analysis-table'+age_generation").innerHTML+='\
-                        <tr><b>'+type+'</b> min:'+analysis[type].min.toFixed(2)+', max:'+analysis[type].max.toFixed(2)+', media:'+analysis[type].mean.toFixed(2)+'</div>\
-                      ';
-                }else{
-                    document.getElementById("analysis-table'+age_generation").innerHTML+='\
-                        <div><b>'+type+'</b> min: -, max: -, media: -</div>\
-                      ';
-                }
-            }
-*/
+
 
 
 var classify_results_by_age=function(data){
@@ -320,21 +311,14 @@ var explore_result_detail=function(session_id){
 	';
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){explore_results();});
 	if(!cache_user_subject_result_detail.hasOwnProperty(session_id)){
-		ajax_CORS_request_json(backend_url+'ajaxdb.php?action=get_result_detail&session='+session_id+'&user='+session_data.user, function(data) {
-				cache_user_subject_result_detail[session_id]=data;
-                show_user_results_detail(session_id);
-            });
-    }else{
-        show_user_results_detail(session_id);
+        console.log('NOTE: Trying to access session details which does not exist!!');
+        cache_user_subject_result_detail[session_id]={"general":{"session":session_id},"elements":[]};
     }
+    show_user_results_detail(session_id);
+
 };
 
-// TODO
-var set_cache_user_subject_detail_show_detail=function(data) {
-    // TODO TODO, we need to know how to bind session_id here if we want to externalize the function
-    cache_user_subject_result_detail[session_id]=data;
-    show_user_results_detail(session_id);
-};
+
 
 var show_user_results_detail=function(session_id){
     if(!cache_user_subject_result_detail[session_id].hasOwnProperty('elements') || cache_user_subject_result_detail[session_id].elements.length==0){
@@ -402,7 +386,19 @@ var explore_result_detail_individual=function(session_ac_id){
 };
 
 
-
+/*
+            for (var type in {'conciencia':0,'memoria_visual':0,'ritmo':0,'velocidad':0,'discr_visual':0}) {
+                if (analysis.hasOwnProperty(type)) {
+                    document.getElementById("analysis-table'+age_generation").innerHTML+='\
+                        <tr><b>'+type+'</b> min:'+analysis[type].min.toFixed(2)+', max:'+analysis[type].max.toFixed(2)+', media:'+analysis[type].mean.toFixed(2)+'</div>\
+                      ';
+                }else{
+                    document.getElementById("analysis-table'+age_generation").innerHTML+='\
+                        <div><b>'+type+'</b> min: -, max: -, media: -</div>\
+                      ';
+                }
+            }
+*/
 /*var analyze_subject_data_merged_types=function(){
     // inverse for to order by date (earliest first), max one per day (the last of that day)
     var analysis={};

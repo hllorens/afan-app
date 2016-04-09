@@ -41,8 +41,11 @@ function onDeviceReady() {
                         'PhoneGap=' + device.phonegap + '-' + 
                         'Platform=' + device.platform + '-' + 
                         'UUID='     + device.uuid     + '-' + 
-                        'Ver='  + device.version + '-' + 
-                        'Online='  + (navigator.connection.type == Connection.NONE); // remove if this fails, might need cordova plugin add cordova-plugin-network-information
+                        'Ver='  + device.version 
+                        ; 
+                        // remove if this fails, might need cordova plugin add cordova-plugin-network-information
+                        //+ '-' + 
+                        //'Online='  + (navigator.connection.type == Connection.NONE) needs plugin
 	}
 	splash_screen();
 }
