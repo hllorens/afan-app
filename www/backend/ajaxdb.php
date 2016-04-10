@@ -375,47 +375,49 @@ if ($action == "get_users"){
 	$output["data"]["birthdate"]=$birthdate;
 	$output["data"]["comments"]=$comments;
     submit_data($output);
-}else if ($action == "send_session_data_post"){
-	$str_json=json_decode($_POST['json_string'],true);
+}else if ($action == "send_sessions_data_post"){
+	$str_json_arr=json_decode($_POST['json_string'],true);
 	$output["msg"]="success";
-	$type=$str_json["type"];
-	$mode=$str_json["mode"];
-	$user=$str_json["user"];
-	$subject=$str_json["subject"];
-	$age=$str_json["age"];
-	$num_answered=$str_json["num_answered"];
-	$num_correct=round((double) $str_json["num_correct"],2);
-	$result=0;
-	if(((int) $num_answered)!=0) $result= round(((int) $num_correct) / ((int) $num_answered), 2);
-	$level=$str_json["level"];
-	$duration=$str_json["duration"];
-	$timestamp=$str_json["timestamp"];
+    foreach ($str_json_arr as $str_json) {
+        $type=$str_json["type"];
+        $mode=$str_json["mode"];
+        $user=$str_json["user"];
+        $subject=$str_json["subject"];
+        $age=$str_json["age"];
+        $num_answered=$str_json["num_answered"];
+        $num_correct=round((double) $str_json["num_correct"],2);
+        $result=0;
+        if(((int) $num_answered)!=0) $result= round(((int) $num_correct) / ((int) $num_answered), 2);
+        $level=$str_json["level"];
+        $duration=$str_json["duration"];
+        $timestamp=$str_json["timestamp"];
 
-	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
+        if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
 
-	$error=0;
-	
-    if($mode=="test"){
-        $sQuery = "INSERT INTO sessions(type,mode,user,subject,age,num_answered,num_correct,result,level,duration,timestamp)  VALUES ('$type','$mode','$user','$subject','$age','$num_answered','$num_correct','$result','$level','$duration','$timestamp');"; 
-        $rResult = mysqli_query( $db_connection, $sQuery );
-        if(!$rResult){ $output["msg"]=mysqli_error( $db_connection )." -- ".$sQuery; $error=1;}
-        else{ 
-            $session_id=mysqli_insert_id($db_connection);
-            foreach ($str_json["details"] as $detail){
-                $sQuery = "INSERT INTO session_activities(type,mode,user,subject,session,activity,choice,result,level,duration,timestamp)  VALUES ('$type','$mode','$user','$subject','$session_id','".$detail["activity"]."','".$detail["choice"]."','".$detail["result"]."','$level','".$detail["duration"]."','".$detail["timestamp"]."')"; 
-                $rResult = mysqli_query( $db_connection, $sQuery );
-                if(!$rResult){ $output["msg"]=mysqli_error( $db_connection )." -- ".$sQuery; $error=1; break;}
+        $error=0;
+        
+        if($mode=="test"){
+            $sQuery = "INSERT INTO sessions(type,mode,user,subject,age,num_answered,num_correct,result,level,duration,timestamp)  VALUES ('$type','$mode','$user','$subject','$age','$num_answered','$num_correct','$result','$level','$duration','$timestamp');"; 
+            $rResult = mysqli_query( $db_connection, $sQuery );
+            if(!$rResult){ $output["msg"]=mysqli_error( $db_connection )." -- ".$sQuery; $error=1;}
+            else{ 
+                $session_id=mysqli_insert_id($db_connection);
+                foreach ($str_json["details"] as $detail){
+                    $sQuery = "INSERT INTO session_activities(type,mode,user,subject,session,activity,choice,result,level,duration,timestamp)  VALUES ('$type','$mode','$user','$subject','$session_id','".$detail["activity"]."','".$detail["choice"]."','".$detail["result"]."','$level','".$detail["duration"]."','".$detail["timestamp"]."')"; 
+                    $rResult = mysqli_query( $db_connection, $sQuery );
+                    if(!$rResult){ $output["msg"]=mysqli_error( $db_connection )." -- ".$sQuery; $error=1; break;}
+                }
+                if($error==0) $output["msg"]="Success. Data session stored in the server. --"; // -- '.$sQuery.'"}';}
             }
-            if($error==0) $output["msg"]="Success. Data session stored in the server. --"; // -- '.$sQuery.'"}';}
+        }else{
+            $sQuery = "INSERT INTO sessions_train(type,mode,user,subject,age,num_answered,num_correct,result,level,duration,timestamp)  VALUES ('$type','$mode','$user','$subject','$age','$num_answered','$num_correct','$result','$level','$duration','$timestamp');"; 
+            $rResult = mysqli_query( $db_connection, $sQuery );
+            if(!$rResult){ $output["msg"]=mysqli_error( $db_connection )." -- ".$sQuery; $error=1;}
         }
-    }else{
-        $sQuery = "INSERT INTO sessions_train(type,mode,user,subject,age,num_answered,num_correct,result,level,duration,timestamp)  VALUES ('$type','$mode','$user','$subject','$age','$num_answered','$num_correct','$result','$level','$duration','$timestamp');"; 
-        $rResult = mysqli_query( $db_connection, $sQuery );
-        if(!$rResult){ $output["msg"]=mysqli_error( $db_connection )." -- ".$sQuery; $error=1;}
+        if($error==1) break;
     }
-    
+    if($error==0) $output["msg"]="Success. ".count($str_json_arr)." sessions stored in the server. --";
     submit_data($output);
-
 }else if ($action == "delete_session"){
 	$id=get_value("id");
 	$user=get_value("user");
