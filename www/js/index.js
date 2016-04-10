@@ -36,7 +36,7 @@ var exit_app=function(){
 
 function onDeviceReady() {
 	device_info="browser"
-	if(is_app){
+	/*if(is_app){
 		device_info = 'name='     + device.name     + '-' + 
                         'PhoneGap=' + device.phonegap + '-' + 
                         'Platform=' + device.platform + '-' + 
@@ -46,7 +46,7 @@ function onDeviceReady() {
                         // remove if this fails, might need cordova plugin add cordova-plugin-network-information
                         //+ '-' + 
                         //'Online='  + (navigator.connection.type == Connection.NONE) needs plugin
-	}
+	}*/
 	splash_screen();
 }
 

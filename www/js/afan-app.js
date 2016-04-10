@@ -14,7 +14,6 @@ var set_internet_access_true=function(){
     internet_access=true;
     //jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_session_state&action=gen_session_state');
     ajax_CORS_request_json(backend_url+'ajaxdb.php?action=gen_session_state',set_session_state);
-    menu_screen();
 }
 var set_internet_access_false=function(){
     internet_access=false;
@@ -25,6 +24,7 @@ var set_internet_access_false=function(){
 var set_session_state=function(result) {
     if(result.hasOwnProperty('error') && result.error!=""){alert("SET SESSION STATE ERROR: "+result.error); return;}
     session_state=result.state; //console.log(session_state);
+    menu_screen();
 };
 
 
@@ -170,6 +170,7 @@ function login_screen(){
 		<br /><button id="exit" class="button exit">Salir</button> \
 			';
         if(internet_access && !is_local){
+            if(debug) alert('google button ON');
             gapi.signin.render('signinButton', {
               'callback': 'signInCallback',
               'clientid': '125860785862-s07kh0j5tpb2drjkeqsifldn39krhh60.apps.googleusercontent.com',
@@ -208,8 +209,8 @@ var set_login_bypass=function(result) {
         if(result.hasOwnProperty('error') && result.error!=""){alert("LOGIN ERROR: "+result.error); return;}
         if(debug){
             console.log(result);
-            console.log("logged! "+result.email+" level:"+result.access_level);
-            alert("logged! "+result.email+" level:"+result.access_level);
+            console.log("logged bypass! "+result.email+" level:"+result.access_level);
+            alert("logged bypass! "+result.email+" level:"+result.access_level);
         }
         user_data=result;
         session_data.user=user_data.email;
@@ -226,11 +227,14 @@ var set_login_bypass=function(result) {
 };
 
 function login_bypass(){
+    canvas_zone_vcentered.innerHTML='...loging in...';
     if(user_bypass==undefined){
-        user_data = JSON.parse(localStorage.getItem("user_data"));
         var default_user="";
-        if(user_data.hasOwnProperty('email')){
-            default_user=user_data.email;
+        if(localStorage.getItem("user_data")!=null){
+            user_data = JSON.parse(localStorage.getItem("user_data"));
+            if(user_data.hasOwnProperty('email')){
+                default_user=user_data.email;
+            }
         }
         user_bypass = prompt("email:",default_user);
     }
@@ -270,8 +274,8 @@ var set_user_signin=function(result) {
         }
         if(debug){
             console.log(result);
-            console.log("logged! "+result.email+" level:"+result.access_level);
-            alert("logged! "+result.email+" level:"+result.access_level);
+            console.log("logged google! "+result.email+" level:"+result.access_level);
+            alert("logged google! "+result.email+" level:"+result.access_level);
         }
         user_data=result;
         session_data.user=user_data.email;
@@ -458,9 +462,9 @@ function menu_screen(){
 	cache_cognitionis_pagination_page=0;
 	if(debug) console.log('user.email: '+user_data.email);
 	if(session_state=="unset"){
-        canvas_zone_vcentered.innerHTML='...waiting for session state...';
-        setTimeout(function() {menu_screen()}, 2000); // add a counter and if it reaches something fail gracefully
+        alert('ERROR: session is not set');
 	}else if(user_data.email==null && !game_mode){
+        if(debug) alert('still unlogged - going to login');
 		login_screen();
 	}else if(!game_mode){
 		var sign='<li><a href="#" id="show_profile">perfil</a></li>\
@@ -487,7 +491,7 @@ function menu_screen(){
 		';
         var offline_opts='';
         if(localStorage.hasOwnProperty('locally_stored_sessions')){
-            offline_opts='<br /><button id="send_stored_sessions"  class="button">Enviar <i>datos offline</i></button>';
+            offline_opts='<br />Hay '+JSON.parse(localStorage.getItem('locally_stored_sessions')).length+' <i>datos offline</i> <button id="send_stored_sessions"  class="button">Enviar</button>';
         }
 		if(user_data.access_level!='admin') admin_opts="";
 		if(user_data.email=='invitee'){ normal_opts="";}
@@ -825,81 +829,69 @@ function send_session_data(finish_callback){
                 details: session_data.details
             };
         if(session_data.mode=="test"){
+            if(!cache_user_subject_results.hasOwnProperty(session_data.subject)) cache_user_subject_results[session_data.subject]={'general':{'user':session_data.user,'subject':session_data.subject},'elements':[]};
             cache_user_subject_results[session_data.subject].elements.unshift(result_obj);
             cache_user_subject_result_detail[result_obj.id]={general: {
                                                                 session: result_obj.id
                                                             } ,
                                                              elements: result_obj.details};
         }else{
+            if(!cache_user_subject_training.hasOwnProperty(session_data.subject)) cache_user_subject_training[session_data.subject]={'general':{'user':session_data.user,'subject':session_data.subject},'elements':[]};;
             cache_user_subject_training[session_data.subject].elements.unshift(result_obj);
         }
         if(user_data.email!='invitee'){
-            if(internet_access){
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", backend_url+'ajaxdb.php',true);
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                xhr.responsetype="json";
-                xhr.send("action=send_session_data_post&json_string="+(JSON.stringify(session_data))); 
-                canvas_zone_vcentered.innerHTML='<br />...Enviando datos al servidor...<br /><br />';
-                xhr.onload = function () {
-                    var data=JSON.parse(this.responseText);
-                    canvas_zone_vcentered.innerHTML='<br />Datos guardados en el servidor.<br /><br />\
-                    <br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>';
-                    document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
-                    if(debug) console.log('Storing data. Server message: '+data.msg);
-                    reset_session();
-                    if(typeof(finish_callback)!='undefined'){finish_callback();}
-                    else{game();}
-                };
-            }else{
-                var locally_stored_sessions=[];
-                if(localStorage.hasOwnProperty('locally_stored_sessions')){
-                    locally_stored_sessions=JSON.parse(localStorage.getItem("locally_stored_sessions"));
-                }
-                locally_stored_sessions.push(session_data);
-                localStorage.setItem("locally_stored_sessions", JSON.stringify(locally_stored_sessions));
-                reset_session();
-                if(typeof(finish_callback)!='undefined'){finish_callback();}
-                else{game();}
+            var locally_stored_sessions=[];
+            if(localStorage.hasOwnProperty('locally_stored_sessions')){
+                locally_stored_sessions=JSON.parse(localStorage.getItem("locally_stored_sessions"));
             }
+            locally_stored_sessions.push(session_data);
+            localStorage.setItem("locally_stored_sessions", JSON.stringify(locally_stored_sessions));
+            reset_session();            
+            check_internet_access_with_img_url('http://www.centroafan.com/logo-afan.jpg',send_session_data_success,send_session_data_fail);
         }else{
             if(typeof(finish_callback)!='undefined'){finish_callback();}
             else{game();}
         }
     }
+}
 
-
+function send_session_data_success(){
+    if(localStorage.hasOwnProperty('locally_stored_sessions')){
+        var locally_stored_sessions=JSON.parse(localStorage.getItem("locally_stored_sessions"));
+        ajax_CORS_request(backend_url+'ajaxdb.php',send_session_data_success_callback,"json","POST","action=send_sessions_data_post&json_string="+(JSON.stringify(locally_stored_sessions)));
+        canvas_zone_vcentered.innerHTML='<br />...Enviando datos offline al servidor...<br /><br />';
+    }else{
+        alert("ERROR: No hay datos para enviar.");
+        menu_screen();
+    }
+}
+function send_session_data_success_callback(data){
+    internet_access=true;
+    canvas_zone_vcentered.innerHTML='<br />Datos guardados en el servidor.';
+    if(debug) console.log('Storing data. Server message: '+data.msg);
+    reset_session();
+    localStorage.removeItem("locally_stored_sessions");
+    if(typeof(finish_callback)!='undefined'){finish_callback();}
+    else{menu_screen();}
+}
+function send_session_data_fail(){
+    internet_access=false;
+    console.log("No hay conexión a internet, guardando en local...");
+    if(typeof(finish_callback)!='undefined'){finish_callback();}
+    else{menu_screen();}
+}
+// Function created to make it explicit that this timethe user intendendly clicked on "send data"
+// And it was not possible to send it (no internet)
+function send_stored_sessions_fail(){
+    internet_access=false;
+    alert("No hay conexión a internet, pruebe más tarde.");
+    if(typeof(finish_callback)!='undefined'){finish_callback();}
+    else{menu_screen();}
 }
 
 function send_stored_sessions(){
     remove_modal();
-    if(internet_access){
-        if(localStorage.hasOwnProperty('locally_stored_sessions')){
-            locally_stored_sessions=JSON.parse(localStorage.getItem("locally_stored_sessions"));
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", backend_url+'ajaxdb.php',true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.responsetype="json";
-            xhr.send("action=send_sessions_data_post&json_string="+(JSON.stringify(locally_stored_sessions))); 
-            canvas_zone_vcentered.innerHTML='<br />...Enviando datos offline al servidor...<br /><br />';
-            xhr.onload = function () {
-                var data=JSON.parse(this.responseText);
-                canvas_zone_vcentered.innerHTML='<br />Datos offline guardados en el servidor.<br /><br />\
-                <br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>';
-                document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
-                if(debug) console.log('Storing data. Server message: '+data.msg);
-                reset_session();
-                if(typeof(finish_callback)!='undefined'){finish_callback();}
-                else{game();}
-            };
-        }else{
-            alert("No hay datos para enviar.");
-            menu_screen();
-        }
-    }else{
-        alert("No hay conexión a internet, pruebe más tarde.");
-        menu_screen();
-    }
+    check_internet_access_with_img_url('http://www.centroafan.com/logo-afan.jpg',send_session_data_success,send_stored_sessions_fail);
 }
 
 
