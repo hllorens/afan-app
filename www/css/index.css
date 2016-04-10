@@ -71,6 +71,7 @@ h1{font: normal 26px Monospace,Arial,sans-serif; margin: 5px; color: #722;}
 .canvas-with-header{top:48px; bottom:1%;}
 #header_text{
     display:-ms-inline-grid; /*for IE, centers it a bit*/
+    vertical-align:super;
 }
 #header_text:hover{
 	cursor:pointer;

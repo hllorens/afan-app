@@ -225,7 +225,7 @@ var calculate_user_summary_view=function(){
 }
 
 var show_summary_view=function(){
-    user_summary_view=calculate_user_summary_view();
+    var user_summary_view=calculate_user_summary_view();
     if(user_summary_view.length==0){
         document.getElementById("results-div").innerHTML="<br />No hay resultados";
     }else{
