@@ -169,7 +169,7 @@ function login_screen(){
 		<br /><button class="button exit" id="invitee_access">Invitado</button> \
 		<br /><button id="exit" class="button exit">Salir</button> \
 			';
-        if(internet_access && !is_local){
+        if(internet_access && !is_local()){
             if(debug) alert('google button ON');
             gapi.signin.render('signinButton', {
               'callback': 'signInCallback',
@@ -479,7 +479,7 @@ function menu_screen(){
 		<li><a id="exit_app_hamburger">salir</a></li>\
 		</ul>';
         var name_with_details=app_name;
-        if(is_local){name_with_details+=' [app]';}
+        if(is_local()){name_with_details+=' [app]';}
         if(!internet_access){name_with_details+=' (offline)';}
 		header_zone.innerHTML='<a id="hamburger_icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">\
 		<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"/></svg></a> <span id="header_text">'+name_with_details+'</span>';
