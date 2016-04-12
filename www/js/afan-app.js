@@ -296,8 +296,18 @@ var set_user_signin=function(result) {
 
 function gdisconnect(){
 	hamburger_close();
-	if(user_data.email=='invitee'){ login_screen(); return;}
-	ajax_CORS_request_json(backend_url+'ajaxdb.php?action=gdisconnect',set_gdisconnect);
+    user_bypass=undefined;
+    if(localStorage.hasOwnProperty('locally_stored_sessions')){
+        if (!confirm("Hay datos sin enviar. Si se desconecta se perderan. Desea desconetarse?")) {
+            return;
+        }
+    }
+    localStorage.removeItem("locally_stored_sessions"); // avoid cross user interaction
+	if(user_data.email=='invitee' || user_bypass!=undefined){
+        login_screen();
+    }else{
+        ajax_CORS_request_json(backend_url+'ajaxdb.php?action=gdisconnect',set_gdisconnect);
+    }
 }
 
 var set_gdisconnect=function(result) {
@@ -515,7 +525,7 @@ function menu_screen(){
         }else{
             document.getElementById("login_screen").addEventListener(clickOrTouch,function(){hamburger_close();login_screen();});
         }
-        if(localStorage.hasOwnProperty('locally_stored_sessions')){
+        if(localStorage.hasOwnProperty('locally_stored_sessions') && user_data.email!='invitee'){
             document.getElementById("send_stored_sessions").addEventListener(clickOrTouch,send_stored_sessions);
         }
 
@@ -525,26 +535,13 @@ function menu_screen(){
         document.getElementById("results").addEventListener(clickOrTouch,show_results);
         document.getElementById("show_about").addEventListener(clickOrTouch,function(){hamburger_close();show_about();});
 
-		/*if(cache_user_subjects==null){
-            if(internet_access){ajax_CORS_request_json(backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user,set_cache_subjects);}
-            else{
-                cache_user_subjects=JSON.parse(localStorage.getItem("cache_user_subjects"));
-                prepare_menu_when_subjects_loaded();
-            }
-		}else{
-            prepare_menu_when_subjects_loaded();
-		}*/
         prepare_menu_when_subjects_loaded(); // loaded at user login time
 	}else{
 		game(); // just training
 	}
 }
 
-/*var set_cache_subjects=function(data) {
-    cache_user_subjects=data;
-    localStorage.setItem("cache_user_subjects", JSON.stringify(data));
-    prepare_menu_when_subjects_loaded();
-};*/
+
 
 var prepare_menu_when_subjects_loaded=function(){
     subjects_select_elem=document.getElementById('subjects-select');
@@ -557,7 +554,6 @@ var prepare_menu_when_subjects_loaded=function(){
     document.getElementById("start-test-button").disabled=false;    
     document.getElementById("results").disabled=false;
     document.getElementById("manage-subjects").disabled=false;
-    //if(user_data.email!='invitee'){}
     if(user_data.access_level=='admin'){document.getElementById("letter_reader").disabled=false;}
 
 }
@@ -827,10 +823,10 @@ function send_session_data(finish_callback){
                 result:session_data.result,
                 level:session_data.level,
                 duration:session_data.duration,
-                timestamp:session_data.timestamp,
-                details: session_data.details
+                timestamp:session_data.timestamp
             };
         if(session_data.mode=="test"){
+            result_obj.details=session_data.details; // add details
             if(!cache_user_subject_results.hasOwnProperty(session_data.subject)) cache_user_subject_results[session_data.subject]={'general':{'user':session_data.user,'subject':session_data.subject},'elements':[]};
             cache_user_subject_results[session_data.subject].elements.unshift(result_obj);
             cache_user_subject_result_detail[result_obj.id]={general: {session: result_obj.id}, elements: result_obj.details};
