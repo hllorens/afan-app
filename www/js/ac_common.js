@@ -76,6 +76,8 @@ var Activity = (function(){
         ';
         document.getElementById("help_button").addEventListener(clickOrTouch,function(){if(!this.in_process) this.show_help();}.bind(this));
         document.getElementById("go-back").addEventListener(clickOrTouch,function(){if(!this.in_process) game();}.bind(this));
+        document.getElementById("header_text").removeEventListener(clickOrTouch,menu_screen); // if comes from menu
+        document.getElementById("header_text").innerHTML=this.type;
         if(session_data.mode!="test"){
             document.getElementById("level_button").addEventListener(clickOrTouch,function(){if(!this.in_process) this.select_level(elem);}.bind(this));
         }

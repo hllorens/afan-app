@@ -166,9 +166,8 @@ function login_screen(){
 	   <span class="icon"></span>\
 		<span class="buttonText"></span>\
 		</div>\
-		<br /><button class="button exit" id="invitee_access">Invitado</button> \
-		<br /><button id="exit" class="button exit">Salir</button> \
-			';
+		<br /><button class="button" id="invitee_access">Invitado</button> \
+			'; 
         if(internet_access && !is_local()){
             if(debug) alert('google button ON');
             gapi.signin.render('signinButton', {
@@ -185,7 +184,6 @@ function login_screen(){
 
         }
 		document.getElementById("invitee_access").addEventListener(clickOrTouch,function(){invitee_access();});
-		document.getElementById("exit").addEventListener(clickOrTouch,function(){exit_app();});
 	}
 }
 
@@ -476,7 +474,6 @@ function menu_screen(){
 		hamburger_menu_content.innerHTML=''+get_reduced_display_name(user_data.display_name)+'<ul>\
 		'+sign+'\
 		<li><a href="#" id="show_about">acerca de..</a></li>\
-		<li><a id="exit_app_hamburger">salir</a></li>\
 		</ul>';
         var name_with_details=app_name;
         if(is_local()){name_with_details+=' [app]';}
@@ -506,12 +503,11 @@ function menu_screen(){
 		<br /><button id="manage-subjects" disabled="true" class="button">Participantes</button> \
         <br /><button id="results" disabled="true" class="button">Resultados</button>\
 		'+offline_opts+'\
-		<br /><button id="exit_app" class="button exit">Salir</button> \
 		</nav>\
 		';
 		if(user_data.access_level=='admin'){
-			document.getElementById("admin_screen").addEventListener(clickOrTouch,function(){admin_screen();});
-			document.getElementById("letter_reader").addEventListener(clickOrTouch,function(){letter_reader();});
+			document.getElementById("admin_screen").addEventListener(clickOrTouch,admin_screen);
+			document.getElementById("letter_reader").addEventListener(clickOrTouch,letter_reader);
 		}
 		if(user_data.email!='invitee'){
 			document.getElementById("show_profile").addEventListener(clickOrTouch,function(){hamburger_close();show_profile();});
@@ -520,16 +516,14 @@ function menu_screen(){
             document.getElementById("login_screen").addEventListener(clickOrTouch,function(){hamburger_close();login_screen();});
         }
         if(localStorage.hasOwnProperty('locally_stored_sessions')){
-            document.getElementById("send_stored_sessions").addEventListener(clickOrTouch,function(){send_stored_sessions();});
+            document.getElementById("send_stored_sessions").addEventListener(clickOrTouch,send_stored_sessions);
         }
 
 		document.getElementById("hamburger_icon").addEventListener(clickOrTouch,hamburger_toggle);
-		document.getElementById("header_text").addEventListener(clickOrTouch,function(){menu_screen();});
-		document.getElementById("manage-subjects").addEventListener(clickOrTouch,function(){manage_subjects();});
-        document.getElementById("results").addEventListener(clickOrTouch,function(){show_results();});
-        document.getElementById("exit_app").addEventListener(clickOrTouch,function(){exit_app();});
+		document.getElementById("header_text").addEventListener(clickOrTouch,menu_screen);
+		document.getElementById("manage-subjects").addEventListener(clickOrTouch,manage_subjects);
+        document.getElementById("results").addEventListener(clickOrTouch,show_results);
         document.getElementById("show_about").addEventListener(clickOrTouch,function(){hamburger_close();show_about();});
-        document.getElementById("exit_app_hamburger").addEventListener(clickOrTouch,function(){hamburger_close();exit_app();});
 
 		/*if(cache_user_subjects==null){
             if(internet_access){ajax_CORS_request_json(backend_url+'ajaxdb.php?action=get_subjects&user='+session_data.user,set_cache_subjects);}
@@ -750,34 +744,42 @@ var game=function(){
     // CANNOT be here, in game-mode no clicks yet---------------------------
     //if(!check_if_sounds_loaded(memoria)){return;}
     // ---------------------------------------------------------------------- 
-    // send data if seesion.mode is training
-    if(session_data.mode=="training" && !game_mode && session_data.duration!=0){send_session_data(game);return;}
-    //reset game variables --------
-    reset_session();
-    //-----------------------------
-	var extra_options="";
-	if(!game_mode){
-        extra_options='<br /><button id="go_back_button" class="minibutton fixed-bottom-right go-back">&larr;</button>';
-        header_text.innerHTML=' &larr; '+app_name+' menu';
-    }
-    canvas_zone_vcentered.innerHTML=' \
-    <br /><button id="conciencia" class="button">Conciencia</button> \
-    <br /><button id="memoria_visual" class="button">Memoria Visual</button> \
-    <br /><button id="ritmo" class="button">Ritmo</button> \
-    <br /><button id="velocidad" class="button">Velocidad</button> \
-    <br /><button id="discr_visual" class="button">Discr. Visual</button> \
-	<br /><button id="completo" class="button">COMPLETO</button>\
-    '+extra_options+'\
-    ';
-    
-    document.getElementById("completo").addEventListener(clickOrTouch,function(){completo();});
-    document.getElementById("conciencia").addEventListener(clickOrTouch,function(){conciencia();});
-    document.getElementById("memoria_visual").addEventListener(clickOrTouch,function(){memoria_visual();});
-    document.getElementById("ritmo").addEventListener(clickOrTouch,function(){ritmo();});
-    document.getElementById("velocidad").addEventListener(clickOrTouch,function(){velocidad();});
-    document.getElementById("discr_visual").addEventListener(clickOrTouch,function(){discr_visual();});
-    if(!game_mode){
-        document.getElementById("go_back_button").addEventListener(clickOrTouch,function(){menu_screen();});
+    // send data if seesion.mode is training and >60 seconds and >5 activities
+    if(session_data.mode=="training" && !game_mode && session_data.duration>60 && session_data.num_answered>5){
+        send_session_data(game);
+    }else{
+        //reset game variables --------
+        reset_session();
+        //-----------------------------
+        var extra_options="";
+        if(!game_mode){
+            extra_options='<br /><button id="go_back_button" class="minibutton fixed-bottom-right go-back">&larr;</button>';
+            header_text.innerHTML=' &larr; '+app_name+' menu';
+        }
+        canvas_zone_vcentered.innerHTML=' \
+        <br /><button id="conciencia" class="button">Conciencia</button> \
+        <br /><button id="memoria_visual" class="button">Memoria Visual</button> \
+        <br /><button id="ritmo" class="button">Ritmo</button> \
+        <br /><button id="velocidad" class="button">Velocidad</button> \
+        <br /><button id="discr_visual" class="button">Discr. Visual</button> \
+        <br /><button id="completo" class="button">COMPLETO</button>\
+        '+extra_options+'\
+        ';
+        
+        document.getElementById("completo").addEventListener(clickOrTouch,function(){completo();});
+        document.getElementById("conciencia").addEventListener(clickOrTouch,function(){conciencia();});
+        document.getElementById("memoria_visual").addEventListener(clickOrTouch,function(){memoria_visual();});
+        document.getElementById("ritmo").addEventListener(clickOrTouch,function(){ritmo();});
+        document.getElementById("velocidad").addEventListener(clickOrTouch,function(){velocidad();});
+        document.getElementById("discr_visual").addEventListener(clickOrTouch,function(){discr_visual();});
+        if(!game_mode){
+            document.getElementById("go_back_button").addEventListener(clickOrTouch,function(){menu_screen();});
+        }
+        // reset header link
+        //document.getElementById("header_text").removeEventListener(clickOrTouch,game); // if comes from game
+        // if comes from menu (in case it is already there)
+        document.getElementById("header_text").removeEventListener(clickOrTouch,menu_screen);
+        document.getElementById("header_text").addEventListener(clickOrTouch,menu_screen);
     }
 }
 
@@ -831,10 +833,7 @@ function send_session_data(finish_callback){
         if(session_data.mode=="test"){
             if(!cache_user_subject_results.hasOwnProperty(session_data.subject)) cache_user_subject_results[session_data.subject]={'general':{'user':session_data.user,'subject':session_data.subject},'elements':[]};
             cache_user_subject_results[session_data.subject].elements.unshift(result_obj);
-            cache_user_subject_result_detail[result_obj.id]={general: {
-                                                                session: result_obj.id
-                                                            } ,
-                                                             elements: result_obj.details};
+            cache_user_subject_result_detail[result_obj.id]={general: {session: result_obj.id}, elements: result_obj.details};
         }else{
             if(!cache_user_subject_training.hasOwnProperty(session_data.subject)) cache_user_subject_training[session_data.subject]={'general':{'user':session_data.user,'subject':session_data.subject},'elements':[]};;
             cache_user_subject_training[session_data.subject].elements.unshift(result_obj);
@@ -846,9 +845,11 @@ function send_session_data(finish_callback){
             }
             locally_stored_sessions.push(session_data);
             localStorage.setItem("locally_stored_sessions", JSON.stringify(locally_stored_sessions));
-            reset_session();            
+            reset_session();
+            canvas_zone_vcentered.innerHTML='<br />...Enviando datos offline al servidor...<br /><br />';
             check_internet_access_with_img_url('http://www.centroafan.com/logo-afan.jpg',send_session_data_success,send_session_data_fail);
         }else{
+            reset_session();
             if(typeof(finish_callback)!='undefined'){finish_callback();}
             else{game();}
         }
@@ -859,7 +860,6 @@ function send_session_data_success(){
     if(localStorage.hasOwnProperty('locally_stored_sessions')){
         var locally_stored_sessions=JSON.parse(localStorage.getItem("locally_stored_sessions"));
         ajax_CORS_request(backend_url+'ajaxdb.php',send_session_data_success_callback,"json","POST","action=send_sessions_data_post&json_string="+(JSON.stringify(locally_stored_sessions)));
-        canvas_zone_vcentered.innerHTML='<br />...Enviando datos offline al servidor...<br /><br />';
     }else{
         alert("ERROR: No hay datos para enviar.");
         menu_screen();

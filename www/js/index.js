@@ -12,8 +12,6 @@ if(QueryString.hasOwnProperty('user') && QueryString.user!='') user_bypass=Query
 // responsive tunings
 prevent_scrolling();
 
-// variables
-var exit_url="http://www.centroafan.com";
 
 
 var is_app=is_cordova();
@@ -22,16 +20,6 @@ if(is_app){
 	document.addEventListener('deviceready', onDeviceReady, false);
 }else{
 	onDeviceReady();
-}
-
-
-
-var exit_app=function(){
-		if(is_cordova()){
-			navigator.app.exitApp();
-		}else{
-			location.href = exit_url;
-		}
 }
 
 function onDeviceReady() {
