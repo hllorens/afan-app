@@ -25,6 +25,7 @@
     <!--<icon src="res/icon.png" />-->
     <platform name="ios">
         <preference name="Orientation" value="all" />
+        <preference name="Fullscreen" value="true" /> <!--removes status bar-->
     </platform>
 
     
