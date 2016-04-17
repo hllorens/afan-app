@@ -302,7 +302,6 @@ var set_user_signin=function(result) {
 
 function gdisconnect(){
 	hamburger_close();
-    user_bypass=undefined;
     if(localStorage.hasOwnProperty('locally_stored_sessions')){
         if (!confirm("Hay datos sin enviar. Si se desconecta se perderan. Desea desconetarse?")) {
             return;
@@ -310,6 +309,7 @@ function gdisconnect(){
     }
     localStorage.removeItem("locally_stored_sessions"); // avoid cross user interaction
 	if(user_data.email=='invitee' || user_bypass!=undefined){
+        user_bypass=undefined;
         login_screen();
     }else{
         ajax_CORS_request_json(backend_url+'ajaxdb.php?action=gdisconnect',set_gdisconnect);
