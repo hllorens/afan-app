@@ -17,6 +17,7 @@ prevent_scrolling();
 var is_app=is_cordova();
 if(is_app){
     console.log("is app");
+    if (!window.cordova) alert("ERROR: Running cordova without including cordova.js!");
 	document.addEventListener('deviceready', onDeviceReady, false);
 }else{
 	onDeviceReady();

@@ -204,20 +204,23 @@ function invitee_access(){
 
 var set_login_bypass=function(result) {
     if (result) {
-        if(result.hasOwnProperty('error') && result.error!=""){alert("LOGIN ERROR: "+result.error); return;}
-        if(debug){
-            console.log(result);
-            console.log("logged bypass! "+result.email+" level:"+result.access_level);
-            alert("logged bypass! "+result.email+" level:"+result.access_level);
+        if(result.hasOwnProperty('error') && result.error!=""){
+            alert('LOGIN ERROR: '+user_bypass+' no existe. Server error:'+result.error); user_bypass=undefined; login_screen();
+        }else{
+            if(debug){
+                console.log(result);
+                console.log("logged bypass! "+result.email+" level:"+result.access_level);
+                alert("logged bypass! "+result.email+" level:"+result.access_level);
+            }
+            user_data=result;
+            session_data.user=user_data.email;
+            session_data.user_access_level=user_data.access_level;
+            cache_user_subjects=user_data.subjects;
+            cache_user_subject_results=user_data.subject_results;
+            cache_user_subject_result_detail=user_data.subject_result_details;
+            localStorage.setItem("user_data", JSON.stringify(user_data));
+            menu_screen();
         }
-        user_data=result;
-        session_data.user=user_data.email;
-        session_data.user_access_level=user_data.access_level;
-        cache_user_subjects=user_data.subjects;
-        cache_user_subject_results=user_data.subject_results;
-        cache_user_subject_result_detail=user_data.subject_result_details;
-        localStorage.setItem("user_data", JSON.stringify(user_data));
-        menu_screen();
     } else {
         alert('Failed to make a server-side call. Check your configuration and console.</br>Result:'+ result);
         login_screen();
@@ -265,24 +268,27 @@ function signInCallback(authResult) {
 
 var set_user_signin=function(result) {
     if (result) {
-        if(result.hasOwnProperty('error') && result.error!=""){alert("LOGIN ERROR: "+result.error); return;}
-        if(result.hasOwnProperty('info') && result.info=="new user"){
-            open_js_modal_content_accept('<p>Usuario creado para: '+result.email+' \
-            en breve recibirá un email confirmando su registro.</p>');
+        if(result.hasOwnProperty('error') && result.error!=""){
+            alert("LOGIN ERROR: "+result.error); login_screen();
+        }else{
+            if(result.hasOwnProperty('info') && result.info=="new user"){
+                open_js_modal_content_accept('<p>Usuario creado para: '+result.email+' \
+                en breve recibirá un email confirmando su registro.</p>');
+            }
+            if(debug){
+                console.log(result);
+                console.log("logged google! "+result.email+" level:"+result.access_level);
+                alert("logged google! "+result.email+" level:"+result.access_level);
+            }
+            user_data=result;
+            session_data.user=user_data.email;
+            session_data.user_access_level=user_data.access_level;
+            cache_user_subjects=user_data.subjects;
+            cache_user_subject_results=user_data.subject_results;
+            cache_user_subject_result_detail=user_data.subject_result_details;
+            localStorage.setItem("user_data", JSON.stringify(user_data));
+            menu_screen();
         }
-        if(debug){
-            console.log(result);
-            console.log("logged google! "+result.email+" level:"+result.access_level);
-            alert("logged google! "+result.email+" level:"+result.access_level);
-        }
-        user_data=result;
-        session_data.user=user_data.email;
-        session_data.user_access_level=user_data.access_level;
-        cache_user_subjects=user_data.subjects;
-        cache_user_subject_results=user_data.subject_results;
-        cache_user_subject_result_detail=user_data.subject_result_details;
-        localStorage.setItem("user_data", JSON.stringify(user_data));
-        menu_screen();
     } else if (authResult['error']) {
         alert('There was an error: ' + authResult['error']);
         login_screen();
