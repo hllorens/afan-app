@@ -173,8 +173,7 @@ var acRitmo=function(){
         }else{
             that.ac.details.result="incorrect";
         }
-        
-        session_data.num_answered=that.ac.MAX_LEVELS*that.ac.max_played_times_this_level_test; // not used in game
+        session_data.num_answered++;
         that.ac.end();
     }
 }

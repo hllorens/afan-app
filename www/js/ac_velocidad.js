@@ -167,7 +167,7 @@ var acVelocidad=function(){
         }else{
             that.ac.details.result="incorrect";
         }
-        session_data.num_answered=that.ac.MAX_LEVELS*that.ac.MAX_PLAYED_TIMES_PER_LEVEL_TEST; // not used in game
+        session_data.num_answered++;
         that.ac.end()
     }
 }

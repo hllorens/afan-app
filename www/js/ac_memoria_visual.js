@@ -130,7 +130,7 @@ var acMemVis=function(){
             that.ac.details.result="incorrect";
         }
         if(that.ac.current_usr_answer_corrected) that.ac.details.choice+="(corr)";
-        session_data.num_answered=that.ac.MAX_LEVELS*that.ac.max_played_times_this_level_test; // not used in game
+        session_data.num_answered++;
         that.ac.end();
     }
 }
