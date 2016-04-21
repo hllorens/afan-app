@@ -148,7 +148,7 @@ if ($action == "get_users"){
     unset($_SESSION['username']);
     unset($_SESSION['email']);
     unset($_SESSION['picture']);
-    if ( (get_value("state")) != ($_SESSION["state"]) ) {
+    if ( (get_value("state")) != ($_SESSION["state"]) && get_value("state")!='offline') {
         $output['error']="FAILURE: Forgery attack? Invalid state parameter ".get_value("state")." expected: ".$_SESSION["state"];
     }else{
         $user = $_REQUEST['user'];

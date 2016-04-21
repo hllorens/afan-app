@@ -13,7 +13,8 @@ function check_internet_access(){
 var set_internet_access_true=function(){
     internet_access=true;
     //jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_session_state&action=gen_session_state');
-    ajax_CORS_request_json(backend_url+'ajaxdb.php?action=gen_session_state',set_session_state);
+    if(is_local()){session_state="offline";menu_screen();}
+    else{ajax_CORS_request_json(backend_url+'ajaxdb.php?action=gen_session_state',set_session_state);}
 }
 var set_internet_access_false=function(){
     internet_access=false;
@@ -606,6 +607,7 @@ var manage_subjects=function(){
 
 
 var add_subject=function(){
+    if(!internet_access){alert('Error: no se puede añadir sujetos sin internet');return;}
 	var accept_function=function(){
 		var myform=document.getElementById('my-form');
 		var myformsubmit=document.getElementById('my-form-submit');
@@ -656,6 +658,7 @@ var update_alias=function(){
 }
 
 var edit_subject=function(sid){
+    if(!internet_access){alert('Error: no se puede editar sujetos sin internet');return;}
 	var accept_function=function(){
 		var myform=document.getElementById('my-form');
 		var myformsubmit=document.getElementById('my-form-submit');
@@ -849,7 +852,7 @@ function send_session_data(finish_callback){
             localStorage.setItem("locally_stored_sessions", JSON.stringify(locally_stored_sessions));
             reset_session();
             canvas_zone_vcentered.innerHTML='<br />...Enviando datos offline al servidor...<br /><br />';
-            check_internet_access_with_img_url('http://www.centroafan.com/logo-afan.jpg',send_session_data_success,send_session_data_fail);
+            check_internet_access_with_img_url('http://www.centroafan.com/logo-afan.jpg',send_session_data_success,send_session_data_fail,finish_callback);
         }else{
             reset_session();
             if(typeof(finish_callback)!='undefined'){finish_callback();}
@@ -858,10 +861,10 @@ function send_session_data(finish_callback){
     }
 }
 
-function send_session_data_success(){
+function send_session_data_success(finish_callback){
     if(localStorage.hasOwnProperty('locally_stored_sessions')){
         var locally_stored_sessions=JSON.parse(localStorage.getItem("locally_stored_sessions"));
-        ajax_CORS_request(backend_url+'ajaxdb.php',send_session_data_success_callback,"json","POST","action=send_sessions_data_post&json_string="+(JSON.stringify(locally_stored_sessions)));
+        ajax_CORS_request(backend_url+'ajaxdb.php',send_session_data_success_callback,"json","POST","action=send_sessions_data_post&json_string="+(JSON.stringify(locally_stored_sessions)),finish_callback);
     }else{
         alert("ERROR: No hay datos para enviar.");
         menu_screen();
@@ -873,10 +876,10 @@ function send_session_data_success_callback(data){
     if(debug) console.log('Storing data. Server message: '+data.msg);
     reset_session();
     localStorage.removeItem("locally_stored_sessions");
-    if(typeof(finish_callback)!='undefined'){finish_callback();}
+    if(data.hasOwnProperty('callback_arg')){data.callback_arg();}
     else{menu_screen();}
 }
-function send_session_data_fail(){
+function send_session_data_fail(finish_callback){
     internet_access=false;
     console.log("No hay conexión a internet, guardando en local...");
     if(typeof(finish_callback)!='undefined'){finish_callback();}

@@ -27,8 +27,8 @@ var acRitmo=function(){
                 <div style="border:0px dotted #eee;min-height:52px;"><span id="anspan">&nbsp;</span></div>  \
                 <button id="pta" class="button button-fat button-hidden" disabled="disabled">.</button>\
                 <button id="ptaa" class="button button-fat button-hidden" disabled="disabled">___</button>\
-                <br /><br /><button id="ac_check" class="button button-hidden" disabled="disabled">¡Hecho!</button> <button id="borrarb" class="button backgroundRed button-hidden" disabled="disabled">borrar</button>\
-             ';//+that.ac.current_key_answer;
+                <br /><br /><button id="ac_check" class="button button-hidden" disabled="disabled">¡Hecho!</button> <button id="borrarb" class="button button-hidden" disabled="disabled">borrar</button>\
+             ';//+that.ac.current_key_answer; // backgroundRed
             that.ac.add_buttons(canvas_zone_vcentered);
             that.ac.playb=document.getElementById('playb');
             that.ac.hinttext=document.getElementById('hinttext');
@@ -51,7 +51,7 @@ var acRitmo=function(){
         //that.ac.anspan.removeChild(item);
         that.ac.current_usr_answer=[]; //.pop();
         if(that.ac.current_usr_answer.length==0){
-            that.ac.borrarb.classList.add('button-hidden');
+            //that.ac.borrarb.classList.add('button-hidden');
             that.ac.borrarb.disabled=true;
         }
     }
@@ -91,6 +91,7 @@ var acRitmo=function(){
         document.getElementById("pta").classList.remove('button-hidden');
         document.getElementById("ptaa").classList.remove('button-hidden');
         document.getElementById("ac_check").classList.remove('button-hidden');
+        that.ac.borrarb.classList.remove('button-hidden');
         that.ac.hinttext.innerHTML='¿qué has escuchado?';
         if(session_data.mode=="test" && that.ac.played_times<that.ac.MAX_PLAYED_TIMES_TEST_DRY){
             that.ac.hinttext.innerHTML="[ENTRENA] "+that.ac.hinttext.innerHTML;
@@ -156,7 +157,7 @@ var acRitmo=function(){
             that.ac.playb.disabled=false;
             if(that.ac.current_usr_answer.length>0){
                 that.ac.borrarb.disabled=false;
-                that.ac.borrarb.classList.remove('button-hidden');
+                //that.ac.borrarb.classList.remove('button-hidden');
             }
             if(that.ac.current_usr_answer.length>that.ac.MAX_LEVELS) that.ac.check();
         }
