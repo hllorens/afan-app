@@ -17,7 +17,7 @@ var explore_results=function(){
 
 
 var show_user_results=function(){
-    if(cache_user_subject_results.hasOwnProperty(session_data.subject) && cache_user_subject_results[session_data.subject].elements.length==0){
+    if(!cache_user_subject_results.hasOwnProperty(session_data.subject) || cache_user_subject_results[session_data.subject].elements.length==0){
         document.getElementById("results-div").innerHTML="<b>"+session_data.subject+"</b><br />No hay resultados";
     }else{
         document.getElementById("results-div").innerHTML='\
