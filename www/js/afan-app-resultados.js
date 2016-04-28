@@ -9,7 +9,7 @@ var explore_results=function(){
 	';
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){show_results();});
     if(!cache_user_subject_results.hasOwnProperty(session_data.subject)){
-        console.log('NOTE: Trying to access a subject that still does not have any result...');
+        //console.log('NOTE: Trying to access a subject that still does not have any result...');
         cache_user_subjects[session_data.subject]={"general":{"user":session_data.user,"subject": session_data.subject},"elements":[]};
     }
     show_user_results();
@@ -18,7 +18,7 @@ var explore_results=function(){
 
 var show_user_results=function(){
     if(!cache_user_subject_results.hasOwnProperty(session_data.subject) || cache_user_subject_results[session_data.subject].elements.length==0){
-        document.getElementById("results-div").innerHTML="<b>"+session_data.subject+"</b><br />No hay resultados";
+        document.getElementById("results-div").innerHTML="<b>"+session_data.subject+"</b><br />Aún no hay resultados para "+session_data.subject;
     }else{
         document.getElementById("results-div").innerHTML='\
          <div style=""><span style="font-weight:bold;">'+cache_user_subject_results[session_data.subject].general.subject+'</span><button id="stat" class="stat"></button></div><table id="results-table"  class="results-table"></table>';
