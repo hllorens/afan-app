@@ -18,7 +18,7 @@ var explore_results=function(){
 
 var show_user_results=function(){
     if(cache_user_subject_results.hasOwnProperty(session_data.subject) && cache_user_subject_results[session_data.subject].elements.length==0){
-        document.getElementById("results-div").innerHTML="<b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
+        document.getElementById("results-div").innerHTML="<b>"+session_data.subject+"</b><br />No hay resultados";
     }else{
         document.getElementById("results-div").innerHTML='\
          <div style=""><span style="font-weight:bold;">'+cache_user_subject_results[session_data.subject].general.subject+'</span><button id="stat" class="stat"></button></div><table id="results-table"  class="results-table"></table>';
