@@ -19,21 +19,19 @@
 	<div id="zone_canvas" class="canvas-with-header">
 		<div class="text-center vertical-center-container">
 			<div id="zone_canvas_vcentered" class="text-center vertical-center-content">
-			OPTIONALLY IF WE USE THE OPTION OF GOOGLEPLAY OR APPLESTORE...
-			DEVICE INFO:<br />
-			...
-			if PC browser -> just trigger the web app
-			if iOS        -> make a select to download the app or go to the web
-			if Android    -> select to ...
-			<br />
-			<span id="userAgent"></span>
+                ...
+                <br />
+                <span id="userAgent"></span>
 			</div>
 		</div>
 	</div>
 </div>
 
 <script>
-	document.getElementById("userAgent").innerHTML=navigator.userAgent;
+	//document.getElementById("userAgent").innerHTML=navigator.userAgent;
+	if(window.location.href=='http://www.centroafan.com/afan-app/'){
+        window.location.href ='http://www.centroafan.com/afan-app/www/';
+    }
 </script>
 
 </body>
