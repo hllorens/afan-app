@@ -10,7 +10,7 @@ var explore_results=function(){
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){show_results();});
     if(!cache_user_subject_results.hasOwnProperty(session_data.subject)){
         //console.log('NOTE: Trying to access a subject that still does not have any result...');
-        cache_user_subjects[session_data.subject]={"general":{"user":session_data.user,"subject": session_data.subject},"elements":[]};
+        cache_user_subject_results[session_data.subject]={"general":{"user":session_data.user,"subject": session_data.subject},"elements":[]};
     }
     show_user_results();
 };

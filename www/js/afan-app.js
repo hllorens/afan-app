@@ -821,6 +821,9 @@ function send_session_data(finish_callback){
         if(session_data.num_answered!=0) session_data.result=session_data.num_correct/session_data.num_answered;
         if(debug) console.log(JSON.stringify(session_data));
         // first store locally in cache
+        if(!cache_user_subject_results.hasOwnProperty(session_data.subject)){
+            cache_user_subject_results[session_data.subject]={"general":{"user":session_data.user,"subject": session_data.subject},"elements":[]};
+        }
         var result_obj={
                 id:""+(cache_user_subject_results[session_data.subject].elements.length+1),
                 subject: session_data.subject,
