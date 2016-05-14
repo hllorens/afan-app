@@ -119,11 +119,15 @@ var audio_object_sprite_ref={
 	zfx_wrong: {id: "zfx_wrong50", start: 36.233, end: 36.734}, 
 	zsilence_start: {id: "zsilence_start", start: 0.100, end: 0.700}
 };
-var wordimage_image_ref=getAllCSSselectorsMatching("wordimg-sprite.css",new RegExp("wordimage-"));
-for(var i=0;i<wordimage_image_ref.length;i++){
-    wordimage_image_ref[i]=wordimage_image_ref[i].replace('.wordimage-','');
-}
 
+// local copy for chrome on file:// that cannot parse css
+var wordimage_image_ref=["lombriz", "abeja", "aceite", "aeroplano", "ala", "almeja", "anciana", "antena", "arbol", "arco", "ardilla", "avion", "azul", "bala", "ballena", "bandera", "banyera", "barco", "bici", "bocadillo", "boca", "brazo", "buho", "cabra", "calcetines", "calla", "cama", "camara", "camello", "camino", "camion", "camisa", "campana", "campo", "cancion", "candado", "canya", "caracol", "carta", "casa", "cebra", "cerdo", "cerezas", "cerilla", "col", "comprar", "conejo", "copa", "corazon", "corbata", "cortina", "cuatro", "cuchara", "dardo", "diana", "diccionario", "dulce", "elefante", "ensalada", "escenario", "faro", "flor", "foca", "fresa", "gallina", "gasolina", "gato", "goma", "gorra", "gorro", "hoja", "hormiga", "hueso", "huevo", "jaula", "jirafa", "koala", "lampara", "lapiz", "leche", "libros", "limon", "lluvia", "abrigo", "madera", "maiz", "mano", "manzana", "maracas", "marco", "mariquita", "martillo", "mesa", "mono", "monte", "morsa", "murcielago", "naranja", "noria", "obrero", "oreja", "oruga", "oso", "oveja", "pajaro", "pala", "pantano", "papel", "paraguas", "pastel", "patata", "pato", "pera", "percha", "perro", "pescado", "pez", "piedra", "pino", "pinya", "pinza", "plancha", "plano", "platano", "plato", "pluma", "preso", "puente", "queso", "rama", "raton", "regadera", "reja", "reloj", "rino", "rojo", "ropa", "sal", "sandia", "sapo", "serpiente", "seta", "silbato", "sofa", "sol", "sombrero", "sombrilla", "sopa", "sorpresa", "television", "tigre", "tijeras", "tomate", "topo", "tornillo", "tortuga", "tostadora", "tranvia", "tren", "tres", "tuerca", "uvas", "vaca", "ventana", "verde", "vino"];
+//if(!is_local() || !(/Chrome/.test(navigator.userAgent))){
+//    wordimage_image_ref=getAllCSSselectorsMatching("wordimg-sprite.css",new RegExp("wordimage-"));
+//for(var i=0;i<wordimage_image_ref.length;i++){
+//    wordimage_image_ref[i]=wordimage_image_ref[i].replace('.wordimage-','');
+//}
+//}
 
 
 
@@ -366,9 +370,14 @@ var read_input_sounds=function(){
 }
 
 var check_missing_elements=function(){
+    if(is_local() && /Chrome/.test(navigator.userAgent)){
+        alert("ABORTING: images cannot be checked from Chrome in file://");
+        return;
+    }
 	var undefined_sounds={total:0};
 	var undefined_images={total:0};
 	var msg="";
+
 	if(media_objects.jsons.hasOwnProperty("ac_conciencia_train.json")){
         var level=1;
         do{

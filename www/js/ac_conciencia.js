@@ -68,7 +68,7 @@ var acConciencia=function(){
 
                 var answer_i=that.ac.cur_data['answers'][use];
                 answers_div.innerHTML+='<div id="answer'+i+'" class="hover_red_border"  ></div>';
-                if(!selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+that.ac.cur_data['answers'][use])){
+                if( (!is_local() || !(/Chrome/.test(navigator.userAgent))) && !selectorExistsInCSS("wordimg-sprite.css",".wordimage-"+that.ac.cur_data['answers'][use])){
                     alert("ERROR: .wordimage-"+that.ac.cur_data['answers'][use]+" not found in wordimg-sprite.css.");
                     document.getElementById("answer"+i).appendChild(media_objects.images['wrong.png']);
                 }else if(used_answers_text.hasOwnProperty(that.ac.cur_data['answers'][use])){
