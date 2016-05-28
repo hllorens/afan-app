@@ -8,17 +8,15 @@ var acMemVis=function(){
     this.ac.MAX_LEVELS=6;
     this.ac.MAX_PASSED_TIMES_PER_LEVEL_GAME=4;
     this.ac.MAX_PLAYED_TIMES_PER_LEVEL_TEST=2;
-    //this.ac.MAX_FAILED_TIMES_TEST=2;
+    this.ac.MIN_LEVEL=2;
     var that=this;
 
 
 
-
     this.ac.start_activity=function(){
-        if(that.ac.level>that.ac.MAX_LEVELS){ //|| (session_data.mode=="test" && !game_mode && that.ac.failed_times>=that.ac.MAX_FAILED_TIMES_TEST) ){
+        if(that.ac.level>that.ac.MAX_LEVELS){
             that.ac.finish();
         }else{
-            //if(session_data.mode=="test" && this.played_times==this.MAX_PLAYED_TIMES_TEST_DRY) that.ac.level=1; level is reset in common
             that.ac.current_usr_answer=[];
             that.ac.current_usr_answer_corrected=false;
             var sprite_images=wordimage_image_ref; //['pato','gato','sol','pez','tren','sal','col','reja','oreja','koala','bala','ala'];
@@ -59,7 +57,7 @@ var acMemVis=function(){
         // don't worry about recursion, all functions will end there
         if(that.ac.uncovered==that.ac.current_key_answer.length){
             that.ac.uncovered=0;
-            setTimeout(function(){that.ac.memoria_visual_find_pattern();}, 4000);
+            setTimeout(function(){that.ac.memoria_visual_find_pattern();}, 2000);
         }else{	//uncover...
             document.getElementById('xx').children[that.ac.uncovered].children[0].classList.remove('covered');
             that.ac.uncovered++;

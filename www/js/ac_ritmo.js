@@ -5,12 +5,12 @@
 var acRitmo=function(){
     this.ac=new Activity('Ritmo','ritmo','start_activity');
     this.ac.help_text='Escucha la secuencia. Después tendrás que reproducirla.';
+    
     this.ac.MAX_LEVELS=6;
     this.ac.MAX_PASSED_TIMES_PER_LEVEL_GAME=4;
     this.ac.MAX_PLAYED_TIMES_PER_LEVEL_TEST=2; // all the activities
-    //this.ac.MAX_FAILED_TIMES_TEST=2;
+    this.ac.MIN_LEVEL=2;
     var that=this;
-
 
 
     this.ac.start_activity=function(){

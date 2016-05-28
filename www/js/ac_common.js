@@ -14,7 +14,8 @@ var Activity = (function(){
         this.callback_name=callback_name;
         this.finish_callback="not set";
         this.in_process=false;
-        this.level=1;
+        this.MIN_LEVEL=1;
+        this.level=this.MIN_LEVEL;
         this.level_played_times=0;
         this.level_passed_times=0;
         this.level_failed_times=0;
@@ -26,6 +27,7 @@ var Activity = (function(){
         this.MAX_LEVELS=1;
         this.MAX_PASSED_TIMES_PER_LEVEL_GAME=10;
         this.MAX_PLAYED_TIMES_PER_LEVEL_TEST=10;
+        this.MAX_PLAYED_TIMES_PER_LEVEL_TEST_DRY=1;
         this.MAX_PLAYED_TIMES_TEST=-1;
         this.MAX_PLAYED_TIMES_TEST_DRY=2;
         this.MAX_FAILURES=-1;
@@ -87,7 +89,7 @@ var Activity = (function(){
         this.reset_dry();
     }
     Activity.prototype.reset_dry=function(){
-        this.level=1;
+        this.level=this.MIN_LEVEL;
         this.passed_times=0;
         this.reset_level();
         this.reset_dry_soft();
@@ -114,6 +116,7 @@ var Activity = (function(){
         // Set defaults, the activity must change them if needed
         this.max_passed_times_this_level_game=this.MAX_PASSED_TIMES_PER_LEVEL_GAME;
         this.max_played_times_this_level_test=this.MAX_PLAYED_TIMES_PER_LEVEL_TEST;
+        this.max_played_times_this_level_test_dry=this.MAX_PLAYED_TIMES_PER_LEVEL_TEST_DRY;
         this[this.callback_name]();
     }
     Activity.prototype.next_activity=function(){
@@ -133,13 +136,17 @@ var Activity = (function(){
             this.reset_dry();
         }
         if((session_data.mode!="test" && this.level_passed_times>=this.max_passed_times_this_level_game) || 
-           (session_data.mode=="test" && this.level_played_times>=this.max_played_times_this_level_test) ){
+           (session_data.mode=="test" && 
+                (this.played_times<this.MAX_PLAYED_TIMES_TEST_DRY  && this.level_played_times>=this.max_played_times_this_level_test_dry) ||
+                (this.played_times>=this.MAX_PLAYED_TIMES_TEST_DRY && this.level_played_times>=this.max_played_times_this_level_test) 
+            )){
             this.reset_level();
             this.level++;
         }
         // Set defaults, the activity must change them if needed
         this.max_passed_times_this_level_game=this.MAX_PASSED_TIMES_PER_LEVEL_GAME;
         this.max_played_times_this_level_test=this.MAX_PLAYED_TIMES_PER_LEVEL_TEST;
+        this.max_played_times_this_level_test_dry=this.MAX_PLAYED_TIMES_PER_LEVEL_TEST_DRY;
         this[this.callback_name]();
     }
     Activity.prototype.end=function(){
