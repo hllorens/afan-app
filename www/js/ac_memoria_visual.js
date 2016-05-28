@@ -8,7 +8,7 @@ var acMemVis=function(){
     this.ac.MAX_LEVELS=6;
     this.ac.MAX_PASSED_TIMES_PER_LEVEL_GAME=4;
     this.ac.MAX_PLAYED_TIMES_PER_LEVEL_TEST=2;
-    this.ac.MIN_LEVEL=2;
+    this.ac.MIN_LEVEL_TEST=2;
     var that=this;
 
 

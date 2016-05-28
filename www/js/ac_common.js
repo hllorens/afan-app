@@ -15,6 +15,8 @@ var Activity = (function(){
         this.finish_callback="not set";
         this.in_process=false;
         this.MIN_LEVEL=1;
+        this.MIN_LEVEL_TEST=1;
+        this.MIN_LEVEL_TEST_DRY=1;
         this.level=this.MIN_LEVEL;
         this.level_played_times=0;
         this.level_passed_times=0;
@@ -89,7 +91,11 @@ var Activity = (function(){
         this.reset_dry();
     }
     Activity.prototype.reset_dry=function(){
-        this.level=this.MIN_LEVEL;
+        if(session_data.mode!="test") this.level=this.MIN_LEVEL;
+        else if(session_data.mode=="test"){
+            if(this.played_times<this.MAX_PLAYED_TIMES_TEST_DRY)  this.level=this.MIN_LEVEL_TEST_DRY;
+            else  this.level=this.MIN_LEVEL_TEST;
+        }
         this.passed_times=0;
         this.reset_level();
         this.reset_dry_soft();
