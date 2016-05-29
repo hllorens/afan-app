@@ -129,7 +129,7 @@ var acVelocidad=function(){
         <p class="montessori">'+that.ac.hide_word(that.ac.sentence,that.ac.word)+'</p>\
         </div>\
         Palabra escondida: <input id="velocidad_answer" class="montessori-40" type="text" value="" autofocus="autofocus" />\
-        <br /><button id="check_vel_button" class="button button-long backgroundRed">No me acuerdo</button>\
+        <br /><br /><button id="check_vel_button" class="button button-long backgroundRed">No me acuerdo</button>\
         ';
         that.ac.add_buttons(canvas_zone_vcentered);
         document.getElementById("check_vel_button").addEventListener(clickOrTouch,function(){that.ac.check();}.bind(that));

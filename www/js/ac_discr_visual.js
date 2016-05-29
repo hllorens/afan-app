@@ -12,6 +12,7 @@ var acDiscrVisual=function(){
 
     this.ac.MAX_PASSED_TIMES_PER_LEVEL_GAME=16;
     this.ac.MAX_PLAYED_TIMES_PER_LEVEL_TEST=4;
+    this.ac.MAX_PLAYED_TIMES_PER_LEVEL_TEST_DRY=2;
 
     this.ac.letters1=['b','c','f','p'];
     this.ac.letters1_only_r=['d','t','v']
