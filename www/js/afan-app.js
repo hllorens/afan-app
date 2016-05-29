@@ -48,8 +48,8 @@ var sounds = [
 	//or absolute http://www.centroafan.com/afan-app-media/audio/...m4a"
 	// relative is the best to reuse it in the cordova app
 	"external-git-ignored/afan-app-media/audio/letters128kbps.m4a",
-	"external-git-ignored/afan-app-media/audio/ta35.m4a",
-	"external-git-ignored/afan-app-media/audio/ta150.m4a"
+	"external-git-ignored/afan-app-media/audio/ta30.m4a",
+	"external-git-ignored/afan-app-media/audio/ta120.m4a"
 ];
 
 
