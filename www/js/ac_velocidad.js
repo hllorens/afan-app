@@ -8,6 +8,7 @@ var acVelocidad=function(){
     this.ac.MAX_LEVELS=4; // 3 is the max but 4 will make it play 2 more times
     this.ac.MAX_PASSED_TIMES_PER_LEVEL_GAME=4;
     this.ac.MAX_PLAYED_TIMES_PER_LEVEL_TEST=2;
+    this.ac.MAX_PLAYED_TIMES_PER_LEVEL_TEST_DRY=2;
     //this.ac.MAX_FAILED_TIMES_TEST=2;
 
     this.ac.sec_init=1;
