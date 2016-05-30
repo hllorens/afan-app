@@ -38,8 +38,10 @@ var show_user_results=function(){
                 { data: 'ver', col_header: 'detalle', link_function_id_button: 'explore_result_detail' }
             ]
         } );
-        if(cache_cognitionis_pagination_page!=0){
+        if(cache_cognitionis_pagination_page!=0 && document.getElementById('results-table-nav').children.length>cache_cognitionis_pagination_page){
             document.getElementById('results-table-nav').children[cache_cognitionis_pagination_page].click();
+        }else{
+            cache_cognitionis_pagination_page=0; // fix-error-state (e.g., details get multi-paged which is undesired)
         }
         document.getElementById("stat").addEventListener(clickOrTouch,analize_subject);
     }
@@ -328,7 +330,7 @@ var show_user_results_detail=function(session_id){
         var results_table=document.getElementById("results-table");
         DataTableSimple.call(results_table, {
             data: cache_user_subject_result_detail[session_id].elements,
-            pagination: 8,
+            pagination: 10,
             row_id: 'id',
             columns: [
                 //{ data: 'id' },

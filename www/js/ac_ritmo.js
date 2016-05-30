@@ -74,6 +74,8 @@ var acRitmo=function(){
 
     this.ac.generate_pattern=function(length){
         var pat=[];
+        // TODO if test first use the ones in ac_ritmo_test and if there are more
+        // needed generate them randomly
         for(var i=0;i<length;i++){
             pat.push((Math.random() <0.5 ? "ta30.m4a" : "ta120.m4a"));
         }

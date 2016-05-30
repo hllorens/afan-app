@@ -125,15 +125,17 @@ function get_user_dump($user){
 $output=array();
 	
 if ($action == "get_users"){
-	if($_SESSION['access_level']!='admin'){echo "ERROR: no admin";return;}
-	$sQuery = "SELECT * FROM users";
-	//echo "query: $sQuery ";
-	$rResult = mysqli_query( $db_connection, $sQuery ) or die(mysqli_error( $db_connection ));
-	while ( $aRow = mysqli_fetch_array( $rResult ) )	{
-		$output[$aRow['email']] = array();
-		$output[$aRow['email']]['email'] = $aRow['email'];
-		$output[$aRow['email']]['access_level'] = $aRow['access_level'];
-	}
+	if($_SESSION['access_level']!='admin'){$output['error']="ERROR: no admin";}
+    else{
+        $sQuery = "SELECT * FROM users";
+        //echo "query: $sQuery ";
+        $rResult = mysqli_query( $db_connection, $sQuery ) or die(mysqli_error( $db_connection ));
+        while ( $aRow = mysqli_fetch_array( $rResult ) )	{
+            $output[$aRow['email']] = array();
+            $output[$aRow['email']]['email'] = $aRow['email'];
+            $output[$aRow['email']]['access_level'] = $aRow['access_level'];
+        }
+    }
     submit_data($output);
 }else if ($action == "gen_session_state"){
 	$state = md5(rand());
@@ -161,6 +163,41 @@ if ($action == "get_users"){
 			$_SESSION['picture'] = $aRow['picture'];
 			$_SESSION['email'] = $user;
             $sQuery = "UPDATE users  SET last_login='$timestamp_seconds',last_provider='bypass' WHERE email='".$_SESSION['email']."';";
+            $rResult = mysqli_query( $db_connection, $sQuery );
+            if(!$rResult){$output['error']="Error: ".mysqli_error( $db_connection )." -- ".$sQuery;}
+            $output=get_user_dump($_SESSION['email']);
+        }else{
+            $output['error']="Error: empty user? no user info with the token?";
+        }
+    }
+    $output['user_id']=$_SESSION['user_id'];
+    $output['display_name']=$_SESSION['display_name'];
+    $output['picture']=$_SESSION['picture'];
+    $output['email']=$_SESSION['email'];
+    $output['access_level']=$_SESSION['access_level'];
+    $output['toksum']=substr($_SESSION['long_lived_access_token']->access_token,0,5);    
+    submit_data($output);
+}else if ($action == "login_act_as"){
+    $output['error']="";
+    $output['info']="act_as";
+    unset($_SESSION['long_lived_access_token']);
+    unset($_SESSION['user_id']);
+    unset($_SESSION['username']);
+    unset($_SESSION['email']);
+    unset($_SESSION['picture']);
+    if ( (get_value("state")) != ($_SESSION["state"]) && get_value("state")!='offline') {
+        $output['error']="FAILURE: Forgery attack? Invalid state parameter ".get_value("state")." expected: ".$_SESSION["state"];
+    }else{
+        $user = $_REQUEST['user'];
+        $sQuery = "SELECT * FROM users WHERE email='".$user."'";
+        $rResult = mysqli_query( $db_connection, $sQuery ) or die(mysqli_error( $db_connection ));
+        if ( $aRow = mysqli_fetch_array( $rResult ) ){ //existing user
+            //$_SESSION['access_level'] = $aRow['access_level']; do not update this or won't be able to get back
+			$_SESSION['user_id'] = $user;
+			$_SESSION['display_name'] = "acting as ".$aRow['display_name'];
+			$_SESSION['picture'] = $aRow['picture'];
+			$_SESSION['email'] = $user;
+            $sQuery = "UPDATE users  SET last_login='$timestamp_seconds',last_provider='act_as' WHERE email='".$_SESSION['email']."';";
             $rResult = mysqli_query( $db_connection, $sQuery );
             if(!$rResult){$output['error']="Error: ".mysqli_error( $db_connection )." -- ".$sQuery;}
             $output=get_user_dump($_SESSION['email']);
