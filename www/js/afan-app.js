@@ -169,11 +169,12 @@ function login_screen(){
 	}else{
 		header_zone.innerHTML='<h1>Acceso</h1>';
 		canvas_zone_vcentered.innerHTML='\
-		<div id="signinButton" class="button">Google+\
+        <p>¿Cómo acceder?</p>\
+		<div id="signinButton" class="button">con Google+\
 	   <span class="icon"></span>\
 		<span class="buttonText"></span>\
 		</div>\
-		<br /><button class="button" id="invitee_access">Invitado</button> \
+		<br /><button class="button" id="invitee_access">sin registrarse</button> \
 			'; 
         if(internet_access && !is_local()){
             if(debug) alert('google button ON');
@@ -221,6 +222,7 @@ function invitee_access(){
     session_data.subject=objectProperties(cache_user_subjects)[0];
     cache_user_subject_results=invitado_data.cache_user_subject_results;
     cache_user_subject_result_detail=invitado_data.cache_user_subject_result_detail;
+    
     set_session_highest_ids();
     menu_screen();
 }

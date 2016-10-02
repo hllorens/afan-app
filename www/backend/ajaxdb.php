@@ -15,9 +15,6 @@ function get_value($name){
 }
 
 
-
-
-
 $action=get_value("action");
 $timestamp_seconds=date("Y-m-d H:i:s");
 
@@ -141,6 +138,10 @@ if ($action == "get_users"){
 	$state = md5(rand());
 	$_SESSION["state"]=$state;
 	$output['state']=$state;
+    //$myfile = fopen("app-access.log", "a") or die("Unable to open file!");
+    //$txt = $timestamp_seconds." ".$_SERVER['REMOTE_ADDR']." ".$_SERVER['HTTP_USER_AGENT'];
+    //fwrite($myfile, $txt);
+    //fclose($myfile); --> it is easier to search in server logs $USER/logs/...
     submit_data($output);
 }else if ($action == "login_bypass"){
     $output['error']="";
