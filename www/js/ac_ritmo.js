@@ -50,6 +50,7 @@ var acRitmo=function(){
         //var item=that.ac.anspan.lastElementChild;
         //that.ac.anspan.removeChild(item);
         that.ac.current_usr_answer=[]; //.pop();
+        alert('borrado');
         if(that.ac.current_usr_answer.length==0){
             //that.ac.borrarb.classList.add('button-hidden');
             that.ac.borrarb.disabled=true;
@@ -79,7 +80,7 @@ var acRitmo=function(){
         for(var i=0;i<length;i++){
             pat.push((Math.random() <0.5 ? "ta30.m4a" : "ta120.m4a"));
         }
-        if(debug) console.log(pat);
+        if(debug) console.log("level:"+that.ac.level+", level_passed_times:"+that.ac.level_passed_times+" "+pat);
         return pat;
     }
 

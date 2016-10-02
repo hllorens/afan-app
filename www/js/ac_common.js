@@ -18,6 +18,7 @@ var Activity = (function(){
         this.MIN_LEVEL_TEST=1;
         this.MIN_LEVEL_TEST_DRY=1;
         this.level=this.MIN_LEVEL;
+        this.level_keep_constant=false;
         this.level_played_times=0;
         this.level_passed_times=0;
         this.level_failed_times=0;
@@ -50,15 +51,22 @@ var Activity = (function(){
             elem.innerHTML='Seleccionar nivel<br /><br /><br />\
                             <button id="decrease" class="minibutton plusminus">-</button>\
                             <span class="level">nivel '+this.level+'</span> \
-                            <button id="increase" class="minibutton plusminus">+</button>\
-                            <br /><br /><br /><button id="change_level" class="button">Hecho</button>\
+                            <button id="increase" class="minibutton plusminus">+</button><br /><br />\
+                            <input type="checkbox" id="keep_constant" /> mantener fijo<br />\
+                            <br /><button id="change_level" class="button">Hecho</button>\
             ';
+            document.getElementById("keep_constant").checked = this.level_keep_constant;
             document.getElementById("decrease").addEventListener(clickOrTouch,function(){
                 if(this.level>1){this.level--;} this.select_level(elem);
                 }.bind(this));
             document.getElementById("increase").addEventListener(clickOrTouch,function(){
                 if(this.level<this.MAX_LEVELS){this.level++;} this.select_level(elem);
             }.bind(this));
+            document.getElementById("keep_constant").addEventListener(clickOrTouch,function(){
+                if (document.getElementById("keep_constant").checked==true) this.level_keep_constant=true;
+                else this.level_keep_constant=false;
+            }.bind(this));
+
         }
         document.getElementById("change_level").addEventListener(clickOrTouch,function(){
             this.played_times=0;
@@ -141,11 +149,13 @@ var Activity = (function(){
         }else if(session_data.mode=="test" && this.played_times==this.MAX_PLAYED_TIMES_TEST_DRY){
             this.reset_dry();
         }
-        if((session_data.mode!="test" && this.level_passed_times>=this.max_passed_times_this_level_game) || 
+        if( (
+           (session_data.mode!="test" && this.level_passed_times>=this.max_passed_times_this_level_game) || 
            (session_data.mode=="test" && 
-                (this.played_times<this.MAX_PLAYED_TIMES_TEST_DRY  && this.level_played_times>=this.max_played_times_this_level_test_dry) ||
-                (this.played_times>=this.MAX_PLAYED_TIMES_TEST_DRY && this.level_played_times>=this.max_played_times_this_level_test) 
-            )){
+                ((this.played_times<this.MAX_PLAYED_TIMES_TEST_DRY  && this.level_played_times>=this.max_played_times_this_level_test_dry) ||
+                (this.played_times>=this.MAX_PLAYED_TIMES_TEST_DRY && this.level_played_times>=this.max_played_times_this_level_test))
+            )
+            ) && !this.level_keep_constant){
             this.reset_level();
             this.level++;
         }
