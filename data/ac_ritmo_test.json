@@ -1,8 +1,11 @@
 
 {
-	"2" : [["ta30.m4a","ta30.m4a"], ["ta30.m4a","ta120.m4a"]],
-	"3" : ["Visitamos un pueblecito", "En el mar vimos tiburones"],
-	"4" : ["El aspecto de este edificio es noble", "Las campanas sonaban alegres en una atm\u00f3sfera t\u00edbia"],
-	"5" : ["El aspecto de este edificio es noble", "Las campanas sonaban alegres en una atm\u00f3sfera t\u00edbia"],
-	"6" : ["El aspecto de este edificio es noble", "Las campanas sonaban alegres en una atm\u00f3sfera t\u00edbia"]
+	"2" : ["..", "_."],
+	"3" : ["._.", ".._"],
+	"4" : ["..__", "._.."],
+	"5" : ["_._..","._.._"],
+	"6" : ["__._..",".___._"]
 }
+
+
+

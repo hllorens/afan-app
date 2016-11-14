@@ -20,7 +20,11 @@ var acRitmo=function(){
             that.ac.started=true;
             that.ac.ta_played_once=true;that.ac.taa_played_once=true;that.ac.both_played_once=true; // for safety, if level changed directly
             that.ac.current_usr_answer=[];
-            that.ac.current_key_answer=that.ac.generate_pattern(that.ac.level);
+            if(session_data.mode=="test" && that.ac.played_times>=that.ac.MAX_PLAYED_TIMES_TEST_DRY){
+                that.ac.current_key_answer=that.ac.convert_pattern(that.ac.level,that.ac.level_played_times);
+            }else{
+                that.ac.current_key_answer=that.ac.generate_pattern(that.ac.level);
+            }
             canvas_zone_vcentered.innerHTML='\
                 <div id="hinttext">Pulsa PLAY para escuchar secuencia</div>\
                 <div id="sound"><button id="playb" class="button">PLAY</button></div> \
@@ -75,10 +79,19 @@ var acRitmo=function(){
 
     this.ac.generate_pattern=function(length){
         var pat=[];
-        // TODO if test first use the ones in ac_ritmo_test and if there are more
-        // needed generate them randomly
         for(var i=0;i<length;i++){
             pat.push((Math.random() <0.5 ? "ta30.m4a" : "ta120.m4a"));
+        }
+        if(debug) console.log("level:"+that.ac.level+", level_passed_times:"+that.ac.level_passed_times+" "+pat);
+        return pat;
+    }
+    
+    this.ac.convert_pattern=function(level,index){
+        var pat=[];
+        for(var i=0;i<that.ac.activities[level][index].length;i++){
+            var elem="ta30.m4a";
+            if(that.ac.activities[level][index][i]=='_') elem="ta120.m4a";
+            pat.push(elem);
         }
         if(debug) console.log("level:"+that.ac.level+", level_passed_times:"+that.ac.level_passed_times+" "+pat);
         return pat;
@@ -205,6 +218,14 @@ var ritmo=function(finish_callback){
     ritmo_obj.ac.ta_played_once=false;
     ritmo_obj.ac.taa_played_once=false;
     ritmo_obj.ac.both_played_once=false;
+    
+    ritmo_obj.ac.activities={};
+    ritmo_obj.ac.activities[2]=media_objects.jsons["ac_ritmo_test.json"][2].slice();
+    ritmo_obj.ac.activities[3]=media_objects.jsons["ac_ritmo_test.json"][3].slice();
+    ritmo_obj.ac.activities[4]=media_objects.jsons["ac_ritmo_test.json"][4].slice();
+    ritmo_obj.ac.activities[5]=media_objects.jsons["ac_ritmo_test.json"][5].slice();
+    ritmo_obj.ac.activities[6]=media_objects.jsons["ac_ritmo_test.json"][6].slice();
+    
     document.getElementById("ac_check").addEventListener(clickOrTouch,function(){ritmo_obj.ac.start();}.bind(ritmo_obj));
     document.getElementById("pta").addEventListener(clickOrTouch,function(){ritmo_obj.ac.play_ta();}.bind(ritmo_obj));
     document.getElementById("ptaa").addEventListener(clickOrTouch,function(){ritmo_obj.ac.play_taa();}.bind(ritmo_obj));
