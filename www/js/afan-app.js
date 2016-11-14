@@ -189,11 +189,16 @@ function login_screen(){
             }); //'redirecturi': 'postmessage', --> avoids reloading the page?
             // accesstype="offline" --> ?? isn't implicit?
         }else{
-            document.getElementById("signinButton").addEventListener(clickOrTouch,function(){login_bypass();});
+            document.getElementById("signinButton").addEventListener(clickOrTouch,function(event){tabclickeffect(event,login_bypass);});
 
         }
-		document.getElementById("invitee_access").addEventListener(clickOrTouch,function(){invitee_access();});
+		document.getElementById("invitee_access").addEventListener(clickOrTouch,function(event){tabclickeffect(event,invitee_access);});
 	}
+}
+
+function tabclickeffect(event,f){
+    event.stopPropagation(); //Make all touch events stop
+    setTimeout(function(){f();},150);  
 }
 
 function set_session_highest_ids(){
@@ -619,7 +624,7 @@ function menu_screen(){
 		document.getElementById("hamburger_icon").addEventListener(clickOrTouch,hamburger_toggle);
 		document.getElementById("header_text").addEventListener(clickOrTouch,menu_screen);
 		document.getElementById("manage-subjects").addEventListener(clickOrTouch,manage_subjects);
-        document.getElementById("results").addEventListener(clickOrTouch,show_results);
+        document.getElementById("results").addEventListener(clickOrTouch,function(event){tabclickeffect(event,show_results);});
         document.getElementById("show_about").addEventListener(clickOrTouch,function(){hamburger_close();show_about();});
 
         prepare_menu_when_subjects_loaded(); // loaded at user login time
@@ -635,8 +640,8 @@ var prepare_menu_when_subjects_loaded=function(){
     select_fill_with_json(cache_user_subjects,subjects_select_elem,session_data.subject);
     set_subject();
 
-    document.getElementById("start-button").addEventListener(clickOrTouch,function(){session_data.mode="training";game();});
-    document.getElementById("start-test-button").addEventListener(clickOrTouch,function(){session_data.mode="test";game();});
+    document.getElementById("start-button").addEventListener(clickOrTouch,function(event){session_data.mode="training";tabclickeffect(event,game);});
+    document.getElementById("start-test-button").addEventListener(clickOrTouch,function(event){session_data.mode="test";tabclickeffect(event,game);});
     document.getElementById("start-button").disabled=false;
     document.getElementById("start-test-button").disabled=false;    
     document.getElementById("results").disabled=false;
@@ -869,12 +874,12 @@ var game=function(){
         '+extra_options+'\
         ';
         
-        document.getElementById("completo").addEventListener(clickOrTouch,function(){completo();});
-        document.getElementById("conciencia").addEventListener(clickOrTouch,function(){conciencia();});
-        document.getElementById("memoria_visual").addEventListener(clickOrTouch,function(){memoria_visual();});
-        document.getElementById("ritmo").addEventListener(clickOrTouch,function(){ritmo();});
-        document.getElementById("velocidad").addEventListener(clickOrTouch,function(){velocidad();});
-        document.getElementById("discr_visual").addEventListener(clickOrTouch,function(){discr_visual();});
+        document.getElementById("completo").addEventListener(clickOrTouch,function(event){tabclickeffect(event,completo);});
+        document.getElementById("conciencia").addEventListener(clickOrTouch,function(event){tabclickeffect(event,conciencia);});
+        document.getElementById("memoria_visual").addEventListener(clickOrTouch,function(event){tabclickeffect(event,memoria_visual);});
+        document.getElementById("ritmo").addEventListener(clickOrTouch,function(event){tabclickeffect(event,ritmo);});
+        document.getElementById("velocidad").addEventListener(clickOrTouch,function(event){tabclickeffect(event,velocidad);});
+        document.getElementById("discr_visual").addEventListener(clickOrTouch,function(event){tabclickeffect(event,discr_visual);});
         if(!game_mode){
             document.getElementById("go_back_button").addEventListener(clickOrTouch,function(){menu_screen();});
         }
