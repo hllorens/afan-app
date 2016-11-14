@@ -73,14 +73,15 @@ var acRitmo=function(){
             document.getElementById("ptaa").disabled=true;
             document.getElementById("ac_check").disabled=true;
             that.ac.playb.disabled=true;
-            AudioLib.play_sound_arr(that.ac.current_key_answer,that.ac.play_pattern_ended);
+            SoundChain.play_sound_arr(that.ac.current_key_answer,audio_sprite,that.ac.play_pattern_ended);
+            //AudioLib.play_sound_arr(that.ac.current_key_answer,that.ac.play_pattern_ended);
         }
     }
 
     this.ac.generate_pattern=function(length){
         var pat=[];
         for(var i=0;i<length;i++){
-            pat.push((Math.random() <0.5 ? "ta30.m4a" : "ta120.m4a"));
+            pat.push((Math.random() <0.5 ? "ta30.m4al" : "ta120.m4al"));
         }
         if(debug) console.log("level:"+that.ac.level+", level_passed_times:"+that.ac.level_passed_times+" "+pat);
         return pat;
@@ -89,8 +90,8 @@ var acRitmo=function(){
     this.ac.convert_pattern=function(level,index){
         var pat=[];
         for(var i=0;i<that.ac.activities[level][index].length;i++){
-            var elem="ta30.m4a";
-            if(that.ac.activities[level][index][i]=='_') elem="ta120.m4a";
+            var elem="ta30.m4al";
+            if(that.ac.activities[level][index][i]=='_') elem="ta120.m4al";
             pat.push(elem);
         }
         if(debug) console.log("level:"+that.ac.level+", level_passed_times:"+that.ac.level_passed_times+" "+pat);
@@ -151,7 +152,8 @@ var acRitmo=function(){
                     //that.ac.borrarb.classList.add('button-hidden');
                 }
             }
-            AudioLib.play_sound_single(s,that.ac.play_sound_end);
+            //AudioLib.play_sound_single(s,that.ac.play_sound_end);
+            audio_sprite.playSpriteRange(s,that.ac.play_sound_end)
         }
     }
 

@@ -47,11 +47,14 @@ var sounds = [
 	// it can be dropbox https://dl.dropboxusercontent.com/u/188219/
 	//or absolute http://www.centroafan.com/afan-app-media/audio/...m4a"
 	// relative is the best to reuse it in the cordova app
-	"external-git-ignored/afan-app-media/audio/letters128kbps.m4a",
-	"external-git-ignored/afan-app-media/audio/ta30.m4a",
-	"external-git-ignored/afan-app-media/audio/ta120.m4a"
+	"external-git-ignored/afan-app-media/audio/letters80kbps-extns.m4a"
+//	"external-git-ignored/afan-app-media/audio/letters128kbps.m4a"
+	//"external-git-ignored/afan-app-media/audio/ta30.m4a",
+	//"external-git-ignored/afan-app-media/audio/ta120.m4a"
 ];
-
+var audio_sprite;
+var audio_sprite_name='letters80kbps-extns.m4a';
+//var audio_sprite_name='letters128kbps.m4a';
 
 // More efficient for offline scenario to use require or dirctly iclude the data
 var jsons= [
@@ -83,8 +86,7 @@ if(game_mode){
 	canvas_zone.classList.add("canvas-full");
 }
 
-var audio_sprite;
-var audio_sprite_name='letters128kbps.m4a';
+
 
 // already done in php? to match img name (ascii) and answer? Maybe keep "original answer" with the correct letters 
 //var letter_equivalence = { 'à':'a', 'á':'a', 'ç':'c', 'è':'e', 'é':'e', 'í':'i', 'ï':'i', 'ñ':'ny', 'ò':'o', 'ó':'o', 'ú':'u' };
@@ -116,6 +118,10 @@ var audio_object_sprite_ref={
 	u: {id: "u", start: 49.951, end: 50.651}, 
 	y: {id: "y", start: 6.894, end: 7.598}, 
 	z: {id: "z", start: 47.946, end: 48.651}, 
+	'ta30.m4a': {id: "ta30.m4a", start: 51.850, end: 52.119}, 
+	'ta120.m4a': {id: "ta120.m4a", start: 53.700, end: 54.861}, 
+	'ta30.m4al': {id: "ta30l.m4a", start: 51.700, end: 52.500}, 
+	'ta120.m4al': {id: "ta120l.m4a", start: 53.500, end: 55.100}, 
 	zfx_correct: {id: "zfx_correct50", start: 14.700, end: 15.204}, 
 	zfx_wrong: {id: "zfx_wrong50", start: 36.233, end: 36.734}, 
 	zsilence_start: {id: "zsilence_start", start: 0.100, end: 0.700}
