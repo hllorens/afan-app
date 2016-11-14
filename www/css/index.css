@@ -111,8 +111,14 @@ div.button{
 	text-align:center;
     padding:12px 5px 0px 5px;
     cursor:pointer;
+    -webkit-transition: all .15s ease;
+    transition: all .15s ease;
 }
-
+button:active {
+  box-shadow: 2px 8px 4px -6px rgba(0, 0, 0, 0.8);
+  transform: translateY(2px);
+  background-color: #bbb;
+}
 
 
 button.button{
@@ -122,11 +128,17 @@ button.button{
 	color:#111;
 	min-width:48px;min-height:48px;
 	margin:2px;
-	-webkit-transition: background 0.2s ease-in-out;
-	-moz-transition:    background 0.2s ease-in-out;
-	-ms-transition:     background 0.2s ease-in-out;
-	transition:         background 0.2s ease-in-out;
+	-webkit-transition: all .15s ease;
+	-moz-transition:    all .15s ease-in-out;
+	-ms-transition:     all .15s ease-in-out;
+	transition:         all .15s ease;
 }
+button.button:active {
+  box-shadow: 2px 8px 4px -6px rgba(0, 0, 0, 0.8);
+  transform: translateY(2px);
+  background-color: #bbb;
+}
+
 
 button.stat{
 	border:1px solid #6a6;

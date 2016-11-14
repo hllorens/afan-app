@@ -170,12 +170,14 @@ var acRitmo=function(){
             document.getElementById("ac_check").classList.remove('button-hidden');
             that.ac.hinttext.innerHTML="Pulsa Empezar";
         }else{
-            that.ac.playb.disabled=false;
-            if(that.ac.current_usr_answer.length>0){
-                that.ac.borrarb.disabled=false;
-                //that.ac.borrarb.classList.remove('button-hidden');
+            if(that.ac.started){
+                that.ac.playb.disabled=false;
+                if(that.ac.current_usr_answer.length>0){
+                    that.ac.borrarb.disabled=false;
+                    //that.ac.borrarb.classList.remove('button-hidden');
+                }
+                if(that.ac.current_usr_answer.length>that.ac.MAX_LEVELS) that.ac.check();
             }
-            if(that.ac.current_usr_answer.length>that.ac.MAX_LEVELS) that.ac.check();
         }
     }
 
