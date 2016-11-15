@@ -177,7 +177,7 @@ function login_screen(){
 		header_zone.innerHTML='<h1>Acceso</h1>';
 		canvas_zone_vcentered.innerHTML='\
         <p>¿Cómo acceder?</p>\
-		<div id="signinButton" class="button">con Google+\
+		<div id="signinButton" class="button">con Google\
 	   <span class="icon"></span>\
 		<span class="buttonText"></span>\
 		</div>\
