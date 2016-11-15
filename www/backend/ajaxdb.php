@@ -60,6 +60,7 @@ function get_user_dump($user){
 		$ret['subjects'][$aRow['alias']]['name'] = $aRow['name'];
 		$ret['subjects'][$aRow['alias']]['alias'] = $aRow['alias'];
 		$ret['subjects'][$aRow['alias']]['birthdate'] = $aRow['birthdate'];
+		$ret['subjects'][$aRow['alias']]['genre'] = $aRow['genre'];
 		$ret['subjects'][$aRow['alias']]['comments'] = $aRow['comments'];
 	}
 
@@ -355,6 +356,7 @@ if ($action == "get_users"){
 		$output[$aRow['alias']]['name'] = $aRow['name'];
 		$output[$aRow['alias']]['alias'] = $aRow['alias'];
 		$output[$aRow['alias']]['birthdate'] = $aRow['birthdate'];
+		$output[$aRow['alias']]['genre'] = $aRow['genre'];
 		$output[$aRow['alias']]['comments'] = $aRow['comments'];
 	}
 
@@ -366,11 +368,12 @@ if ($action == "get_users"){
 	$alias=get_value('alias');
 	$name=get_value('name');
 	$birthdate=get_value('birthdate');
+	$genre=get_value('genre');
 	$comments=get_value('comments');
 
 	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
 
-	$sQuery = "INSERT INTO subjects (user, alias, name, birthdate,comments) VALUES ('$user', '$alias', '$name', '$birthdate', '$comments');";
+	$sQuery = "INSERT INTO subjects (user, alias, name, birthdate, genre, comments) VALUES ('$user', '$alias', '$name', '$birthdate', '$genre', '$comments');";
 	$rResult = mysqli_query( $db_connection, $sQuery );
 	if(!$rResult){
         //header('HTTP/1.1 500 Internal Server Error');die("Error: Exists. ".mysqli_error( $db_connection )." -- ".$sQuery);
@@ -387,6 +390,7 @@ if ($action == "get_users"){
         $output["data"]["alias"]=$alias;
         $output["data"]["name"]=$name;
         $output["data"]["birthdate"]=$birthdate;
+        $output["data"]["genre"]=$genre;
         $output["data"]["comments"]=$comments;
     }
     submit_data($output);
@@ -396,12 +400,13 @@ if ($action == "get_users"){
 	$alias=get_value('alias');
 	$name=get_value('name');
 	$birthdate=get_value('birthdate');
+	$genre=get_value('genre');
 	$comments=get_value('comments');
 
 	if($_SESSION['access_level']!='admin' && $user!=$_SESSION['email']){echo "ERROR: no admin or owner of subject";return;}
 
 	
-	$sQuery = "UPDATE subjects  SET name='$name', birthdate='$birthdate',comments='$comments' WHERE id=$lid;";
+	$sQuery = "UPDATE subjects  SET name='$name', birthdate='$birthdate', genre='$genre',comments='$comments' WHERE id=$lid;";
 	$rResult = mysqli_query( $db_connection, $sQuery );
 	if(!$rResult){header('HTTP/1.1 500 Internal Server Error');die("Error: Exists. ".mysqli_error( $db_connection )." -- ".$sQuery);}
 	$output["success"]=$alias;
@@ -411,6 +416,7 @@ if ($action == "get_users"){
 	$output["data"]["alias"]=$alias;
 	$output["data"]["name"]=$name;
 	$output["data"]["birthdate"]=$birthdate;
+	$output["data"]["genre"]=$genre;
 	$output["data"]["comments"]=$comments;
     submit_data($output);
 }else if ($action == "send_sessions_data_post"){
