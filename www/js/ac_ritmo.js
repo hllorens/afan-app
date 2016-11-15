@@ -54,7 +54,7 @@ var acRitmo=function(){
         //var item=that.ac.anspan.lastElementChild;
         //that.ac.anspan.removeChild(item);
         that.ac.current_usr_answer=[]; //.pop();
-        alert('borrado');
+        open_js_modal_alert_timeout('Info','Borrado',1500);
         if(that.ac.current_usr_answer.length==0){
             //that.ac.borrarb.classList.add('button-hidden');
             that.ac.borrarb.disabled=true;
@@ -202,7 +202,7 @@ var acRitmo=function(){
 
 var ritmo=function(finish_callback){
     if(!check_if_sounds_loaded(function(){ritmo(finish_callback);})){return;}
-    AudioLib.init(media_objects.sounds,debug); // for non sprite sounds
+    //AudioLib.init(media_objects.sounds,debug); // for non sprite sounds
     preventBackExit();
     remove_modal();
     var ritmo_obj=new acRitmo();

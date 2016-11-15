@@ -760,12 +760,13 @@ var update_alias=function(){
 var edit_subject=function(sid){
     check_internet_access_with_img_url(
         'http://www.centroafan.com/logo-afan.jpg',
-        function(){edit_subject_internet();internet_access=true;},
-        function(){alert('Error: no se puede editar sujetos sin internet');internet_access=false;}
+        function(){internet_access=true;edit_subject_internet(sid);}.bind(sid),
+        function(){internet_access=false;alert('Error: no se puede editar sujetos sin internet');}
         );
 };
 var edit_subject_internet=function(sid){
     if(!internet_access){alert('Error: no se puede editar sujetos sin internet');return;}
+    if(typeof(sid)==='undefined'){alert('Error: subject id (sid) is undefined.');return;}
 	var accept_function=function(){
 		var myform=document.getElementById('my-form');
 		var myformsubmit=document.getElementById('my-form-submit');
@@ -793,12 +794,13 @@ var edit_subject_internet=function(sid){
 		}
 	};
 	var cancel_function=function(){ remove_modal("js-modal-window-alert"); };
-	var subj2edit={"id": sid, "alias":"", "name":"", "birthdate":"", "genre":"", "comments":"", "user":"afan"}
+	var subj2edit={"id": sid, "alias":"", "name":"", "birthdate":"", "genre":"", "comments":"", "user":user_data.email}
 	for(var key in cache_user_subjects){
 		if (cache_user_subjects.hasOwnProperty(key) && cache_user_subjects[key]['id']==sid) {
 			subj2edit=cache_user_subjects[key];
 		}
 	}
+    if(subj2edit.alias==""){alert("Error: subject id "+sid+" not found.");return;}
 	var form_html='<form id="my-form" action="javascript:void(0);"> \
 			<ul class="errorMessages"></ul>\
 			<!--<label>Usuario</label><input type="text" readonly="readonly" value="'+subj2edit.user+'" /><br />--> \
