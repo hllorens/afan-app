@@ -182,6 +182,7 @@ function login_screen(){
 		<span class="buttonText"></span>\
 		</div>\
 		<br /><button class="button" id="invitee_access">sin registrarse</button> \
+		<br /><br /><br /><button class="button" id="tutorial" style="background:#9cf;">Tutorial</button> \
 			'; 
         if(internet_access && !is_local()){
             if(debug) alert('google button ON');
@@ -198,6 +199,7 @@ function login_screen(){
             add_click_fancy("signinButton",login_bypass);
         }
         add_click_fancy("invitee_access",invitee_access);
+        add_click_fancy("tutorial",function(){window.open('https://prezi.com/yzc7wxcsa5fi/cole/', '_blank');});
     }
 }
 
