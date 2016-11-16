@@ -687,9 +687,9 @@ var manage_subjects=function(){
 	}    
     
 	if(user_subjects_data.length==0){
-		document.getElementById("results-div").innerHTML="Resultados user: "+session_data.user+"<br />No hay participantes";
+		document.getElementById("results-div").innerHTML="Participantes:<br />No hay participantes";
 	}else{
-		document.getElementById("results-div").innerHTML="Resultados user: "+session_data.user+"<br /><table id=\"results-table\"  class=\"results-table\"></table>";
+		document.getElementById("results-div").innerHTML="Participantes:<br /><table id=\"results-table\"  class=\"results-table\"></table>";
 		var results_table=document.getElementById("results-table");
 		DataTableSimple.call(results_table, {
 			data: user_subjects_data,
