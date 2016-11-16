@@ -293,6 +293,7 @@ if ($action == "get_users"){
                 }else if(!empty($_SESSION['email'])){ //new user
                     $_SESSION['access_level'] = 'normal'; //invitee
                     mail("hectorlm1983@gmail.com","New afan-app user","NEW USER: ".$_SESSION['email'].". Change from 'invitee' to something else or DELETE");
+                    mail($_SESSION['email'],"Bienvenido a CoLE!","Estimad@ ".$_SESSION['email'].",<br /><br />Ya puede usar la aplicación CoLE con todas sus funcionalidades.<br /><br />Atentamente,<br />Centro Afán<br />www.centroafan.com/cole");
                     $sQuery = "INSERT INTO users (email, display_name, access_level, picture, last_login, last_provider, creation_timestamp) VALUES ('".$_SESSION['email']."', '".$_SESSION['display_name']."', '".$_SESSION['access_level']."', '".$_SESSION['picture']."', '$timestamp_seconds', 'google', '$timestamp_seconds');";
                     $rResult = mysqli_query( $db_connection, $sQuery );
                     if(!$rResult){$output['error']="Error: Exists. ".mysqli_error( $db_connection )." -- ".$sQuery;}

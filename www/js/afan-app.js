@@ -323,8 +323,7 @@ var set_user_signin=function(result) {
             alert("LOGIN ERROR: "+result.error); login_screen();
         }else{
             if(result.hasOwnProperty('info') && result.info=="new user"){
-                open_js_modal_content_accept('<p>Usuario creado para: '+result.email+' \
-                en breve recibirá un email confirmando su registro.</p>');
+                open_js_modal_content_accept('<p>Usuario creado para: '+result.email+'</p>');
             }
             if(debug){
                 console.log(result);
