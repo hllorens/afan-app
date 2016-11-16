@@ -784,10 +784,10 @@ var edit_subject_internet=function(sid){
 		}else{
 			open_js_modal_content('<h1>Actualizando... '+document.getElementById('new-alias').value+'</h1>');
             if(user_data.email=='invitee'){
-                cache_user_subjects.invitado.name=document.getElementById('new-name').value;
-                cache_user_subjects.invitado.birthdate=document.getElementById('new-birthdate').value;
-                cache_user_subjects.invitado.genre=document.getElementById('new-genre').value;
-                cache_user_subjects.invitado.comments=document.getElementById('new-comments').value;
+                cache_user_subjects[document.getElementById('new-alias').value].name=document.getElementById('new-name').value;
+                cache_user_subjects[document.getElementById('new-alias').value].birthdate=document.getElementById('new-birthdate').value;
+                cache_user_subjects[document.getElementById('new-alias').value].genre=document.getElementById('new-genre').value;
+                cache_user_subjects[document.getElementById('new-alias').value].comments=document.getElementById('new-comments').value;
                 remove_modal();
                 remove_modal("js-modal-window-alert");
                 manage_subjects(); // to reload with the new user...

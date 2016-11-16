@@ -205,7 +205,7 @@ var summary_view=function(session_id){
 var calculate_user_summary_view=function(){
     var ret={'general':{'user':session_data.user},'elements':[]};
     for (var subj in cache_user_subject_results) {
-        if (cache_user_subject_results.hasOwnProperty(subj)) {
+        if (cache_user_subject_results.hasOwnProperty(subj) && cache_user_subject_results[subj].elements.length!=0) {
             if(ret.elements.length==0 || ret.elements[ret.elements.length-1].subject!=subj){
                 ret.elements.push({
                                    'subject':subj,'conciencia':'-','memoria_visual':'-','ritmo':'-','velocidad':'-','discr_visual':'-','timestamp':'-',
