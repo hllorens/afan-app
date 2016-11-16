@@ -143,9 +143,9 @@ var acRitmo=function(){
             document.getElementById("ac_check").disabled=true;
             if(that.ac.started){
                 that.ac.playb.disabled=true;
-                that.ac.current_usr_answer.push(s);
-                var symbol=".";
-                if(s=="ta120.m4a") symbol="___";
+                that.ac.current_usr_answer.push(s+'l');
+                //var symbol=".";
+                //if(s=="ta120.m4a") symbol="___";
                 //that.ac.anspan.innerHTML+=' <button class="button button-flat">'+symbol+'</div>';
                 if(that.ac.current_usr_answer.length>0){
                     that.ac.borrarb.disabled=true;
@@ -185,8 +185,8 @@ var acRitmo=function(){
 
     this.ac.check=function(){
         that.ac.details={};
-        that.ac.details.activity=that.ac.current_key_answer.toString().replace(/ta30.m4a/g,'.').replace(/ta120.m4a/g,'___');
-        that.ac.details.choice=that.ac.current_usr_answer.toString().replace(/ta30.m4a/g,'.').replace(/ta120.m4a/g,'___');
+        that.ac.details.activity=that.ac.current_key_answer.toString().replace(/ta30.m4al?/g,'.').replace(/ta120.m4al?/g,'___');
+        that.ac.details.choice=that.ac.current_usr_answer.toString().replace(/ta30.m4al?/g,'.').replace(/ta120.m4al?/g,'___');
         if(debug) console.log(that.ac.details.activity+" vs "+that.ac.details.choice);
         if(that.ac.details.activity==that.ac.details.choice){
             that.ac.details.result="correct";
