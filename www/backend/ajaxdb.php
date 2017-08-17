@@ -293,9 +293,9 @@ if ($action == "get_users"){
                 }else if(!empty($_SESSION['email'])){ //new user
                     $_SESSION['access_level'] = 'normal'; //invitee
                     $mail_headers= 'MIME-Version: 1.0' . "\r\n" . 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-                    $mail_headers.= 'From: CoLE <info@centroafan.com>' . "\r\n";
+                    //$mail_headers.= 'From: CoLE <montsedeayala@gmail.com>' . "\r\n";
                     mail("hectorlm1983@gmail.com","New CoLE user","NEW USER: ".$_SESSION['email'].". DELETE if needed",$mail_headers);
-                    mail($_SESSION['email'],"Bienvenido a CoLE!","Estimad@ ".$_SESSION['email'].",<br /><br />Ya puede usar la aplicación CoLE con todas sus funcionalidades.<br /><br />Atentamente,<br />Centro Afán<br />www.centroafan.com/cole",$mail_headers);
+                    mail($_SESSION['email'],"Bienvenido a CoLE!","Estimad@ ".$_SESSION['email'].",<br /><br />Ya puede usar la aplicación CoLE con todas sus funcionalidades.<br /><br />Atentamente,<br />Equipo de CoLE",$mail_headers);
                     $sQuery = "INSERT INTO users (email, display_name, access_level, picture, last_login, last_provider, creation_timestamp) VALUES ('".$_SESSION['email']."', '".$_SESSION['display_name']."', '".$_SESSION['access_level']."', '".$_SESSION['picture']."', '$timestamp_seconds', 'google', '$timestamp_seconds');";
                     $rResult = mysqli_query( $db_connection, $sQuery );
                     if(!$rResult){$output['error']="Error: Exists. ".mysqli_error( $db_connection )." -- ".$sQuery;}

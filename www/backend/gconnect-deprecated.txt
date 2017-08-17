@@ -9,7 +9,7 @@
 			//$client->authenticate($code);
 			//$_SESSION['long_lived_access_token'] = json_decode($client->getAccessToken());
             				//header("Incorrect state, forgery attack?",true, 401);
-//"redirect_uri" => "https://www.centroafan.com/oauth2callback" or "postmessage", --> this info should be already in the $code
+//"redirect_uri" => "https://www.xxx.com/oauth2callback" or "postmessage", --> this info should be already in the $code
 
 
 

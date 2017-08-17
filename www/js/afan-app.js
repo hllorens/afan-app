@@ -6,9 +6,10 @@ if(QueryString.hasOwnProperty('game_mode') && QueryString.game_mode=='true') gam
 
 var app_name='CoLE';
 
+var internet_access_file_url=window.location.href+'external-git-ignored/afan-app-media/img/logo-afan.png';
 var internet_access=true;
 function check_internet_access(){
-    check_internet_access_with_img_url('http://www.centroafan.com/logo-afan.jpg',set_internet_access_true,set_internet_access_false);
+    check_internet_access_with_img_url(internet_access_file_url,set_internet_access_true,set_internet_access_false);
 }
 var set_internet_access_true=function(){
     internet_access=true;
@@ -30,7 +31,7 @@ var set_session_state=function(result) {
 
 
 var backend_url='backend/' //../backend
-if(is_local()){backend_url='http://www.centroafan.com/dev-afan-app/www/backend/';}
+if(is_local()){backend_url=window.location.href+'backend/';}
 
 // MEDIA
 var images = [
@@ -45,9 +46,10 @@ var images = [
 ];
 var sounds = [
 	// it can be dropbox https://dl.dropboxusercontent.com/u/188219/
-	//or absolute http://www.centroafan.com/afan-app-media/audio/...m4a"
+	//or absolute http://www.xxx.com/afan-app-media/audio/...m4a"
 	// relative is the best to reuse it in the cordova app
 	"external-git-ignored/afan-app-media/audio/letters80kbps-extns.m4a"
+    //backed up in dropbox
 //	"external-git-ignored/afan-app-media/audio/letters128kbps.m4a"
 	//"external-git-ignored/afan-app-media/audio/ta30.m4a",
 	//"external-git-ignored/afan-app-media/audio/ta120.m4a"
@@ -56,12 +58,12 @@ var audio_sprite;
 var audio_sprite_name='letters80kbps-extns.m4a';
 //var audio_sprite_name='letters128kbps.m4a';
 
-// More efficient for offline scenario to use require or dirctly iclude the data
+// More efficient for offline scenario to use require or dirctly include the data
 var jsons= [
-//	"external-git-ignored/data/ac_conciencia_train.json",
-//	"external-git-ignored/data/ac_conciencia_test.json",
-//	"external-git-ignored/data/ac_velocidad_train.json",
-//	"external-git-ignored/data/ac_velocidad_test.json"
+//	"data/ac_conciencia_train.json",
+//	"data/ac_conciencia_test.json",
+//	"data/ac_velocidad_train.json",
+//	"data/ac_velocidad_test.json"
 ]
 
 var offline_jsons=[];
@@ -281,7 +283,7 @@ function login_bypass(){
     }
     
     check_internet_access_with_img_url(
-        'http://www.centroafan.com/logo-afan.jpg',
+        internet_access_file_url,
             function(){
                 internet_access=true;
                 ajax_CORS_request_json(backend_url+'ajaxdb.php?action=login_bypass&state='+session_state+'&user='+user_bypass,set_login_bypass);
@@ -540,8 +542,8 @@ function show_about(){
         <img src="'+media_objects.images['logo-afan.png'].src+'" /><br /><h1>Programa CoLE</h1>Corrección de los errores en Lectura y Escritura<br />\
         &copy; 2015\
         <br /><br />M.de Ayala, H.Llorens<br />\
-        Url: <a href="http://www.centroafan.com">www.centroafan.com</a> <br />\
-        Contacto: info@centroafan.com  <br />\
+        Url: <a href="http://www.cognitionis.com">www.cognitionis.com</a> <br />\
+        Contacto: montsedeayala@gmail.com  <br />\
         <br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>\
         ';
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
@@ -610,7 +612,7 @@ function menu_screen(){
 			document.getElementById("admin_screen").addEventListener(clickOrTouch,function(e) {
                 e.stopPropagation();
                 check_internet_access_with_img_url(
-                    'http://www.centroafan.com/logo-afan.jpg',
+                    internet_access_file_url,
                     function(){admin_screen();internet_access=true;},
                     function(){alert('Error: no se puede administrar sin internet');internet_access=false;}
                     );
@@ -671,7 +673,7 @@ var manage_subjects=function(){
             function(e) {
                 e.stopPropagation();
                 check_internet_access_with_img_url(
-                    'http://www.centroafan.com/logo-afan.jpg',
+                    internet_access_file_url,
                     function(){add_subject();internet_access=true;},
                     function(){alert('Error: no se puede añadir sujetos sin internet');internet_access=false;}
                     );
@@ -761,7 +763,7 @@ var update_alias=function(){
 
 var edit_subject=function(sid){
     check_internet_access_with_img_url(
-        'http://www.centroafan.com/logo-afan.jpg',
+        internet_access_file_url,
         function(){internet_access=true;edit_subject_internet(sid);}.bind(sid),
         function(){internet_access=false;alert('Error: no se puede editar sujetos sin internet');}
         );
@@ -974,7 +976,7 @@ function send_session_data(finish_callback){
             localStorage.setItem("locally_stored_sessions", JSON.stringify(locally_stored_sessions));
             reset_session();
             canvas_zone_vcentered.innerHTML='<br />...Enviando datos offline al servidor...<br /><br />';
-            check_internet_access_with_img_url('http://www.centroafan.com/logo-afan.jpg',send_session_data_success,send_session_data_fail,finish_callback);
+            check_internet_access_with_img_url(internet_access_file_url,send_session_data_success,send_session_data_fail,finish_callback);
         }else{
             reset_session();
             if(typeof(finish_callback)!='undefined'){finish_callback();}
@@ -1020,7 +1022,7 @@ function send_stored_sessions_fail(){
 function send_stored_sessions(){
     remove_modal();
     canvas_zone_vcentered.innerHTML='<br />...Enviando datos al servidor...<br /><br />';
-    check_internet_access_with_img_url('http://www.centroafan.com/logo-afan.jpg',send_session_data_success,send_stored_sessions_fail);
+    check_internet_access_with_img_url(internet_access_file_url,send_session_data_success,send_stored_sessions_fail);
 }
 
 
