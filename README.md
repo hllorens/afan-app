@@ -6,7 +6,9 @@ Installation (server)
 ========
 Audio (some servers have problems serving audio files), modifying .htaccess with:
     AddType audio/mp4 .mp4 .m4a
-Might help but sometimes the problem is that the audio file is not reachable... 
+Might help but sometimes the problem is that the audio file is not reachable...
+(contact server support or try a different server. NOTE: dropbox or drive do not work as of 2017)
+Do not work much on this until HTML5 offers better sound handling, then perhaps you don't need fancy loading.
 
 
 MySQL DB (see ajaxdb.php): Create the required DB and put a file in a folder e.g., ../../../secrets/db_credentials_afan-app.json
@@ -18,7 +20,9 @@ MySQL DB (see ajaxdb.php): Create the required DB and put a file in a folder e.g
     }
     FUTURE: use firebase
     
-Google Auth (see ajaxdb.php): Create a file with the app id e.g., ../../../secrets/gclient_secret_afan-app.json
+Google Auth (see ajaxdb.php): 
+Make sure https://code.google.com/apis/console/  credentials include the domain name (URL)
+Create a file with the app id e.g., ../../../secrets/gclient_secret_afan-app.json
     {
         "client_id": "xxxxxkrhh60.apps.googleusercontent.com",
         "client_secret": "xxxxxx"
