@@ -9,7 +9,10 @@ Audio (some servers have problems serving audio files), modifying .htaccess with
 Might help but sometimes the problem is that the audio file is not reachable...
 (contact server support or try a different server. NOTE: dropbox or drive do not work as of 2017)
 Do not work much on this until HTML5 offers better sound handling, then perhaps you don't need fancy loading.
+Free servers that work: capnix.com
+Free servers that break: unaux.com
 
+in ajax.php file remove ../ from the secrets url (in free servers they are exposed...)
 
 MySQL DB (see ajaxdb.php): Create the required DB and put a file in a folder e.g., ../../../secrets/db_credentials_afan-app.json
     {
