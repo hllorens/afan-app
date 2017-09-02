@@ -24,7 +24,9 @@ MySQL DB (see ajaxdb.php): Create the required DB and put a file in a folder e.g
     FUTURE: use firebase
     
 Google Auth (see ajaxdb.php): 
-Make sure https://code.google.com/apis/console/  credentials include the domain name (URL)
+
+Make sure https://code.google.com/apis/console/  API&Services->credentials include the domain name (URL)
+
 Create a file with the app id e.g., ../../../secrets/gclient_secret_afan-app.json
     {
         "client_id": "xxxxxkrhh60.apps.googleusercontent.com",
