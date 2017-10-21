@@ -6,7 +6,7 @@ if(QueryString.hasOwnProperty('game_mode') && QueryString.game_mode=='true') gam
 
 var app_name='CoLE';
 
-var internet_access_file_url=window.location.href+'external-git-ignored/afan-app-media/img/logo-afan.png';
+var internet_access_file_url=window.location.href.replace(/\?i=.*$/,'')+'external-git-ignored/afan-app-media/img/logo-afan.png';
 var internet_access=true;
 function check_internet_access(){
     check_internet_access_with_img_url(internet_access_file_url,set_internet_access_true,set_internet_access_false);
@@ -178,16 +178,27 @@ function login_screen(){
 	}else{
 		header_zone.innerHTML='<h1>Acceso</h1>';
 		canvas_zone_vcentered.innerHTML='\
-        <p>¿Cómo acceder?</p>\
-		<div id="signinButton" class="button">con Google\
-	   <span class="icon"></span>\
-		<span class="buttonText"></span>\
-		</div>\
-		<br /><button class="button" id="invitee_access">sin registrarse</button> \
-		<br /><br /><br /><button class="button" id="tutorial" style="background:#9cf;">Tutorial</button> \
-			'; 
+        <p>Comprobando internet y acceso</p>';
         if(internet_access && !is_local()){
             if(debug) alert('google button ON');
+            canvas_zone_vcentered.innerHTML='\
+            <p>¿Cómo acceder?</p>\
+            <div id="temporal_message">cargando...</div>\
+            <div id="signinButton" class="button" style="visibility:hidden">con Google\
+              <span class="icon"></span>\
+              <span class="buttonText"></span>\
+            </div>\
+            <br /><button class="button" id="invitee_access" style="visibility:hidden">sin registrarse</button> \
+            <br /><br /><br /><button class="button" id="tutorial" style="background:#9cf;visibility:hidden;">Tutorial</button> \
+                ';
+            setTimeout(function(){
+                    document.getElementById('temporal_message').style.display= 'none';
+                    document.getElementById('signinButton').style.visibility= 'visible';
+                    document.getElementById('invitee_access').style.visibility= 'visible';
+                    document.getElementById('tutorial').style.visibility= 'visible';
+                }, 2000);
+
+
             gapi.signin.render('signinButton', {
               'callback': 'signInCallback',
               'clientid': '125860785862-s07kh0j5tpb2drjkeqsifldn39krhh60.apps.googleusercontent.com',
@@ -198,6 +209,15 @@ function login_screen(){
             }); //'redirecturi': 'postmessage', --> avoids reloading the page?
             // accesstype="offline" --> ?? isn't implicit?
         }else{
+            canvas_zone_vcentered.innerHTML='\
+            <p>¿Cómo acceder?</p>\
+            <div id="signinButton" class="button">con Google (offline)\
+              <span class="icon"></span>\
+              <span class="buttonText"></span>\
+            </div>\
+            <br /><button class="button" id="invitee_access">sin registrarse</button> \
+            <br /><br /><br /><button class="button" id="tutorial" style="background:#9cf;">Tutorial</button> \
+                '; 
             add_click_fancy("signinButton",login_bypass);
         }
         add_click_fancy("invitee_access",invitee_access);
@@ -316,7 +336,12 @@ function signInCallback(authResult) {
 		// Send one-time-code to server, if responds -> success
 		if(debug) console.log(authResult);
 		ajax_CORS_request_json(backend_url+'ajaxdb.php?action=gconnect&state='+session_state+'&code='+authResult['code'],set_user_signin);
-	}
+	}else{
+        document.getElementById('temporal_message').style.display= 'none';
+        document.getElementById('signinButton').style.visibility= 'visible';
+        document.getElementById('invitee_access').style.visibility= 'visible';
+        document.getElementById('tutorial').style.visibility= 'visible';
+    }
 }
 
 var set_user_signin=function(result) {
