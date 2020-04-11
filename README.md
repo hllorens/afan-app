@@ -9,10 +9,10 @@ Audio (some servers have problems serving audio files), modifying .htaccess with
 Might help but sometimes the problem is that the audio file is not reachable...
 (contact server support or try a different server. NOTE: dropbox or drive do not work as of 2017)
 Do not work much on this until HTML5 offers better sound handling, then perhaps you don't need fancy loading.
-Free servers that work: capnix.com
-Free servers that break: unaux.com
+Free servers that work: unaux.com
 
-in ajax.php file remove ../ from the secrets url (in free servers they are exposed...)
+To use this in free-servers (like profreehost or unaux):
+In `ajax.php` file remove `../` from the secrets url (in free servers they are exposed...)
 
 MySQL DB (see ajaxdb.php): Create the required DB and put a file in a folder e.g., ../../../secrets/db_credentials_afan-app.json
     {
@@ -25,7 +25,7 @@ MySQL DB (see ajaxdb.php): Create the required DB and put a file in a folder e.g
     
 Google Auth (see ajaxdb.php): 
 
-Make sure https://code.google.com/apis/console/  API&Services->credentials include the domain name (URL)
+Make sure https://code.google.com/apis/console/  API&Services->credentials->OAuth 2.0 Client IDs (edit) includes the domain name (URL)
 
 Create a file with the app id e.g., ../../../secrets/gclient_secret_afan-app.json
     {
