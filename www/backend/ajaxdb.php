@@ -18,12 +18,13 @@ function get_value($name){
 $action=get_value("action");
 $timestamp_seconds=date("Y-m-d H:i:s");
 
-// access info (if not WordPress)
-$db_credentials = json_decode(file_get_contents("../../../../secrets/db_credentials_afan-app.json"));
-$gclient_secret = json_decode(file_get_contents("../../../../secrets/gclient_secret_afan-app.json"));
-
-$db_connection =  mysqli_connect( $db_credentials->db_server, $db_credentials->user, $db_credentials->pass  ) or die( 'Could not open connection to server' );
-mysqli_select_db( $db_connection, $db_credentials->db_name) or die( 'Could not select database' );
+// ---- IMPORTANT: UPDATE WITH THE REAL PATH TO SECRETS ---------------
+$db_credentials = json_decode(file_get_contents("../../../secrets/db_credentials_afan-app.json"));
+$gclient_secret = json_decode(file_get_contents("../../../secrets/gclient_secret_afan-app.json"));
+// --------------------------------------------------------------------
+$default_error['error']='db credentials issue. Bad path in ajaxdb.php?';
+$db_connection =  mysqli_connect( $db_credentials->db_server, $db_credentials->user, $db_credentials->pass  ) or die(submit_data($default_error));
+mysqli_select_db( $db_connection, $db_credentials->db_name) or die(submit_data($default_error));
 
 /* SET UTF-8 independently of the MySQL and PHP installation */
 mysqli_query($db_connection, "SET NAMES 'utf8'");	

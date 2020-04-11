@@ -13,10 +13,19 @@ if(QueryString.hasOwnProperty('user') && QueryString.user!='') user_bypass=Query
 prevent_scrolling();
 
 var is_app=is_cordova();
+var forced_no_lazy=false;
 if(is_app){
-    console.log("is app");
+    alert("is app");
     if (!window.cordova) alert("ERROR: Running cordova without including cordova.js!");
-	document.addEventListener('deviceready', onDeviceReady, false);
+    var r = confirm("Proceed as app (otherwise browser setup will be used)");
+    if (r == true) {
+        document.addEventListener('deviceready', onDeviceReady, false);
+    } else {
+        is_app=false;
+        forced_no_lazy=true;
+        ResourceLoader.is_iOS=false;
+        onDeviceReady();
+    } 
 }else{
 	onDeviceReady();
 }
@@ -39,7 +48,9 @@ function onDeviceReady() {
 
 function splash_screen(){
 	// the default index.html might contain splash screen directly (more efficient)
-	ResourceLoader.load_media(images,sounds,jsons,check_internet_access,true,debug);
+   //                                                                                       lazy  debug
+   if(!forced_no_lazy)	ResourceLoader.load_media(images,sounds,jsons,check_internet_access,true,debug); 
+   else       ResourceLoader.load_media(images,sounds,jsons,check_internet_access,false,true);
 }
 
 // IMPORTANT: this should wait for all resources, even the jsons requested in js

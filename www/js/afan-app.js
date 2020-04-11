@@ -5,13 +5,16 @@ var game_mode=false;
 if(QueryString.hasOwnProperty('game_mode') && QueryString.game_mode=='true') game_mode=true;
 
 var app_name='CoLE';
+var backend_url='backend/' //../backend
+if(is_local()){backend_url=window.location.href.replace(/\?.*=.*$/,'')+'backend/';}
 
-var internet_access_file_url=window.location.href.replace(/\?i=.*$/,'')+'external-git-ignored/afan-app-media/img/logo-afan.png';
+var internet_access_file_url=window.location.href.replace(/\?.*=.*$/,'')+'external-git-ignored/afan-app-media/img/logo-afan.png';
 var internet_access=true;
 function check_internet_access(){
     check_internet_access_with_img_url(internet_access_file_url,set_internet_access_true,set_internet_access_false);
 }
 var set_internet_access_true=function(){
+    console.log("trying with "+backend_url+'ajaxdb.php?action=gen_session_state');                                                                            
     internet_access=true;
     //jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_session_state&action=gen_session_state');
     if(is_local()){session_state="offline";menu_screen();}
@@ -30,8 +33,7 @@ var set_session_state=function(result) {
 };
 
 
-var backend_url='backend/' //../backend
-if(is_local()){backend_url=window.location.href+'backend/';}
+
 
 // MEDIA
 var images = [
@@ -174,12 +176,14 @@ var cache_user_subject_training={};
 function login_screen(){
 	if(debug){alert('login_screen called');}
 	if(user_bypass!=undefined){
+        console.log('login_bypass() executed: '+user_bypass);
 		login_bypass();
 	}else{
 		header_zone.innerHTML='<h1>Acceso</h1>';
 		canvas_zone_vcentered.innerHTML='\
         <p>Comprobando internet y acceso</p>';
         if(internet_access && !is_local()){
+            console.log('login not local');
             if(debug) alert('google button ON');
             canvas_zone_vcentered.innerHTML='\
             <p>¿Cómo acceder?</p>\
@@ -192,7 +196,8 @@ function login_screen(){
             <br /><br /><br /><button class="button" id="tutorial" style="background:#9cf;visibility:hidden;">Tutorial</button> \
                 ';
             setTimeout(function(){
-                    document.getElementById('temporal_message').style.display= 'none';
+                    var tmpmsg=document.getElementById('temporal_message')
+                    if(typeof(tmpmsg)!='undefined' && tmpmsg!=null) tmpmsg.style.display= 'none';
                     document.getElementById('signinButton').style.visibility= 'visible';
                     document.getElementById('invitee_access').style.visibility= 'visible';
                     document.getElementById('tutorial').style.visibility= 'visible';
@@ -209,6 +214,7 @@ function login_screen(){
             }); //'redirecturi': 'postmessage', --> avoids reloading the page?
             // accesstype="offline" --> ?? isn't implicit?
         }else{
+            console.log('login local');
             canvas_zone_vcentered.innerHTML='\
             <p>¿Cómo acceder?</p>\
             <div id="signinButton" class="button">con Google (offline)\
@@ -273,9 +279,12 @@ var set_login_bypass=function(result) {
                 console.log("logged bypass! "+result.email+" level:"+result.access_level);
                 alert("logged bypass! "+result.email+" level:"+result.access_level);
             }
+            console.log(result);
             user_data=result;
             session_data.user=user_data.email;
             session_data.user_access_level=user_data.access_level;
+            if(!user_data.hasOwnProperty(display_name) || user_data.display_name==null || user_data.display_name==undefined) 
+                user_data.display_name="bypass-not-defined";                                            
             cache_user_subjects=user_data.subjects;
             cache_user_subject_results=user_data.subject_results;
             cache_user_subject_result_detail=user_data.subject_result_details;
@@ -302,6 +311,7 @@ function login_bypass(){
         user_bypass = prompt("email:",default_user);
     }
     
+    console.log('trying '+backend_url+'ajaxdb.php?action=login_bypass&state='+session_state+'&user='+user_bypass,set_login_bypass);                                                                                                               
     check_internet_access_with_img_url(
         internet_access_file_url,
             function(){
@@ -330,7 +340,7 @@ function login_bypass(){
 }
 
 function signInCallback(authResult) {
-	//console.log(authResult);
+	console.log('authResult '+authResult);
 	if (authResult['code']) {
 		canvas_zone_vcentered.innerHTML='<div class="loader">Loading...</div>';
 		// Send one-time-code to server, if responds -> success
@@ -599,7 +609,7 @@ function menu_screen(){
 			sign='<li><a href="#" id="login_screen">acceder</a></li>';
 		}
 		// TODO if admin administrar... lo de sujetos puede ir aquí tb...
-		hamburger_menu_content.innerHTML=''+get_reduced_display_name(user_data.display_name)+'<ul>\
+		hamburger_menu_content.innerHTML=''+get_reduced_display_name(user_data.email)+'<ul>\
 		'+sign+'\
 		<li><a href="#" id="show_about">acerca de..</a></li>\
 		</ul>';
