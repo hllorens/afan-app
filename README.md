@@ -41,8 +41,9 @@ Create a file with the app id e.g., ../../../secrets/gclient_secret_afan-app.jso
 Get external dependencies and copy or extract them in: www/external-git-ignored/
 
 
-1) **cognitionis-js**: from either it's github repo (cognitionis-js) or from this repo backup (www/external-dependencies-backup)
-2) **afan-app-media**: dropbox (current-projects/afan-app-media) or from this repo backup (www/external-dependencies-backup)
+1) **cognitionis-js**: from either it's github repo (cognitionis-js) or from https://github.com/hllorens/afan-app/tree/master/www/external-dependencies-backup
+2) **afan-app-media**: dropbox (current-projects/afan-app-media) or from https://github.com/hllorens/afan-app/tree/master/www/external-dependencies-backup
+3) **chartist**: from its web or from https://github.com/hllorens/afan-app/tree/master/www/external-dependencies-backup
 
 
 
