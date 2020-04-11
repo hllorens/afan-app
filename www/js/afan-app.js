@@ -198,9 +198,12 @@ function login_screen(){
             setTimeout(function(){
                     var tmpmsg=document.getElementById('temporal_message')
                     if(typeof(tmpmsg)!='undefined' && tmpmsg!=null) tmpmsg.style.display= 'none';
-                    document.getElementById('signinButton').style.visibility= 'visible';
-                    document.getElementById('invitee_access').style.visibility= 'visible';
-                    document.getElementById('tutorial').style.visibility= 'visible';
+                    var tmpmsg=document.getElementById('signinButton')
+                    if(typeof(tmpmsg)!='undefined' && tmpmsg!=null) document.getElementById('signinButton').style.visibility= 'visible';
+                    var tmpmsg=document.getElementById('invitee_access')
+                    if(typeof(tmpmsg)!='undefined' && tmpmsg!=null) document.getElementById('invitee_access').style.visibility= 'visible';
+                    var tmpmsg=document.getElementById('tutorial')
+                    if(typeof(tmpmsg)!='undefined' && tmpmsg!=null) document.getElementById('tutorial').style.visibility= 'visible';
                 }, 2000);
 
 
