@@ -14,7 +14,8 @@ Free servers that work: unaux.com
 To use this in free-servers (like profreehost or unaux):
 In `ajax.php` file remove `../` from the secrets url (in free servers they are exposed...)
 
-MySQL DB (see ajaxdb.php): Create the required DB and put a file in a folder e.g., ../../../secrets/db_credentials_afan-app.json
+**MySQL DB**
+(see ajaxdb.php): Create the required DB and put a file in a folder e.g., ../../../secrets/db_credentials_afan-app.json
     {
         "user": "xxxx",
         "pass": "xxxx",
@@ -23,7 +24,9 @@ MySQL DB (see ajaxdb.php): Create the required DB and put a file in a folder e.g
     }
     FUTURE: use firebase
     
-Google Auth (see ajaxdb.php): 
+**Google Auth**
+
+See ajaxdb.php 
 
 Make sure https://code.google.com/apis/console/  API&Services->credentials->OAuth 2.0 Client IDs (edit) includes the domain name (URL)
 
@@ -34,12 +37,16 @@ Create a file with the app id e.g., ../../../secrets/gclient_secret_afan-app.jso
     }
     FUTURE: use firebase
 
+**External dependencies**
+Get external dependencies and copy or extract them in: www/external-git-ignored/
 
-Get external dependencies from either other repos (cognitionis-js) or dropbox (current-projects/afan-app-media)
 
-Or from this repo backup (www/external-dependencies-backup)
+1) **cognitionis-js**: from either it's github repo (cognitionis-js) or from https://github.com/hllorens/afan-app/tree/master/www/external-dependencies-backup
+2) **afan-app-media**: dropbox (current-projects/afan-app-media) or from https://github.com/hllorens/afan-app/tree/master/www/external-dependencies-backup
+3) **chartist**: from its web or from https://github.com/hllorens/afan-app/tree/master/www/external-dependencies-backup
 
-copy or extract them in: www/external-git-ignored/
+
+
 
 
 
