@@ -83,6 +83,12 @@ var show_subject_analysis=function(){
     if(cache_user_subject_results[session_data.subject].elements.length==0){
         document.getElementById("results-div").innerHTML="<b>"+cache_user_subject_results[session_data.subject].general.subject+"</b><br />No hay resultados";
     }else{
+        if(typeof(Chartist)=='undefined'){
+            document.getElementById("results-div").innerHTML='\
+            <br /><br />\
+            <b>ERROR: Chartist is not available, intall dependency in external-git-ignored</b><br />';
+            return;
+        }
         var analysis=analyze_subject_data(); // per activity type
         // último, media (min,max), tests
         //           <table id="results-table"  class=\"results-table\"></table>\
