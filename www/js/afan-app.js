@@ -175,7 +175,9 @@ var cache_user_subject_training={};
 
 function login_screen(){
 	if(debug){alert('login_screen called');}
-	if(user_bypass!=undefined){
+    invitee_access();
+    
+	/*if(user_bypass!=undefined){
         console.log('login_bypass() executed: '+user_bypass);
 		login_bypass();
 	}else{
@@ -186,14 +188,14 @@ function login_screen(){
             console.log('login not local');
             if(debug) alert('google button ON');
             canvas_zone_vcentered.innerHTML='\
-            <p>¿Cómo acceder?</p>\
+            <!--<p>¿Cómo acceder?</p>-->\
             <div id="temporal_message">cargando...</div>\
-            <div id="signinButton" class="button" style="visibility:hidden">con Google\
+            <!--<div id="signinButton" class="button" style="visibility:hidden">con Google\
               <span class="icon"></span>\
               <span class="buttonText"></span>\
-            </div>\
-            <br /><button class="button" id="invitee_access" style="visibility:hidden">sin registrarse</button> \
-            <br /><br /><br /><button class="button" id="tutorial" style="background:#9cf;visibility:hidden;">Tutorial</button> \
+            </div>-->\
+            <br /><button class="button" id="invitee_access" style="visibility:hidden">ACCEDER</button> \
+            <br /><br /><br /><!--<button class="button" id="tutorial" style="background:#9cf;visibility:hidden;">Tutorial</button>--> \
                 ';
             setTimeout(function(){
                     var tmpmsg=document.getElementById('temporal_message')
@@ -232,7 +234,7 @@ function login_screen(){
         add_click_fancy("invitee_access",invitee_access);
         add_click_fancy("tutorial",function(){window.open('https://docs.google.com/presentation/d/1CrSH6px6nm_4RUqpjfwB5E0xv4XWS6sKnwicqaoGaYY/edit?usp=sharing', '_blank');});
         // https://prezi.com/yzc7wxcsa5fi/cole/ too fancy and not always compatible...
-    }
+    }*/
 }
 
 
@@ -577,10 +579,10 @@ function show_profile(){
 function show_about(){
     header_text.innerHTML=' &larr; '+app_name+' menu';
     canvas_zone_vcentered.innerHTML=' \
-        <img src="'+media_objects.images['logo-afan.png'].src+'" /><br /><h1>Programa CoLE</h1>Corrección de los errores en Lectura y Escritura<br />\
-        &copy; 2015\
-        <br /><br />M.de Ayala, H.Llorens<br />\
-        Url: <a href="http://www.cognitionis.com">www.cognitionis.com</a> <br />\
+        <img src="'+media_objects.images['logo-afan.png'].src+'" /><br /><span style="color: #722;">Programa CoLE&copy;</span><!--Corrección de los errores en Lectura y Escritura--><br />\
+        <span style="font-style: italic;">Por Montse de Ayala</span><br />\
+        <span style="font-family: myMontessori,cursive,Roboto,Droid">Psicopedagoga y Maestra de Audición y Lenguaje</span><br />\
+        <!--Url: <a href="http://www.cognitionis.com">www.cognitionis.com</a> <br />-->\
         Contacto: montsedeayala@gmail.com  <br />\
         <br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>\
         ';
@@ -612,13 +614,14 @@ function menu_screen(){
 			sign='<li><a href="#" id="login_screen">acceder</a></li>';
 		}
 		// TODO if admin administrar... lo de sujetos puede ir aquí tb...
-		hamburger_menu_content.innerHTML=''+get_reduced_display_name(user_data.email)+'<ul>\
+		hamburger_menu_content.innerHTML=''+//get_reduced_display_name(user_data.email)+
+        '<ul>\
 		'+sign+'\
 		<li><a href="#" id="show_about">acerca de..</a></li>\
 		</ul>';
         var name_with_details=app_name;
         if(is_local()){name_with_details+=' [app]';}
-        if(!internet_access){name_with_details+=' (offline)';}
+        //if(!internet_access){name_with_details+=' (offline)';} 
 		header_zone.innerHTML='<a id="hamburger_icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">\
 		<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"/></svg></a> <span id="header_text">'+name_with_details+'</span>';
         header_text=document.getElementById('header_text');
@@ -635,17 +638,21 @@ function menu_screen(){
 		if(user_data.email=='invitee'){ normal_opts="";}
 		canvas_zone_vcentered.innerHTML=' \
 		<div id="menu-logo-div"></div> \
-		Participante:  <select id="subjects-select" onchange="set_subject()"></select> \
+		<!--Participante:-->  <select id="subjects-select" onchange="set_subject()" style="display:none;"></select> \
 		<nav id="responsive_menu">\
 		'+admin_opts+'\
+         <img src="'+media_objects.images['logo-afan.png'].src+'" /><br />\
+        <span style="color: #722;font-size:35px;">Programa CoLE</span><br />\
+        <span style="font-style: italic;">Por Montse de Ayala</span><br />\
+        <span style="font-family: myMontessori,cursive,Roboto,Droid">Psicopedagoga y Maestra de Audición y Lenguaje</span><br />\
 		<br /><button id="start-button" class="button" disabled="true">Jugar</button> \
-        <button id="start-test-button" class="button" disabled="true">Test</button> \
+        <!--<button id="start-test-button" class="button" disabled="true">Test</button> \
 		'+normal_opts+'\
 		<br /><button id="manage-subjects" disabled="true" class="button">Participantes</button> \
         <br /><button id="results" disabled="true" class="button">Resultados</button>\
 		'+offline_opts+'\
-		</nav>\
-		';
+		--></nav>\
+		'; //Corrección de los errores en Lectura y Escritura<br />
 		if(user_data.access_level=='admin'){
 			document.getElementById("admin_screen").addEventListener(clickOrTouch,function(e) {
                 e.stopPropagation();
@@ -669,17 +676,30 @@ function menu_screen(){
 
 		document.getElementById("hamburger_icon").addEventListener(clickOrTouch,hamburger_toggle);
 		document.getElementById("header_text").addEventListener(clickOrTouch,menu_screen);
-        add_click_fancy("manage-subjects",manage_subjects);
-        add_click_fancy("results",show_results);
+        //add_click_fancy("manage-subjects",manage_subjects);
+        //add_click_fancy("results",show_results);
         document.getElementById("show_about").addEventListener(clickOrTouch,function(){hamburger_close();show_about();});
 
-        prepare_menu_when_subjects_loaded(); // loaded at user login time
+        prepare_menu_when_subjects_loaded2(); // loaded at user login time
 	}else{
 		game(); // just training
 	}
 }
 
 
+var prepare_menu_when_subjects_loaded2=function(){
+    subjects_select_elem=document.getElementById('subjects-select');
+    select_fill_with_json(cache_user_subjects,subjects_select_elem,session_data.subject);
+    set_subject();
+    add_click_fancy("start-button",function(){session_data.mode="training";game();});
+        document.getElementById("start-button").disabled=false;
+/*    add_click_fancy("start-test-button",function(){session_data.mode="test";game();});
+    document.getElementById("start-test-button").disabled=false;    
+    document.getElementById("results").disabled=false;
+    document.getElementById("manage-subjects").disabled=false;
+    if(user_data.access_level=='admin'){document.getElementById("letter_reader").disabled=false;}*/
+
+}
 
 var prepare_menu_when_subjects_loaded=function(){
     subjects_select_elem=document.getElementById('subjects-select');
@@ -921,11 +941,11 @@ var game=function(){
         <br /><button id="ritmo" class="button">Ritmo</button> \
         <br /><button id="velocidad" class="button">Velocidad</button> \
         <br /><button id="discr_visual" class="button">Discr. Visual</button> \
-        <br /><button id="completo" class="button">COMPLETO</button>\
+        <!--<br /><button id="completo" class="button">COMPLETO</button>-->\
         '+extra_options+'\
         ';
         
-        add_click_fancy("completo",completo);
+        //add_click_fancy("completo",completo);
         add_click_fancy("conciencia",conciencia);
         add_click_fancy("memoria_visual",memoria_visual);
         add_click_fancy("ritmo",ritmo);
