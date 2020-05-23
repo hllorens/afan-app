@@ -614,7 +614,7 @@ function menu_screen(){
 			sign='<li><a href="#" id="login_screen">acceder</a></li>';
 		}
 		// TODO if admin administrar... lo de sujetos puede ir aquí tb...
-		hamburger_menu_content.innerHTML=''+//get_reduced_display_name(user_data.email)+
+		hamburger_menu_content.innerHTML='';//+get_reduced_display_name(user_data.email)+
         '<ul>\
 		'+sign+'\
 		<li><a href="#" id="show_about">acerca de..</a></li>\
