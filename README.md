@@ -47,9 +47,28 @@ Get external dependencies and copy or extract them in: www/external-git-ignored/
 Without chartist you will get an ERROR in afan-app-resultados.js
 
 
+Installation (app)
+========
 
+**Cordova** create new project, add platform android and/or ios
+Copy:
+- config.xml (or adapt the default one)
+- res folder (for icons)
 
+For **releasing**:
+1) Create a keystore file:
+`keytool -genkey -v -keystore the_name.keystore -alias the_alias -keyalg RSA -keysize 2048 -validity 10000`
+Will ask you some questions to generate it...
 
-
+In "appnanme/platforms/android" create "release-signing.properties" with this content:
+```
+storeFile=rel-path-from-platfroms/android-to-xxxx/the_name.keystore
+storeType=jks
+keyAlias=the_alias
+keyPassword=the one used
+storePassword=the one used
+```
+Since google might require you to always sign with the same it is useful to store it into a safe place (out of git)
+E.g., in drive/MH/afan-app so it is on cloud but not exposed
 
 

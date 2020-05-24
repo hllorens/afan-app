@@ -583,7 +583,7 @@ function show_about(){
         <span style="font-style: italic;">Por Montse de Ayala</span><br />\
         <span style="font-family: myMontessori,cursive,Roboto,Droid">Psicopedagoga y Maestra de Audición y Lenguaje</span><br />\
         <!--Url: <a href="http://www.cognitionis.com">www.cognitionis.com</a> <br />-->\
-        Contacto: montsedeayala@gmail.com  <br />\
+        Contacto: montse.cole.app@gmail.com  <br />\
         <br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>\
         ';
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
@@ -608,13 +608,14 @@ function menu_screen(){
         if(debug) alert('still unlogged - going to login');
 		login_screen();
 	}else if(!game_mode){
-		var sign='<li><a href="#" id="show_profile">perfil</a></li>\
+        var sign='';
+		/*sign='<li><a href="#" id="show_profile">perfil</a></li>\
 				  <li><a href="#" id="gdisconnect">desconectar</a></li>';
 		if(user_data.email=='invitee'){
 			sign='<li><a href="#" id="login_screen">acceder</a></li>';
-		}
+		}*/
 		// TODO if admin administrar... lo de sujetos puede ir aquí tb...
-		hamburger_menu_content.innerHTML='';//+get_reduced_display_name(user_data.email)+
+		hamburger_menu_content.innerHTML=''+//+get_reduced_display_name(user_data.email)+
         '<ul>\
 		'+sign+'\
 		<li><a href="#" id="show_about">acerca de..</a></li>\
@@ -664,7 +665,7 @@ function menu_screen(){
             });
 			document.getElementById("letter_reader").addEventListener(clickOrTouch,letter_reader);
 		}
-		if(user_data.email!='invitee'){
+		/*if(user_data.email!='invitee'){
 			document.getElementById("show_profile").addEventListener(clickOrTouch,function(){hamburger_close();show_profile();});
 			document.getElementById("gdisconnect").addEventListener(clickOrTouch,function(){hamburger_close();gdisconnect();});
         }else{
@@ -672,7 +673,7 @@ function menu_screen(){
         }
         if(localStorage.hasOwnProperty('locally_stored_sessions') && user_data.email!='invitee'){
             document.getElementById("send_stored_sessions").addEventListener(clickOrTouch,send_stored_sessions);
-        }
+        }*/
 
 		document.getElementById("hamburger_icon").addEventListener(clickOrTouch,hamburger_toggle);
 		document.getElementById("header_text").addEventListener(clickOrTouch,menu_screen);
