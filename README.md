@@ -55,7 +55,7 @@ Copy:
 - config.xml (or adapt the default one)
 - res folder (for icons)
 
-For **releasing**:
+For **releasing** (app-store, google play store):
 1) Create a keystore file:
 `keytool -genkey -v -keystore the_name.keystore -alias the_alias -keyalg RSA -keysize 2048 -validity 10000`
 Will ask you some questions to generate it...
@@ -70,5 +70,51 @@ storePassword=the one used
 ```
 Since google might require you to always sign with the same it is useful to store it into a safe place (out of git)
 E.g., in drive/MH/afan-app so it is on cloud but not exposed
+
+
+
+Multimedia development
+========
+
+**IMG**: 
+create sprite:
+`css-sprite ./output/ ./Imagenesretocadas/*  -c ../img -s output/sprite.css`
+make it responsive:
+`responsivize-css-sprite.sh css-file vertical-background > css-file-responsive`
+replace-all: `.icon`- -> `.wordimage-`, remove all with, height and add it to the first element as
+
+```.wordimage {
+  background-image: url('../../../afan-app-media/img/wordimg-sprite.png');
+  background-size: 100% auto;
+}```
+
+The rest will only have background-position as percentages
+
+***AUDIO***:
+optimize letter sounds (wav): Use `Audacity`
+normalize -6db
+noise removal (get noise profile selecting noise, then remove noise selecting all)
+increasing sensitivity to 9db improves performance 
+Make all sounds the same length (e.g., about 1s)
+
+generate sprite (source wavs are deprecated, extract them again from m4a sprite):
+`./audio-sprite-generator.py | sed "s/50:/:/g" | sed "s/50\"/\"/g" | sort` (hardcoded folder path, change it as needed)
+Input: wav, Output: wav
+Convert audio to compressed m4a with (see Tools document in drive)
+Note: raw or treated wavs are deprecated so use the sprite m4a to extract them again if needed
+
+Sound and images size is OPTIMIZED, the only further optimization is using image sprite for words and see if that way the size is smaller and the load faster. Make sure caché is used!!!
+
+**External resources**
+Letter sounds could be wikipedia's or our own
+Imagens from PIXABAY.COM
+
+**Activity data**
+Some data is in google spread sheet exportable to .tsv so that we can work in parallel
+https://docs.google.com/spreadsheets/d/1Z5D2Ca2v_KlRktmRjvNEQOmDHrt5_ErWuwOFdStYogQ
+
+Data format
+The correct answer is always the first, the app rands them, the minimum number of answers is two, the maximum is unlimited
+
 
 
