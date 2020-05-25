@@ -1,0 +1,2 @@
+We don't store your data in CoLE version 1.
+If this should change in the future, you will be informed.

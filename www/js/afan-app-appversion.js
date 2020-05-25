@@ -11,14 +11,17 @@ if(is_local()){backend_url=window.location.href.replace(/\?.*=.*$/,'')+'backend/
 var internet_access_file_url=window.location.href.replace(/\?.*=.*$/,'')+'external-git-ignored/afan-app-media/img/logo-afan.png';
 var internet_access=true;
 function check_internet_access(){
-    check_internet_access_with_img_url(internet_access_file_url,set_internet_access_true,set_internet_access_false);
+    //check_internet_access_with_img_url(internet_access_file_url,set_internet_access_true,set_internet_access_false);
+    set_internet_access_true();
 }
 var set_internet_access_true=function(){
-    console.log("trying with "+backend_url+'ajaxdb.php?action=gen_session_state');                                                                            
+    //console.log("trying with "+backend_url+'ajaxdb.php?action=gen_session_state');                                                                            
     internet_access=true;
     //jsonp_request(backend_url+'ajaxdb.php?jsoncallback=set_session_state&action=gen_session_state');
-    if(is_local()){session_state="offline";menu_screen();}
-    else{ajax_CORS_request_json(backend_url+'ajaxdb.php?action=gen_session_state',set_session_state);}
+    //if(is_local()){
+	    session_state="offline";menu_screen();
+    //}
+    //else{ajax_CORS_request_json(backend_url+'ajaxdb.php?action=gen_session_state',set_session_state);}
 }
 var set_internet_access_false=function(){
     internet_access=false;
@@ -315,8 +318,12 @@ function login_bypass(){
         }
         user_bypass = prompt("email:",default_user);
     }
-    
-    console.log('trying '+backend_url+'ajaxdb.php?action=login_bypass&state='+session_state+'&user='+user_bypass,set_login_bypass);                                                                                                               
+
+	//new
+	menu_screen();
+
+
+   /* console.log('trying '+backend_url+'ajaxdb.php?action=login_bypass&state='+session_state+'&user='+user_bypass,set_login_bypass);                                                                                                               
     check_internet_access_with_img_url(
         internet_access_file_url,
             function(){
@@ -340,7 +347,7 @@ function login_bypass(){
                 }
                 menu_screen();
             }
-        );
+        );*/
     
 }
 
@@ -524,12 +531,13 @@ function set_user(){
 		session_data.user=users_select_elem.options[users_select_elem.selectedIndex].value;
 		cache_user_subjects=null; cache_user_subject_results={};
         cache_user_subject_result_detail={};
-	}
+	
+	}/*
     if(user_data.email!=users_select_elem.options[users_select_elem.selectedIndex].value){
         ajax_CORS_request_json(backend_url+'ajaxdb.php?action=login_bypass&state='+session_state+'&user='+session_data.user,set_user_act_as);
     }else{
         ajax_CORS_request_json(backend_url+'ajaxdb.php?action=login_bypass&state='+session_state+'&user='+user_bypass,set_login_bypass);
-    }
+    }*/
 }
 
 var set_user_act_as=function(result) {
@@ -583,7 +591,7 @@ function show_about(){
         <span style="font-style: italic;">Por Montse de Ayala</span><br />\
         <span style="font-family: myMontessori,cursive,Roboto,Droid">Psicopedagoga y Maestra de Audición y Lenguaje</span><br />\
         <!--Url: <a href="http://www.cognitionis.com">www.cognitionis.com</a> <br />-->\
-        Contacto: montse.cole.app@gmail.com  <br />\
+        Contacto: montsedeayala@gmail.com  <br />\
         <br /><button id="go-back" class="minibutton fixed-bottom-right go-back">&larr;</button>\
         ';
 	document.getElementById("go-back").addEventListener(clickOrTouch,function(){menu_screen();});
@@ -595,6 +603,7 @@ function menu_screen(){
 	if(splash!=null && (ResourceLoader.lazy_audio==true || ResourceLoader.not_loaded['sounds'].length==0)){
         splash.parentNode.removeChild(splash); if(debug){alert('load1-complete');}
     }
+
 	if(media_objects===undefined){media_objects=ResourceLoader.ret_media; media_objects.jsons=offline_jsons;} //pointer
 	if(debug){
 		console.log('userAgent: '+navigator.userAgent+' is_app: '+is_app+' Device info: '+device_info);
@@ -608,21 +617,19 @@ function menu_screen(){
         if(debug) alert('still unlogged - going to login');
 		login_screen();
 	}else if(!game_mode){
-        var sign='';
-		/*sign='<li><a href="#" id="show_profile">perfil</a></li>\
+		var sign='<li><a href="#" id="show_profile">perfil</a></li>\
 				  <li><a href="#" id="gdisconnect">desconectar</a></li>';
 		if(user_data.email=='invitee'){
 			sign='<li><a href="#" id="login_screen">acceder</a></li>';
-		}*/
+		}
 		// TODO if admin administrar... lo de sujetos puede ir aquí tb...
-		hamburger_menu_content.innerHTML=''+//+get_reduced_display_name(user_data.email)+
-        '<ul>\
+		hamburger_menu_content.innerHTML='';//+get_reduced_display_name(user_data.email)+'<ul>\
 		'+sign+'\
 		<li><a href="#" id="show_about">acerca de..</a></li>\
 		</ul>';
         var name_with_details=app_name;
         if(is_local()){name_with_details+=' [app]';}
-        //if(!internet_access){name_with_details+=' (offline)';} 
+        //if(!internet_access){name_with_details+=' (offline)';}
 		header_zone.innerHTML='<a id="hamburger_icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">\
 		<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"/></svg></a> <span id="header_text">'+name_with_details+'</span>';
         header_text=document.getElementById('header_text');
@@ -665,7 +672,7 @@ function menu_screen(){
             });
 			document.getElementById("letter_reader").addEventListener(clickOrTouch,letter_reader);
 		}
-		/*if(user_data.email!='invitee'){
+		if(user_data.email!='invitee'){
 			document.getElementById("show_profile").addEventListener(clickOrTouch,function(){hamburger_close();show_profile();});
 			document.getElementById("gdisconnect").addEventListener(clickOrTouch,function(){hamburger_close();gdisconnect();});
         }else{
@@ -673,7 +680,7 @@ function menu_screen(){
         }
         if(localStorage.hasOwnProperty('locally_stored_sessions') && user_data.email!='invitee'){
             document.getElementById("send_stored_sessions").addEventListener(clickOrTouch,send_stored_sessions);
-        }*/
+        }
 
 		document.getElementById("hamburger_icon").addEventListener(clickOrTouch,hamburger_toggle);
 		document.getElementById("header_text").addEventListener(clickOrTouch,menu_screen);
@@ -1048,7 +1055,7 @@ function send_session_data_success(finish_callback){
     if(typeof(finish_callback)=='undefined'){finish_callback=menu_screen;}
     if(localStorage.hasOwnProperty('locally_stored_sessions')){
         var locally_stored_sessions=JSON.parse(localStorage.getItem("locally_stored_sessions"));
-        ajax_CORS_request(backend_url+'ajaxdb.php',send_session_data_success_callback,"json","POST","action=send_sessions_data_post&json_string="+(JSON.stringify(locally_stored_sessions)),finish_callback);
+        //ajax_CORS_request(backend_url+'ajaxdb.php',send_session_data_success_callback,"json","POST","action=send_sessions_data_post&json_string="+(JSON.stringify(locally_stored_sessions)),finish_callback);
     }else{
         alert("ERROR: No hay datos para enviar.");
         menu_screen();
