@@ -83,10 +83,12 @@ make it responsive:
 `responsivize-css-sprite.sh css-file vertical-background > css-file-responsive`
 replace-all: `.icon`- -> `.wordimage-`, remove all with, height and add it to the first element as
 
-```.wordimage {
+```
+.wordimage {
   background-image: url('../../../afan-app-media/img/wordimg-sprite.png');
   background-size: 100% auto;
-}```
+}
+```
 
 The rest will only have background-position as percentages
 
