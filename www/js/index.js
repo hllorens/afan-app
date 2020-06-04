@@ -46,6 +46,7 @@ function onDeviceReady() {
 	splash_screen();
 }
 
+/*
 // ADD google analytics
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -53,23 +54,24 @@ m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 })(window,document,'script','analytics.js','ga');
 
 
-/* REMOVE IF CAUSES PROBLEMS */
+// REMOVE IF CAUSES PROBLEMS 
 if(window.localStorage) {
     ga('create', 'UA-3106165-3', {
       'storage': 'none'
-      , 'clientId': window.localStorage.getItem('ga_clientId')  /*The tracker id obtained from local storage*/
+      , 'clientId': window.localStorage.getItem('ga_clientId')  //The tracker id obtained from local storage
     });
     ga(function(tracker) {
       window.localStorage.setItem('ga_clientId', tracker.get('clientId'));
-     /*The tracker id for each device is different and stored in local storage*/
+     //The tracker id for each device is different and stored in local storage
     });
 }
 else {
     ga('create', 'UA-3106165-3', 'auto');
 }
-ga('set','checkProtocolTask',null); /*checkProtocal Task is set to null so that GA allows tracking other than http/https */
-ga('set', 'page', "afan_restart"); /*Page Name is name of each html page*/
+ga('set','checkProtocolTask',null); //checkProtocal Task is set to null so that GA allows tracking other than http/https 
+ga('set', 'page', "afan_restart"); //Page Name is name of each html page
 ga('send', 'pageview');
+*/
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 function splash_screen(){
