@@ -82,7 +82,8 @@ storePassword=the one used
 Since google might require you to always sign with the same it is useful to store it into a safe place (out of git)
 E.g., in drive/MH/afan-app so it is on cloud but not exposed
 
-Finally to create the signed apk run: 
+Finally to create the signed apk run:
+`cordova build android --prod --release`
 
 
 Multimedia development
