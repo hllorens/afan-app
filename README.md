@@ -50,10 +50,21 @@ Without chartist you will get an ERROR in afan-app-resultados.js
 Installation (app)
 ========
 
-**Cordova** create new project, add platform android and/or ios
+**Cordova** create new project, 
+E.g., `cordova create cole com.cognitionis.cole "da da da to be overwritten"`
+
+add platform android and/or ios
+E.g., `cordova platform add android`
+
 Copy:
 - config.xml (or adapt the default one)
 - res folder (for icons)
+
+Completely overwrite the www folder
+   Uncomment the cordova.js part in index.html
+
+Make sure it compiles
+`cordova build android --prod`
 
 For **releasing** (app-store, google play store):
 1) Create a keystore file:
@@ -71,6 +82,8 @@ storePassword=the one used
 Since google might require you to always sign with the same it is useful to store it into a safe place (out of git)
 E.g., in drive/MH/afan-app so it is on cloud but not exposed
 
+Finally to create the signed apk run:
+`cordova build android --prod --release`
 
 
 Multimedia development
