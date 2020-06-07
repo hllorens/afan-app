@@ -15,9 +15,10 @@ prevent_scrolling();
 var is_app=is_cordova();
 var forced_no_lazy=false;
 if(is_app){
-    alert("is app");
+    if(debug) alert("is app");
     if (!window.cordova) alert("ERROR: Running cordova without including cordova.js!");
-    var r = confirm("Proceed as app (otherwise browser setup will be used)");
+    let r=true;
+    if(debug) r = confirm("Proceed as app (otherwise browser setup will be used)");
     if (r == true) {
         document.addEventListener('deviceready', onDeviceReady, false);
     } else {
@@ -25,7 +26,7 @@ if(is_app){
         forced_no_lazy=true;
         ResourceLoader.is_iOS=false;
         onDeviceReady();
-    } 
+    }
 }else{
 	onDeviceReady();
 }

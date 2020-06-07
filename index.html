@@ -27,9 +27,12 @@
 </div>
 
 <script>
+    console.log("original window.location.href: "+window.location.href);
 	//document.getElementById("userAgent").innerHTML=navigator.userAgent;
 	//if(window.location.href=='http://www.xxx.com/afan-app/'){
-        window.location.href =window.location.href+'www/';
+        //window.location.href =window.location.href+'www/';
+        console.log("new window.location.href: "+window.location.href.replace(/(\?.*|index.html\?.*|index.html)/i, "")+'www/');
+        window.location.href =window.location.href.replace(/(\?.*|index.html\?.*|index.html)/i, "")+'www/';
     //}
 </script>
 
