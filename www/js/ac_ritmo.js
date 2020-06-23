@@ -50,6 +50,7 @@ var acRitmo=function(){
     }
 
     this.ac.borrar=function(){
+        if(document.getElementById("ac_check").disabled==true) return;
         if(that.ac.current_usr_answer.length==0) return;
         //var item=that.ac.anspan.lastElementChild;
         //that.ac.anspan.removeChild(item);
@@ -63,6 +64,7 @@ var acRitmo=function(){
 
 
     this.ac.play_pattern=function(){
+        if(that.ac.playb.disabled==true) return;
         if(that.ac.in_process){alert('disabled: in process');return;}
         else{
             that.ac.in_process=true;
@@ -132,6 +134,7 @@ var acRitmo=function(){
     }
 
     this.ac.play_sound=function(s){
+        if(document.getElementById("pta").disabled==true) return; // android does not respect disabled button click (this is a safety check to force it)
         if(that.ac.in_process){return;}
         else{
             that.ac.in_process=true;
@@ -184,6 +187,7 @@ var acRitmo=function(){
     }
 
     this.ac.check=function(){
+        if(document.getElementById("ac_check").disabled==true) return;
         that.ac.details={};
         that.ac.details.activity=that.ac.current_key_answer.toString().replace(/ta30.m4al?/g,'.').replace(/ta120.m4al?/g,'___');
         that.ac.details.choice=that.ac.current_usr_answer.toString().replace(/ta30.m4al?/g,'.').replace(/ta120.m4al?/g,'___');
