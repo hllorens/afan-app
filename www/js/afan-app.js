@@ -622,7 +622,7 @@ function menu_screen(){
 		</ul>';
         var name_with_details=app_name;
         if(is_local()){name_with_details+=' [app]';}
-        //if(!internet_access){name_with_details+=' (offline)';} 
+        //if(!internet_access){name_with_details+=' (offline)';}
 		header_zone.innerHTML='<a id="hamburger_icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">\
 		<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"/></svg></a> <span id="header_text">'+name_with_details+'</span>';
         header_text=document.getElementById('header_text');
@@ -655,7 +655,7 @@ function menu_screen(){
         <br /><button id="results" disabled="true" class="button">Resultados</button>\
 		'+offline_opts+'\
 		--></nav>\
-		'        ; //Corrección de los errores en Lectura y Escritura<br />
+		'; //Corrección de los errores en Lectura y Escritura<br />
 		if(user_data.access_level=='admin'){
 			document.getElementById("admin_screen").addEventListener(clickOrTouch,function(e) {
                 e.stopPropagation();

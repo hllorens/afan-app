@@ -117,6 +117,7 @@ var acVelocidad=function(){
             }
         }
         pal_wait_time+=that.ac.sec_init*1000;
+        pal_wait_time*=2; // temporarily multiply by 2
         setTimeout(function(){that.ac.velocidad_find_word();}.bind(that), pal_wait_time);
     }
 

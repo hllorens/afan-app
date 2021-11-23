@@ -78,7 +78,8 @@ add platform android and/or ios
 E.g., `cordova platform add android`
 
 Completely overwrite the www folder
-   Uncomment the cordova.js part in index.html
+- Uncomment the cordova.js part in index.html
+- see if some tuning of set_internet_access_true or check_internet_access_with_img is necessary... simplify it and document it!
 
 Make sure it compiles
 `cordova build android --prod`
