@@ -2,6 +2,19 @@ Aplicación CoLE
 ========
 Aplicación para la Corrección de errores en la Lectura y Escritura
 
+
+Deployments
+========
+- Web in **unaux** (TODO: move that to some `heroku` or `netlify` like deployment)
+- App Old **cygwin**: `afan-app` for this git code and `afanapp` for the cordova project
+- App **Google Play Store**: deployed following steps below
+
+
+
+TODO explain step by step how to deploy and change code...
+
+
+
 Installation (server)
 ========
 Audio (some servers have problems serving audio files), modifying .htaccess with:
@@ -42,6 +55,7 @@ Get external dependencies and copy or extract them in: www/external-git-ignored/
 
 
 1) **cognitionis-js**: from either it's github repo (cognitionis-js) or from https://github.com/hllorens/afan-app/tree/master/www/external-dependencies-backup
+  Note: probably useful to get a version committed and just update it manually (comparing with the official repo)
 2) **afan-app-media**: dropbox (current-projects/afan-app-media) or from https://github.com/hllorens/afan-app/tree/master/www/external-dependencies-backup
 3) **chartist**: from its web or from https://github.com/hllorens/afan-app/tree/master/www/external-dependencies-backup.
 Without chartist you will get an ERROR in afan-app-resultados.js
@@ -50,15 +64,18 @@ Without chartist you will get an ERROR in afan-app-resultados.js
 Installation (app)
 ========
 
-**Cordova** create new project, 
-E.g., `cordova create cole com.cognitionis.cole "da da da to be overwritten"`
+**Cordova**:
+create new project in $HOME called **afanapp** which will generate that folder.
+`cd $HOME`
+`cordova create afanapp "com.cognitionis.afanapp" "CoLE: Discriminación Auditiva y Visual, Memoria y Ritmo"`
+  Note: it could have been cole instead of afanapp
+
+Copy from this repo into the afanapp/ folder:
+- `config.xml` (or adapt the default one)
+- `res/` folder (for icons)
 
 add platform android and/or ios
 E.g., `cordova platform add android`
-
-Copy:
-- config.xml (or adapt the default one)
-- res folder (for icons)
 
 Completely overwrite the www folder
    Uncomment the cordova.js part in index.html
@@ -67,20 +84,35 @@ Make sure it compiles
 `cordova build android --prod`
 
 For **releasing** (app-store, google play store):
-1) Create a keystore file:
-`keytool -genkey -v -keystore the_name.keystore -alias the_alias -keyalg RSA -keysize 2048 -validity 10000`
+Used secrets are kept in drive `/MH/afan-app/keystore-and-related-config/`
+- `cognitionis.keystore` a pre-created keystore
+- `release-signing.properties` a pre-created app signing config
+
+1) Use existing or create a keystore `keystore/cognitionis.keystore` file (only once):
+`cd $HOME; mkdir keystore; cd keystore`
+Copy `cognitionis.keystore` there.
+Only if you want to create a new one:
+`keytool -genkey -v -keystore cognitionis.keystore -alias cognitionis_key -keyalg RSA -keysize 2048 -validity 10000`
 Will ask you some questions to generate it...
 
-In "appnanme/platforms/android" create "release-signing.properties" with this content:
+2) Use existing or create `afanapp/platforms/android/release-signing.properties`
+Copy `release-signing.properties` in `$HOME/afanapp/platforms/android/`
+
+Only if you want to create a new one:
+`cd $HOME/afanapp/platforms/android/`
+`vim release-signing.properties` and add this content:
 ```
-storeFile=rel-path-from-platfroms/android-to-xxxx/the_name.keystore
+storeFile=../../../keystore/cognitionis.keystore
 storeType=jks
-keyAlias=the_alias
-keyPassword=the one used
+keyAlias=cognitionis_key
+keyPassword=the one used  <-- this should match the keystore password
 storePassword=the one used
 ```
-Since google might require you to always sign with the same it is useful to store it into a safe place (out of git)
+
+Since google might require you to always sign with the same keystore
+it is useful to store it into a safe place (out of git) and reuse it
 E.g., in drive/MH/afan-app so it is on cloud but not exposed
+
 
 Finally to create the signed apk run:
 `cordova build android --prod --release`
