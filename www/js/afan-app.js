@@ -647,13 +647,15 @@ function menu_screen(){
         <span style="font-style: italic;">Por Montse de Ayala</span><br />\
         <span style="font-family: myMontessori,cursive,Roboto,Droid">Psicopedagoga y Maestra de Audición y Lenguaje</span><br />\
 		<br /><button id="start-button" class="button" disabled="true">Jugar</button> \
+        <br /> <span style="font-size:3vmin;">'+navigator.userAgent+'</span>\
+        <br /> <span style="font-size:3vmin;">'+window.location.href+'</span>\
         <!--<button id="start-test-button" class="button" disabled="true">Test</button> \
 		'+normal_opts+'\
 		<br /><button id="manage-subjects" disabled="true" class="button">Participantes</button> \
         <br /><button id="results" disabled="true" class="button">Resultados</button>\
 		'+offline_opts+'\
 		--></nav>\
-		'; //Corrección de los errores en Lectura y Escritura<br />
+		'        ; //Corrección de los errores en Lectura y Escritura<br />
 		if(user_data.access_level=='admin'){
 			document.getElementById("admin_screen").addEventListener(clickOrTouch,function(e) {
                 e.stopPropagation();
@@ -675,7 +677,9 @@ function menu_screen(){
             document.getElementById("send_stored_sessions").addEventListener(clickOrTouch,send_stored_sessions);
         }*/
 
-		document.getElementById("hamburger_icon").addEventListener(clickOrTouch,hamburger_toggle);
+		//document.getElementById("hamburger_icon").addEventListener(clickOrTouch,hamburger_toggle);
+		document.getElementById("hamburger_icon").addEventListener('click',hamburger_toggle);
+		document.getElementById("hamburger_icon").addEventListener('touch',hamburger_toggle);
 		document.getElementById("header_text").addEventListener(clickOrTouch,menu_screen);
         //add_click_fancy("manage-subjects",manage_subjects);
         //add_click_fancy("results",show_results);
