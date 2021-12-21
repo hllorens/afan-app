@@ -3,16 +3,17 @@ Aplicación CoLE
 Aplicación para la Corrección de errores en la Lectura y Escritura
 
 
+TODO:
+========
+Resolve https://github.com/hllorens/afan-app/issues to get to the payment version
+ con test y report q se generan pueden enviarse a un email o guardarse en local (se perderán si se borran los datos etc)
+ habilidad tb para importar desde un json
+
 Deployments
 ========
 - Web in **unaux** (TODO: move that to some `heroku` or `netlify` like deployment)
 - App Old **cygwin**: `afan-app` for this git code and `afanapp` for the cordova project
 - App **Google Play Store**: deployed following steps below
-
-
-
-TODO explain step by step how to deploy and change code...
-
 
 
 Installation (server)
