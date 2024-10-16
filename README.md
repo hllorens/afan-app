@@ -2,24 +2,18 @@ Aplicación CoLE
 ========
 Aplicación para la Corrección de errores en la Lectura y Escritura
 
-
-TODO:
-========
-afan-app was published in playstore as an apk with minSDK 19 and targedSDK 29.
-            under com.cognitionis.afanapp  version 1.4.4 code 10404
+Last released Version: 1.4.6 (2024-10-17)
 
 VERSIONS USED:
 - node 18.16.0
 - npm 9.5.1
-- cordova 13.0
+- cordova 12.0 (platform android@12, up to SDK tools 33.0.3)
+- java (JDK 17)
+- gradle 7.6
+- Studio ladybug 2024-02 (target SDK: 34, build-tools -> details -> install also 33.0.3 supported by cordova-android@12)
 
- (instead of intalling cordova globally add a package .json in the project) so it gets
-intalled easily with npm install.
+TODO: instead of intalling cordova globally add a package .json in the project so it gets intalled easily with npm install.
 That information and the cordova project itself should be added to git (in this or another repo)
-Currently, we need to compile it for SDK 34.
-Check if Android Stuido can do that automatically or we need to redo the project.
-
-
 
 Resolve https://github.com/hllorens/afan-app/issues to get to the payment version
  con test y report q se generan pueden enviarse a un email o guardarse en local (se perderán si se borran los datos etc)
@@ -82,7 +76,29 @@ Installation (app)
 ========
 
 **Apache Cordova**:
-Install *Android Studio* (latest) and *Apache Cordova* (version ?)
+Install *Android Studio* (latest) and *Apache Cordova* (version 12.0)
+
+Pre-requisites:
+- JDK 17: https://jdk.java.net/archive download, extract and add to PATH
+- Gradle: 7.6
+- Node: 18.16.0
+
+export ANDROID\_HOME=/mnt/c/Users/Hector\_Llorens/AppData/Local/Android/Sdk/
+export PATH="$PATH:/home/hector\_llorens/jdk-17/bin:/home/hector\_llorens/node-v18.16.0-linux-x64/bin:/home/hector\_llorens/gradle-8.7/bin:$ANDROID\_HOME"
+
+In *Android Studio* SDK manager install (docu: https://cordova.apache.org/docs/en/latest/guide/platforms/android/index.html):
+- The target API/s
+- SDK command-line tools
+- SDK platform tools (usually installed by default)
+- Android emulator (usually installed by default)
+
+for f in $(ls /mnt/c/Users/Hector\_Llorens/AppData/Local/Android/Sdk/build-tools/33.0.3/\*.exe);do echo $f ; ln -s $f ${f:0:-4};done
+
+TODO: probably better to just install the command line tools for linux and add those to path and use SDK manager to get what is needed instead of this exe tweak that works in cygwin...
+
+
+Make sure `cordova` is installed `npm list -g --depth=0`
+
 
 create new project in $HOME called **afanapp** which will generate **afanapp** folder.
 `cd $HOME`
@@ -94,7 +110,7 @@ Copy from this repo into the afanapp/ folder:
 - `res.../` folder (for icons): `cp -r afan-app/res-google-play afanapp/res`
 
 add platform android and/or ios
-E.g., `cordova platform add android`
+E.g., `cordova platform add android@12` (or the relevant version)
 It tells you the SDK e.g.,:
         Android Target SDK: android-34
         Android Compile SDK: 34
@@ -110,11 +126,13 @@ Completely replace/overwrite the www folder: `rm -rf afanapp/www;cp -r afan-app/
 
 Make sure it compiles
 `cordova build android --prod`
+Output in: afanapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+
 
 For **releasing** (app-store, google play store):
 Used secrets are kept in drive `/MH/afan-app/keystore-and-related-config/`
 - `cognitionis.keystore` a pre-created keystore
-- `release-signing.properties` a pre-created app signing config
+- `release-signing.properties` a pre-created app signing config (the actual password is readable in that file) (DOES NOT ALWAYS WORK)
 
 1) Use existing or create a keystore `keystore/cognitionis.keystore` file (only once):
 `cd $HOME; mkdir keystore; cd keystore`
@@ -143,7 +161,23 @@ E.g., in drive/MH/afan-app so it is on cloud but not exposed
 
 
 Finally to create the signed apk run:
-`cordova build android --prod --release`
+`vim afanapp/config.xml` and use the desired version (remember to port it to afan-app repo and commit)
+BAD: `cordova build android --prod --release`  (it should use the release-signing.properties, BUT DOES NOT WORK ALWAYS...)
+so better (including specifying the SDK version)
+GOOD: `cordova run android --release -- --keystore=../my-release-key.keystore --storePassword=password --alias=alias_name --password=password --packageType=bundle --gradleArg="-PcdvCompileSdkVersion=34 -PcdvSdkVersion=34"`
+Specify the compile SDK if it is not the default...
+(or --packageType=apk)
+The password for the keystore and the path is in drive `/MH/afan-app/keystore-and-related-config/release-signing.properties`
+
+Output: afanapp/platforms/android/app/build/outputs/bundle/release/app-release.aab  (or apk)
+
+To upload the new release to google go to: 
+Create new release
+- Upload the signed bundle or signed apk
+- release name: usually the version number or any internal name meaningful for you (won't be seen by users)
+- release description: usually copy from the previous and add anything needed
+
+
 
 
 Multimedia development
