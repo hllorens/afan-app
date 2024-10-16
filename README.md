@@ -5,6 +5,22 @@ Aplicación para la Corrección de errores en la Lectura y Escritura
 
 TODO:
 ========
+afan-app was published in playstore as an apk with minSDK 19 and targedSDK 29.
+            under com.cognitionis.afanapp  version 1.4.4 code 10404
+
+VERSIONS USED:
+- node 18.16.0
+- npm 9.5.1
+- cordova 13.0
+
+ (instead of intalling cordova globally add a package .json in the project) so it gets
+intalled easily with npm install.
+That information and the cordova project itself should be added to git (in this or another repo)
+Currently, we need to compile it for SDK 34.
+Check if Android Stuido can do that automatically or we need to redo the project.
+
+
+
 Resolve https://github.com/hllorens/afan-app/issues to get to the payment version
  con test y report q se generan pueden enviarse a un email o guardarse en local (se perderán si se borran los datos etc)
  habilidad tb para importar desde un json
@@ -12,8 +28,8 @@ Resolve https://github.com/hllorens/afan-app/issues to get to the payment versio
 Deployments
 ========
 - Web in **unaux** (TODO: move that to some `heroku` or `netlify` like deployment)
-- App Old **cygwin**: `afan-app` for this git code and `afanapp` for the cordova project
-- App **Google Play Store**: deployed following steps below
+- Android App **Google Play Store**: deployed following steps below
+- Android App apk **cygwin**: `afan-app` folder (this repo, www code) and `afanapp` folder for the **Apache Cordova** project
 
 
 Installation (server)
@@ -65,22 +81,32 @@ Without chartist you will get an ERROR in afan-app-resultados.js
 Installation (app)
 ========
 
-**Cordova**:
-create new project in $HOME called **afanapp** which will generate that folder.
+**Apache Cordova**:
+Install *Android Studio* (latest) and *Apache Cordova* (version ?)
+
+create new project in $HOME called **afanapp** which will generate **afanapp** folder.
 `cd $HOME`
 `cordova create afanapp "com.cognitionis.afanapp" "CoLE: Discriminación Auditiva y Visual, Memoria y Ritmo"`
   Note: it could have been cole instead of afanapp
 
 Copy from this repo into the afanapp/ folder:
-- `config.xml` (or adapt the default one)
-- `res/` folder (for icons)
+- `config.xml` (or adapt the default one): 
+- `res.../` folder (for icons): `cp -r afan-app/res-google-play afanapp/res`
 
 add platform android and/or ios
 E.g., `cordova platform add android`
+It tells you the SDK e.g.,:
+        Android Target SDK: android-34
+        Android Compile SDK: 34
+See minSDK and targetSDK:
+`vim afanapp/platforms/android/cdv-gradle-config.json`
 
-Completely overwrite the www folder
+In package.json change `version` to the desired one
+
+Completely replace/overwrite the www folder: `rm -rf afanapp/www;cp -r afan-app/www afanapp/www`
 - Uncomment the cordova.js part in index.html
-- see if some tuning of set_internet_access_true or check_internet_access_with_img is necessary... simplify it and document it!
+- Replace afan-app.js by the appversion which removes/tunes set\_internet\_access\_true or check\_internet\_access\_with\_img:
+`mv afanapp/www/js/afan-app.js afanapp/www/js/afan-app-original.js;mv afanapp/www/js/afan-app-appversion.js afanapp/www/js/afan-app.js`
 
 Make sure it compiles
 `cordova build android --prod`
