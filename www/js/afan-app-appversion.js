@@ -8,7 +8,7 @@ var app_name='CoLE';
 var backend_url='backend/' //../backend
 if(is_local()){backend_url=window.location.href.replace(/\?.*=.*$/,'')+'backend/';}
 
-var internet_access_file_url=window.location.href.replace(/\?.*=.*$/,'')+'external-git-ignored/afan-app-media/img/logo-afan.png';
+var internet_access_file_url=window.location.href.replace(/\?.*=.*$/,'').replace(/index.html/,'')+'external-git-ignored/afan-app-media/img/logo-afan.png';
 var internet_access=true;
 function check_internet_access(){
     //check_internet_access_with_img_url(internet_access_file_url,set_internet_access_true,set_internet_access_false);
