@@ -123,10 +123,17 @@ Completely replace/overwrite the www folder: `rm -rf afanapp/www;cp -r afan-app/
 - Uncomment the cordova.js part in index.html
 - Replace afan-app.js by the appversion which removes/tunes set\_internet\_access\_true or check\_internet\_access\_with\_img:
 `mv afanapp/www/js/afan-app.js afanapp/www/js/afan-app-original.js;mv afanapp/www/js/afan-app-appversion.js afanapp/www/js/afan-app.js`
+- Extract the external dependencies: unzip afanapp/www/external...-backup in external-git-ignored folder
+`mkdir afanapp/www/external-git-ignored;cd afanapp/www/external-git-ignored;tar xvzf ../external-dependencies-backup/cognitionis-js-2016-11.tgz;tar xvzf ../external-dependencies-backup/chartist.tgz;tar xvzf ../external-dependencies-backup/afan-app-media.tgz`
 
 Make sure it compiles
 `cordova build android --prod`
 Output in: afanapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+
+Test the apk in your phone
+- Uninstall CoLE app
+- Put the apk in Drive MH/test-apks-to-be-deleted
+- Access it with your phone, install it and test
 
 
 For **releasing** (app-store, google play store):

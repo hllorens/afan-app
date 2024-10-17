@@ -624,9 +624,9 @@ function menu_screen(){
 		}
 		// TODO if admin administrar... lo de sujetos puede ir aquí tb...
 		hamburger_menu_content.innerHTML='';//+get_reduced_display_name(user_data.email)+'<ul>\
-		'+sign+'\
-		<li><a href="#" id="show_about">acerca de..</a></li>\
-		</ul>';
+		//'+sign+'\
+		//<li><a href="#" id="show_about">acerca de..</a></li>\
+		//</ul>';
         var name_with_details=app_name;
         if(is_local()){name_with_details+=' [app]';}
         //if(!internet_access){name_with_details+=' (offline)';}
@@ -672,7 +672,7 @@ function menu_screen(){
             });
 			document.getElementById("letter_reader").addEventListener(clickOrTouch,letter_reader);
 		}
-		if(user_data.email!='invitee'){
+		/*if(user_data.email!='invitee'){
 			document.getElementById("show_profile").addEventListener(clickOrTouch,function(){hamburger_close();show_profile();});
 			document.getElementById("gdisconnect").addEventListener(clickOrTouch,function(){hamburger_close();gdisconnect();});
         }else{
@@ -680,13 +680,13 @@ function menu_screen(){
         }
         if(localStorage.hasOwnProperty('locally_stored_sessions') && user_data.email!='invitee'){
             document.getElementById("send_stored_sessions").addEventListener(clickOrTouch,send_stored_sessions);
-        }
+        }*/
 
 		document.getElementById("hamburger_icon").addEventListener(clickOrTouch,hamburger_toggle);
 		document.getElementById("header_text").addEventListener(clickOrTouch,menu_screen);
         //add_click_fancy("manage-subjects",manage_subjects);
         //add_click_fancy("results",show_results);
-        document.getElementById("show_about").addEventListener(clickOrTouch,function(){hamburger_close();show_about();});
+        //document.getElementById("show_about").addEventListener(clickOrTouch,function(){hamburger_close();show_about();});
 
         prepare_menu_when_subjects_loaded2(); // loaded at user login time
 	}else{

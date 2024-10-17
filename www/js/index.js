@@ -4,7 +4,7 @@ if(typeof sounds === 'undefined'){var sounds = [];}
 
 // Check for debug mode
 var QueryString=get_query_string();
-var debug=false;
+var debug=false; // set to true for debug apk
 var user_bypass=undefined;
 if(QueryString.hasOwnProperty('debug') && QueryString.debug=='true') debug=true;
 if(QueryString.hasOwnProperty('user') && QueryString.user!='') user_bypass=QueryString.user;
@@ -28,10 +28,12 @@ if(is_app){
         onDeviceReady();
     }
 }else{
+    if(debug) alert("not app")
 	onDeviceReady();
 }
 
 function onDeviceReady() {
+    if(debug) alert("ready");
 	device_info="browser"
 	/*if(is_app){
 		device_info = 'name='     + device.name     + '-' + 
@@ -86,7 +88,7 @@ function splash_screen(){
 //            but it is proven false at least when a resource is not found
 //            Also this removed splash too early on those cases...
 window.onload = function () { 
-	if(debug) console.log("win.onload");
+	if(debug) alert("win.onload");
 	//var splash=document.getElementById("splash_screen");
 	//if(splash!=null && (ResourceLoader.lazy_audio==false || ResourceLoader.not_loaded['sounds'].length==0)){ splash.parentNode.removeChild(splash); }
 }
