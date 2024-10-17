@@ -2,17 +2,17 @@ Aplicación CoLE
 ========
 Aplicación para la Corrección de errores en la Lectura y Escritura
 
-WEB:
-2024-10-17 The web version still works locally and in unaux server for free.
-           http://cognitionis.com/afan-app/www/index.html
+**WEB**:
+- 2024-10-17 PUBLISHED. **Works** locally and in unaux server for free. http://cognitionis.com/afan-app/www/index.html
 
-Android APP:
-Last released Version: 1.4.1 (2020-08-05). Works and the apk is in cognitionis and drive/MH. It will be removed from playstore since cannot be updated due to the sound issue.
-Last Update trial ver: 1.4.6 (2024-10-17) Sound does not work correctly, we discontinue the app
+**Android APP**:
+- 1.4.6 (2024-10-17) NOT PUBLISHED. Sound does not work correctly. **app discontiued**.
+                     DEBUG: extract the js code from the apk and compare in case the sound file or loading was different
 ISSUE: Audio sprite does not work on the app, it works on the server but not on the app.
            There must be something with android google plugin (AGP) or with the javascript version that breaks or the audio itself...
            Another cause could be https://stackoverflow.com/questions/68896148/android-10-doesnt-support-whitelist-plugin, which needs action maybe to request sounds properly.
-           WE DISCONTINUE THE APP and the last working app version was 1.4.3
+           WE DISCONTINUE THE APP and the last working app version will be 1.4.3
+- **1.4.3** (2020-08-05) PUBLISHED. Target SDK 29 API level 19+. Works and the apk is in cognitionis and drive/MH. It will be removed from playstore since cannot be updated due to the sound issue.
 
 VERSIONS USED:
 - node 18.16.0
