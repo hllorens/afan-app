@@ -11,6 +11,7 @@ Last released Version: 1.4.1 (2020-08-05). Works and the apk is in cognitionis a
 Last Update trial ver: 1.4.6 (2024-10-17) Sound does not work correctly, we discontinue the app
 ISSUE: Audio sprite does not work on the app, it works on the server but not on the app.
            There must be something with android google plugin (AGP) or with the javascript version that breaks or the audio itself...
+           Another cause could be https://stackoverflow.com/questions/68896148/android-10-doesnt-support-whitelist-plugin, which needs action maybe to request sounds properly.
            WE DISCONTINUE THE APP and the last working app version was 1.4.3
 
 VERSIONS USED:
