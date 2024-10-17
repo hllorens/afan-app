@@ -11,13 +11,15 @@ if(QueryString.hasOwnProperty('user') && QueryString.user!='') user_bypass=Query
 
 // responsive tunings
 prevent_scrolling();
-
+var splash=document.getElementById("splash_screen");
 var is_app=is_cordova();
 var forced_no_lazy=false;
 if(is_app){
+    splash.innerHTML="is application"
     if(debug) alert("is app");
     if (!window.cordova) alert("ERROR: Running cordova without including cordova.js!");
     let r=true;
+    splash.innerHTML="is app and has cordova.js loaded"
     if(debug) r = confirm("Proceed as app (otherwise browser setup will be used)");
     if (r == true) {
         document.addEventListener('deviceready', onDeviceReady, false);

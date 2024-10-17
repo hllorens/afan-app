@@ -2,7 +2,16 @@ Aplicación CoLE
 ========
 Aplicación para la Corrección de errores en la Lectura y Escritura
 
-Last released Version: 1.4.6 (2024-10-17)
+WEB:
+2024-10-17 The web version still works locally and in unaux server for free.
+           http://cognitionis.com/afan-app/www/index.html
+
+Android APP:
+Last released Version: 1.4.1 (2020-08-05). Works and the apk is in cognitionis and drive/MH. It will be removed from playstore since cannot be updated due to the sound issue.
+Last Update trial ver: 1.4.6 (2024-10-17) Sound does not work correctly, we discontinue the app
+ISSUE: Audio sprite does not work on the app, it works on the server but not on the app.
+           There must be something with android google plugin (AGP) or with the javascript version that breaks or the audio itself...
+           WE DISCONTINUE THE APP and the last working app version was 1.4.3
 
 VERSIONS USED:
 - node 18.16.0
@@ -134,6 +143,9 @@ Test the apk in your phone
 - Uninstall CoLE app
 - Put the apk in Drive MH/test-apks-to-be-deleted
 - Access it with your phone, install it and test
+
+Alternatively (faster), if you installed linux command-tools or symlinked adb.exe to adb:
+cordova emulate android  (will open the windows android emulator for a quick test/debug)
 
 
 For **releasing** (app-store, google play store):
